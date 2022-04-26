@@ -2,7 +2,7 @@
 import biorbd
 import numpy as np
 import matplotlib.pyplot as plt
-# from IPython import embed
+from IPython import embed
 import bioviz
 
 """
@@ -39,15 +39,28 @@ def integrate_plots(m, X0, t, N, n_step):
     fig, axs = plt.subplots(2, 3)
     axs = np.ravel(axs)
     X_tous = X0
-    for i in range(20): #N - 1):
+    for i in range(int(N/2)-1): #N - 1):
         X = runge_kutta_4(m, X0, t[-1], N, n_step)
         plot_index = 0
-        for k in [3, 4, 5, 18, 27]:
+        for k in [3, 4, 5, 15, 24]:
             axs[plot_index].plot(np.arange(i * n_step, (i + 1) * n_step + 1), np.reshape(X[k, :], n_step + 1), ':',
                         label=f'{m.nameDof()[k].to_string()}')
             plot_index += 1
         X_tous = np.vstack((X_tous, X[:, -1]))
         X0 = X[:, -1]
+
+    X0[m_JeCh.nbQ() + 15] = 0  # brasD
+    X0[m_JeCh.nbQ() + 24] = 0  # brasG
+    for i in range(int(N / 2)-1, N-1):  # N - 1):
+        X = runge_kutta_4(m, X0, t[-1], N, n_step)
+        plot_index = 0
+        for k in [3, 4, 5, 15, 24]:
+            axs[plot_index].plot(np.arange(i * n_step, (i + 1) * n_step + 1), np.reshape(X[k, :], n_step + 1), ':',
+                                 label=f'{m.nameDof()[k].to_string()}')
+            plot_index += 1
+        X_tous = np.vstack((X_tous, X[:, -1]))
+        X0 = X[:, -1]
+
     fig.suptitle('Salto bras en haut (integrated with single shooting)')
     plt.show()
     return X_tous
@@ -70,15 +83,86 @@ t = np.linspace(0, 1, N)
 
 # Salto bras en haut JeCh
 X0 = np.zeros((m_JeCh.nbQ()*2, ))
-X0[18] = -np.pi
-X0[27] = np.pi
-X0[m_JeCh.nbQ()+4] = 2 * np.pi #Salto
-X0[m_JeCh.nbQ()+18] = 2*np.pi
-X0[m_JeCh.nbQ()+27] = -2*np.pi
+X0[15] = -np.pi
+X0[24] = np.pi
+X0[m_JeCh.nbQ()+3] = 2 * np.pi #Salto
 X_tous = integrate_plots(m_JeCh, X0, t, N, n_step)
+print("Salto bras en haut JeCh")
+print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}\n\n")
 
 b = bioviz.Viz(model_path_JeCh)
-b.load_movement(X_tous[:m_JeCh.nbQ(), :].T)
+b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+b.exec()
+
+# Salto bras qui descendent JeCh
+X0 = np.zeros((m_JeCh.nbQ()*2, ))
+X0[15] = -np.pi
+X0[24] = np.pi
+X0[m_JeCh.nbQ()+3] = 2*np.pi #Salto
+X0[m_JeCh.nbQ()+15] = 2*np.pi #brasD
+X0[m_JeCh.nbQ()+24] = -2*np.pi #brasG
+X_tous = integrate_plots(m_JeCh, X0, t, N, n_step)
+print("Salto bras qui descendent JeCh")
+print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}")
+
+b = bioviz.Viz(model_path_JeCh)
+b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+b.exec()
+
+# Salto un bras qui descend JeCh
+X0 = np.zeros((m_JeCh.nbQ()*2, ))
+X0[15] = -np.pi
+X0[24] = np.pi
+X0[m_JeCh.nbQ()+3] = 2*np.pi #Salto
+X0[m_JeCh.nbQ()+24] = -2*np.pi #brasG
+X_tous = integrate_plots(m_JeCh, X0, t, N, n_step)
+print("Salto un bras qui descend JeCh")
+print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}")
+
+b = bioviz.Viz(model_path_JeCh)
+b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+b.exec()
+
+# Salto bras en haut SaMi
+X0 = np.zeros((m_SaMi.nbQ()*2, ))
+X0[15] = -np.pi
+X0[24] = np.pi
+X0[m_SaMi.nbQ()+3] = 2*np.pi #Salto
+X_tous = integrate_plots(m_SaMi, X0, t, N, n_step)
+print("Salto bras en haut SaMi")
+print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}\n\n")
+
+b = bioviz.Viz(model_path_SaMi)
+b.load_movement(X_tous[:, :m_SaMi.nbQ()].T)
+b.exec()
+
+# Salto bras qui descendent SaMi
+X0 = np.zeros((m_SaMi.nbQ()*2, ))
+X0[15] = -np.pi
+X0[24] = np.pi
+X0[m_SaMi.nbQ()+3] = 2 * np.pi #Salto
+X0[m_SaMi.nbQ()+15] = 2*np.pi #brasD
+X0[m_SaMi.nbQ()+24] = -2*np.pi #brasG
+X_tous = integrate_plots(m_SaMi, X0, t, N, n_step)
+print("Salto bras qui descendent SaMi")
+print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}")
+
+b = bioviz.Viz(model_path_SaMi)
+b.load_movement(X_tous[:, :m_SaMi.nbQ()].T)
+b.exec()
+
+# Salto un bras qui descend SaMi
+X0 = np.zeros((m_SaMi.nbQ()*2, ))
+X0[15] = -np.pi
+X0[24] = np.pi
+X0[m_SaMi.nbQ()+3] = 2*np.pi #Salto
+X0[m_SaMi.nbQ()+24] = -2*np.pi #brasG
+X_tous = integrate_plots(m_SaMi, X0, t, N, n_step)
+print("Salto un bras qui descend SaMi")
+print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}")
+
+b = bioviz.Viz(model_path_SaMi)
+b.load_movement(X_tous[:, :m_SaMi.nbQ()].T)
 b.exec()
 
 
