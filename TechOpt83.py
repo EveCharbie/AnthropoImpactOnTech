@@ -65,10 +65,10 @@ def prepare_ocp(
     dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
 
     # Define control path constraint
-    #dof_mappings = BiMappingList()
-    #dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3], to_first=[6, 7, 8, 9])
+    dof_mappings = BiMappingList()
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3], to_first=[6, 7, 8, 9])
     
-    n_tau = 10#4
+    n_tau = 4#10
     tau_min, tau_max, tau_init = -500, 500, 0
     u_bounds = BoundsList()
     u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
@@ -182,6 +182,12 @@ def prepare_ocp(
     x_bounds[0].min[15, 0] = 0
     x_bounds[0].max[15, 0] = 0
 
+    # des bras
+    x_bounds[0].min[16:, :] = -100
+    x_bounds[0].max[16:, :] = 100
+    x_bounds[0].min[16:, 0] = 0
+    x_bounds[0].max[16:, 0] = 0
+
     u_init = InitialGuessList()
     u_init.add([tau_init] * n_tau)
 
@@ -200,7 +206,7 @@ def prepare_ocp(
         objective_functions,
         # constraints,
         ode_solver=ode_solver,
-        #variable_mappings=dof_mappings
+        variable_mappings=dof_mappings,
     )
 
 
