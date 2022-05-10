@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# GV graph
+*.gv
+*.gv.pdf
