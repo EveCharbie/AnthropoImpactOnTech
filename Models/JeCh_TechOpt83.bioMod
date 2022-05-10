@@ -97,6 +97,10 @@ external_forces 0
 	segment	BrasD
 		parent	EpauleD
 		rotations	zy
+		// z tourne le bras
+		// y leve le bras
+		rangeQ	-1.05 1.5
+			-3 .18
 		RT
 			0.7407461168	-0.6039532562	-0.2941694317	0.1612546624
 			0.6178599746	0.7843909783	-0.0545879575	-0.0000019510
@@ -203,6 +207,10 @@ external_forces 0
 	segment	BrasG
 		parent	EpauleG
 		rotations	zy
+		// z tourne le bras
+		// y leve le bras
+		rangeQ	-1.5 1.05
+			-.18 3
 		RT
 			0.7822185856	0.5693963449	0.2528277810	-0.1671338270
 			-0.5693349884	0.8181046273	-0.0810091957	-0.0000077493
