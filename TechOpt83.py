@@ -25,10 +25,12 @@ from bioptim import (
     CostType,
     ConstraintList,
     ConstraintFcn,
+    PenaltyNode,
 )
-
-import pickle
 import time
+
+def minimize_difference(all_pn: PenaltyNode):
+    return all_pn[0].nlp.controls.cx_end - all_pn[1].nlp.controls.cx
 
 def prepare_ocp(
     biorbd_model_path: str, n_shooting: int, final_time: float, ode_solver: OdeSolver = OdeSolver.RK4()
@@ -57,18 +59,36 @@ def prepare_ocp(
     # Add objective functions
     objective_functions = ObjectiveList()
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=0)  # pk Node.ALL_SHOOTING?
+    #objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=1)  # phases
+
+    # objective_functions.add(  # oui? non? je sais pas  phases
+    #     minimize_difference,
+    #     custom_type=ObjectiveFcn.Mayer,
+    #     node=Node.TRANSITION,
+    #     weight=100,
+    #     phase=1,
+    #     quadratic=True,
+    # )
+
     objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.9, max_bound=1.1, weight=0.01)
 
     # Dynamics
     dynamics = DynamicsList()
     dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
+    #dynamics.add(DynamicsFcn.TORQUE_DRIVEN) # phases
+
+    # Constraints
+    # constraints = ConstraintList()  # phases
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.START, first_marker="m0", second_marker="m1", phase=0)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, first_marker="m0", second_marker="m2", phase=0)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, first_marker="m0", second_marker="m1", phase=1)
 
     # Define control path constraint
     dof_mappings = BiMappingList()
     dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11])
     
-    n_tau = 6#10
+    n_tau = nb_q - 6
     tau_min, tau_max, tau_init = -500, 500, 0
     u_bounds = BoundsList()
     u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
@@ -77,7 +97,7 @@ def prepare_ocp(
     nb_q = biorbd_model.nbQ()
     nb_qdot = biorbd_model.nbQdot()
 
-    x = np.vstack((np.zeros((nb_q, 2)), np.ones((nb_qdot, 2))))  # pourquoi 2 colonnes. rep: debut fin
+    x = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))  # pourquoi 2 colonnes. rep: debut fin
     x_init = InitialGuessList()
     x_init.add(x, interpolation=InterpolationType.LINEAR)
     
@@ -86,19 +106,14 @@ def prepare_ocp(
     x_bounds = BoundsList()
     x_bounds.add(bounds=QAndQDotBounds(biorbd_model))
 
-    # Pour plus tard ici
-    # CoM_Q_sym = MX.sym('CoM', biorbd_model.nbQ()) # Q
-    # CoM_Qdot_sym = MX.sym('CoMdot', biorbd_model.nbQ()) # Qdot
-    # CoM_Q_init = np.zeros((biorbd_model.nbQ()))
-    # CoM_Qdot_init = np.zeros((biorbd_model.nbQ()))
-    #
-    # CoM_func = Function('CoM_func', [CoM_Q_sym], [biorbd_model.CoM(CoM_Q_sym).to_mx()])
-    # CoMdot_func = Function('CoMdot_func', [CoM_Q_sym, CoM_Qdot_sym], [biorbd_model.CoM(CoM_Q_sym, CoM_Qdot_sym).to_mx()])
-    # bodyVelo_func = Function('bodyVelo_func', [CoM_Q_sym, CoM_Qdot_sym], [biorbd_model.bodyAngularVelocity(CoM_Q_sym, CoM_Qdot_sym).to_mx()])
-    #
-    # CoM_Q_int_DM = CoM_func(CoM_Q_init)
-    # CoMdot_Q_int_DM = CoMdot_func(CoM_Q_init, CoM_Qdot_init)
-    # bodyVelo__DM = bodyVelo_func(CoM_Q_init, CoM_Qdot_init)
+    # Pour plus tard ici. On est plus tard
+    CoM_Q_sym = MX.sym('CoM', nb_q)
+    CoM_Q_init = np.zeros(nb_q)
+
+    CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model.CoM(CoM_Q_sym).to_mx()])
+    bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym], [biorbd_model.globalJCS(0).to_mx()])  # retourne la RT du bassin
+
+    v = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation
 
     # Contraintes de position
 
@@ -181,6 +196,10 @@ def prepare_ocp(
     x_bounds[0].min[17, 0] = 0
     x_bounds[0].max[17, 0] = 0
 
+    # tenir compte du decalage entre bassin et CoM avec la rotation
+    x_bounds[0].min[12:15, 0] = x_bounds[0].min[12:15, 0] + np.cross(v, x_bounds[0].min[15:18, 0])
+    x_bounds[0].max[12:15, 0] = x_bounds[0].max[12:15, 0] + np.cross(v, x_bounds[0].max[15:18, 0])
+
     # des bras
     x_bounds[0].min[18:22, :] = -100
     x_bounds[0].max[18:22, :] = 100
@@ -218,6 +237,7 @@ def prepare_ocp(
         # constraints,
         ode_solver=ode_solver,
         variable_mappings=dof_mappings,
+        n_threads=2
     )
 
 
@@ -232,6 +252,7 @@ def main():
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
     solver.set_linear_solver("ma57")
     solver.set_maximum_iterations(5000)
+    solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M%S")
