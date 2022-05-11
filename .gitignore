@@ -131,3 +131,6 @@ dmypy.json
 # GV graph
 *.gv
 *.gv.pdf
+
+# Solutions except explicitely added ones
+Solutions/
