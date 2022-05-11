@@ -87,33 +87,26 @@ def prepare_ocp(
     # Define control path constraint
     dof_mappings = BiMappingList()
     dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11])
-    
+
+    nb_q = biorbd_model.nbQ()
+    nb_qdot = biorbd_model.nbQdot()
     n_tau = nb_q - 6
+
     tau_min, tau_max, tau_init = -500, 500, 0
     u_bounds = BoundsList()
     u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
 
     # Initial guesses
-    nb_q = biorbd_model.nbQ()
-    nb_qdot = biorbd_model.nbQdot()
-
     x = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))  # pourquoi 2 colonnes. rep: debut fin
     x_init = InitialGuessList()
     x_init.add(x, interpolation=InterpolationType.LINEAR)
-    
+
+    u_init = InitialGuessList()
+    u_init.add([tau_init] * n_tau)
 
     # Path constraint
     x_bounds = BoundsList()
     x_bounds.add(bounds=QAndQDotBounds(biorbd_model))
-
-    # Pour plus tard ici. On est plus tard
-    CoM_Q_sym = MX.sym('CoM', nb_q)
-    CoM_Q_init = np.zeros(nb_q)
-
-    CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model.CoM(CoM_Q_sym).to_mx()])
-    bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym], [biorbd_model.globalJCS(0).to_mx()])  # retourne la RT du bassin
-
-    v = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation
 
     # Contraintes de position
 
@@ -169,6 +162,14 @@ def prepare_ocp(
     vzinit = 9.81 / 2 * final_time  # vitesse initiale en z du CoM pour revenir a terre au temps final
     vrotxinit = -2 * 3.14  # vitesse initiale en rot x du CoM. 2pi pour un salto
 
+    # decalage entre le bassin et le CoM
+    CoM_Q_sym = MX.sym('CoM', nb_q)
+    CoM_Q_init = np.zeros(nb_q)
+    CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model.CoM(CoM_Q_sym).to_mx()])
+    bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym], [biorbd_model.globalJCS(0).to_mx()])  # retourne la RT du bassin
+
+    v = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation
+
     # en xy bassin
     x_bounds[0].min[12:14, :] = -10
     x_bounds[0].max[12:14, :] = 10
@@ -216,10 +217,6 @@ def prepare_ocp(
     x_bounds[0].max[23, :] = 100
     x_bounds[0].min[23, 0] = 0
     x_bounds[0].max[23, 0] = 0
-
-
-    u_init = InitialGuessList()
-    u_init.add([tau_init] * n_tau)
 
     # constraints = ConstraintList()
     # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0.9, max_bound=1.1, phase=0)
