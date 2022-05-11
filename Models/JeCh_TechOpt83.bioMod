@@ -99,7 +99,7 @@ external_forces 0
 		rotations	zy
 		// z tourne le bras
 		// y leve le bras
-		rangeQ	-1.05 1.5
+		rangesQ	-1.05 1.5
 			-3 .18
 		RT
 			0.7407461168	-0.6039532562	-0.2941694317	0.1612546624
@@ -209,7 +209,7 @@ external_forces 0
 		rotations	zy
 		// z tourne le bras
 		// y leve le bras
-		rangeQ	-1.5 1.05
+		rangesQ	-1.5 1.05
 			-.18 3
 		RT
 			0.7822185856	0.5693963449	0.2528277810	-0.1671338270
@@ -299,6 +299,9 @@ external_forces 0
 	// Segment
 	segment	CuisseM
 		parent	Pelvis
+		rotations xy
+		rangesQ	-0.16 3.
+			-0.3 0.3
 		RT
 			1  0  0  -0.00429149
 			0  1  0  0.02974073
@@ -364,10 +367,11 @@ external_forces 0
 	// Segment
 	segment	PiedM
 		parent	JambeM
+		// pointe de pieds 65 deg
 		RT
 			-1	0	0	-0.0000731275
-			0	0	-1	0.0063187126
-			0	-1	0	0.3813371128
+			0	0.90630779	-0.42261826	0.0063187126
+			0	-0.42261826	-0.90630779	0.3813371128
 			0.0000000000	0.0000000000	0.0000000000	1.0000000000
 		mass	2.4008
 		inertia
