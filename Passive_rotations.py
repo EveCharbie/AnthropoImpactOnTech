@@ -42,7 +42,8 @@ def dynamics_root(m, X, Qddot_J):
     Xdot = np.hstack((Qdot, Qddot_R, Qddot_J))
     return Xdot
 
-def runge_kutta_4_neutre(m, x0, t, tf, N):
+
+def runge_kutta_4_neutre(m, x0, t, tf, N, T0, Tf, Q0, Qf):
     h = tf / (N-1)
 
     Qddot_J = np.zeros((m.nbQ()-m.nbRoot(),)) #### mouvement continu, sans acceleration
@@ -56,16 +57,16 @@ def runge_kutta_4_neutre(m, x0, t, tf, N):
 
     return x
 
-def runge_kutta_4_brasG(m, x0, t, tf, N):
+def runge_kutta_4_brasG(m, x0, t, tf, N, T0, Tf, Q0, Qf):
     h = tf / (N-1)
 
     Qddot_Jt1 = np.zeros((m.nbQ()-m.nbRoot(),)) #### mouvement continu, sans acceleration
     Qddot_Jt23 = np.zeros((m.nbQ() - m.nbRoot(),))
     Qddot_Jt4 = np.zeros((m.nbQ() - m.nbRoot(),))
 
-    Qddot_Jt1[24-6] = Quintic(t, 0, 1, 2.9, .18)  # accelere bras gauche  TODO modifier les bornes
-    Qddot_Jt23[24-6] = Quintic(t + h/2, 0, 1, 2.9, .18)
-    Qddot_Jt4[24-6] = Quintic(t + h, 0, 1, 2.9, .18)
+    Qddot_Jt1[24-6] = Quintic(t, T0, Tf, Q0, Qf)  # accelere bras gauche  TODO modifier les bornes
+    Qddot_Jt23[24-6] = Quintic(t + h/2, T0, Tf, Q0, Qf)
+    Qddot_Jt4[24-6] = Quintic(t + h, T0, Tf, Q0, Qf)
 
     k1 = dynamics_root(m, x0, Qddot_Jt1)
     k2 = dynamics_root(m, x0 + h / 2 * k1, Qddot_Jt23)
@@ -76,19 +77,19 @@ def runge_kutta_4_brasG(m, x0, t, tf, N):
 
     return x
 
-def runge_kutta_4_2bras(m, x0, t, tf, N):
+def runge_kutta_4_2bras(m, x0, t, tf, N, T0, Tf, Q0, Qf):
     h = tf / (N-1)
 
     Qddot_Jt1 = np.zeros((m.nbQ()-m.nbRoot(),)) #### mouvement continu, sans acceleration
     Qddot_Jt23 = np.zeros((m.nbQ() - m.nbRoot(),))
     Qddot_Jt4 = np.zeros((m.nbQ() - m.nbRoot(),))
 
-    Qddot_Jt1[15-6] = -Quintic(t, 0, 1, 2.9, .18)   # accelere bras droit  TODO modifier les bornes
-    Qddot_Jt1[24 - 6] = Quintic(t, 0, 1, 2.9, .18)  # accelere bras gauche
-    Qddot_Jt23[15 - 6] = -Quintic(t + h/2, 0, 1, 2.9, .18)  # accelere bras droit  TODO modifier les bornes
-    Qddot_Jt23[24 - 6] = Quintic(t + h/2, 0, 1, 2.9, .18)  # accelere bras gauche
-    Qddot_Jt4[15 - 6] = -Quintic(t + h, 0, 1, 2.9, .18)  # accelere bras droit  TODO modifier les bornes
-    Qddot_Jt4[24 - 6] = Quintic(t + h, 0, 1, 2.9, .18)  # accelere bras gauche
+    Qddot_Jt1[15-6] = -Quintic(t, T0, Tf, Q0, Qf)   # accelere bras droit  TODO modifier les bornes
+    Qddot_Jt1[24 - 6] = Quintic(t, T0, Tf, Q0, Qf)  # accelere bras gauche
+    Qddot_Jt23[15 - 6] = -Quintic(t + h/2, T0, Tf, Q0, Qf)  # accelere bras droit  TODO modifier les bornes
+    Qddot_Jt23[24 - 6] = Quintic(t + h/2, T0, Tf, Q0, Qf)  # accelere bras gauche
+    Qddot_Jt4[15 - 6] = -Quintic(t + h, T0, Tf, Q0, Qf)  # accelere bras droit  TODO modifier les bornes
+    Qddot_Jt4[24 - 6] = Quintic(t + h, T0, Tf, Q0, Qf)  # accelere bras gauche
 
     k1 = dynamics_root(m, x0, Qddot_Jt1)
     k2 = dynamics_root(m, x0 + h / 2 * k1, Qddot_Jt23)
@@ -99,10 +100,10 @@ def runge_kutta_4_2bras(m, x0, t, tf, N):
 
     return x
 
-def integrate(m, X0, t, N, runge_kutta_4):
+def integrate(m, X0, t, N, runge_kutta_4, T0, Tf, Q0, Qf):
     X_tous = X0
     for i in range(N - 1):
-        X = runge_kutta_4(m, X0, t[i], t[-1], N)
+        X = runge_kutta_4(m, X0, t[i], t[-1], N, T0, Tf, Q0, Qf)
         X_tous = np.vstack((X_tous, X))
         X0 = X
 
@@ -156,32 +157,105 @@ m_SaMi = biorbd.Model(model_path_SaMi)
 m_JeCh.setGravity(np.array((0, 0, 0)))
 m_SaMi.setGravity(np.array((0, 0, 0)))
 
-# b = bioviz.Viz(model_path_JeCh)
-# b.exec()
+def salto_2bras_haut(nom, m, N, T0, Tf, Q0, Qf, viz=False):
+    m.setGravity(np.array((0, 0, 0)))
+    t = np.linspace(0, 1, num=N)
+    X0 = np.zeros((m.nbQ() * 2,))
+    X0[15] = -Q0
+    X0[24] = Q0
+    X0[m.nbQ() + 3] = 2 * np.pi  # Salto rot
+    X_tous = integrate(m, X0, t, N, runge_kutta_4_neutre, T0, Tf, Q0, Qf)
 
-t = np.linspace(0, 1, N)
+    print(f"Salto bras en haut {nom}")
+    print(f"Salto : {X_tous[-1, 3] / 2 / np.pi}\nTilt : {X_tous[-1, 4] / 2 / np.pi}\nTwist : {X_tous[-1, 5] / 2 / np.pi}\n")
+
+    if viz:
+        plot_Q_Qdot_bras(m_JeCh, t, X_tous)
+        plot_Q_Qdot_bassin(m_JeCh, t, X_tous)
+
+        b = bioviz.Viz(model_path_JeCh, show_floor=False)
+        b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+        b.exec()
+
+def salto_2bras_descend(nom, m, N, T0, Tf, Q0, Qf, viz=False):
+    m.setGravity(np.array((0, 0, 0)))
+    t = np.linspace(0, 1, num=N)
+    X0 = np.zeros((m.nbQ() * 2,))
+    X0[15] = -Q0
+    X0[24] = Q0
+    X0[m.nbQ() + 3] = 2 * np.pi  # Salto rot
+    X_tous = integrate(m, X0, t, N, runge_kutta_4_2bras, T0, Tf, Q0, Qf)
+
+    print(f"Salto bras en haut {nom}")
+    print(f"Salto : {X_tous[-1, 3] / 2 / np.pi}\nTilt : {X_tous[-1, 4] / 2 / np.pi}\nTwist : {X_tous[-1, 5] / 2 / np.pi}\n")
+
+    if viz:
+        plot_Q_Qdot_bras(m_JeCh, t, X_tous)
+        plot_Q_Qdot_bassin(m_JeCh, t, X_tous)
+
+        b = bioviz.Viz(model_path_JeCh, show_floor=False)
+        b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+        b.exec()
+
+def salto_brasG_descend(nom, m, N, T0, Tf, Q0, Qf, viz=False):
+    m.setGravity(np.array((0, 0, 0)))
+    t = np.linspace(0, 1, num=N)
+    X0 = np.zeros((m.nbQ() * 2,))
+    X0[15] = -Q0
+    X0[24] = Q0
+    X0[m.nbQ() + 3] = 2 * np.pi  # Salto rot
+    X_tous = integrate(m, X0, t, N, runge_kutta_4_brasG, T0, Tf, Q0, Qf)
+
+    print(f"Salto bras en haut {nom}")
+    print(f"Salto : {X_tous[-1, 3] / 2 / np.pi}\nTilt : {X_tous[-1, 4] / 2 / np.pi}\nTwist : {X_tous[-1, 5] / 2 / np.pi}\n")
+
+    if viz:
+        plot_Q_Qdot_bras(m_JeCh, t, X_tous)
+        plot_Q_Qdot_bassin(m_JeCh, t, X_tous)
+
+        b = bioviz.Viz(model_path_JeCh, show_floor=False)
+        b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+        b.exec()
+
+
+salto_2bras_haut("JeCh", m_JeCh, N, 0, .5, np.pi, 0)
+salto_2bras_descend("JeCh", m_JeCh, N, 0, .5, np.pi, 0)
+salto_brasG_descend("JeCh", m_JeCh, N, 0, .5, np.pi, 0)
+
+salto_2bras_haut("SaMi", m_SaMi, N, 0, .5, np.pi, 0)
+salto_2bras_descend("SaMi", m_SaMi, N, 0, .5, np.pi, 0)
+salto_brasG_descend("SaMi", m_SaMi, N, 0, .5, np.pi, 0)
+
+exit()
+
+T0 = 0
+Tf = .5
+Q0 = np.pi
+Qf = 0
+
+t = np.linspace(0, 1, num=N)
 
 # Salto bras en haut JeCh
 X0 = np.zeros((m_JeCh.nbQ()*2, ))
 X0[15] = -np.pi
 X0[24] = np.pi
 X0[m_JeCh.nbQ()+3] = 2 * np.pi  # Salto rot
-X_tous = integrate(m_JeCh, X0, t, N, runge_kutta_4_neutre)
+X_tous = integrate(m_JeCh, X0, t, N, runge_kutta_4_neutre, T0, Tf, Q0, Qf)
 print("Salto bras en haut JeCh")
 print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}\n")
-plot_Q_Qdot_bras(m_JeCh, t, X_tous)
-plot_Q_Qdot_bassin(m_JeCh, t, X_tous)
-
-b = bioviz.Viz(model_path_JeCh, show_floor=False)
-b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
-b.exec()
+# plot_Q_Qdot_bras(m_JeCh, t, X_tous)
+# plot_Q_Qdot_bassin(m_JeCh, t, X_tous)
+#
+# b = bioviz.Viz(model_path_JeCh, show_floor=False)
+# b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+# b.exec()
 
 # Salto bras qui descendent JeCh
 X0 = np.zeros((m_JeCh.nbQ()*2, ))
 X0[15] = -np.pi
 X0[24] = np.pi
 X0[m_JeCh.nbQ()+3] = 2*np.pi  # Salto rot
-X_tous = integrate(m_JeCh, X0, t, N, runge_kutta_4_2bras)
+X_tous = integrate(m_JeCh, X0, t, N, runge_kutta_4_2bras, T0, Tf, Q0, Qf)
 print("Salto bras qui descendent JeCh")
 print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}\n")
 plot_Q_Qdot_bras(m_JeCh, t, X_tous)
@@ -196,7 +270,7 @@ X0 = np.zeros((m_JeCh.nbQ()*2, ))
 X0[15] = -np.pi
 X0[24] = np.pi
 X0[m_JeCh.nbQ()+3] = 2*np.pi  # Salto rot
-X_tous = integrate(m_JeCh, X0, t, N, runge_kutta_4_brasG)
+X_tous = integrate(m_JeCh, X0, t, N, runge_kutta_4_brasG, T0, Tf, Q0, Qf)
 print("Salto un bras qui descend JeCh")
 print(f"Salto : {X_tous[-1, 3] / 2/np.pi}\nTilt : {X_tous[-1, 4] / 2/np.pi}\nTwist : {X_tous[-1, 5] / 2/np.pi}\n")
 plot_Q_Qdot_bras(m_JeCh, t, X_tous)
