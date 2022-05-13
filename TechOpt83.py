@@ -94,6 +94,8 @@ def prepare_ocp(
     u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
 
     # Initial guesses
+    # 13 mai 2022 je pense qu'en ce moment il a trouve un creux qui est faux (poissone avant le carpe) et il n'en sortira pas
+    # un guess initial bien informe sera probablement utile et necessaire pour reduire le temps de calcul.
     x = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))
     x_init = InitialGuessList()
     x_init.add(x, interpolation=InterpolationType.LINEAR)
@@ -116,8 +118,8 @@ def prepare_ocp(
     x_bounds[0].max[:3, :] = .1
     x_bounds[0].min[:3, 0] = 0
     x_bounds[0].max[:3, 0] = 0
-    x_bounds[0].min[2, 1] = 0
-    x_bounds[0].max[2, 1] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[0].min[2, 1:] = 0
+    x_bounds[0].max[2, 1:] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
     x_bounds[0].min[3, 0] = 0
@@ -154,6 +156,8 @@ def prepare_ocp(
     # le dehanchement
     x_bounds[0].min[11, 0] = 0
     x_bounds[0].max[11, 0] = 0
+    # x_bounds[0].min[11, 2] = -.05
+    # x_bounds[0].max[11, 2] = .05
 
     # Contraintes de position: PHASE 1 l'ouverture et la vrille et demie
 
@@ -329,7 +333,7 @@ def main():
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
     solver.set_linear_solver("ma57")
-    solver.set_maximum_iterations(5000)
+    solver.set_maximum_iterations(10000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
@@ -345,7 +349,7 @@ def main():
         np.save(f'Solutions/{nom}-{temps}-qdot.npy', qdots)
 
     # Print the last solution
-    sol.animate(n_frames=-1)
+    sol.animate(n_frames=-1, show_floor=False)
     #sol.graphs()
 
 
