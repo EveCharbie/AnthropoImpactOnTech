@@ -96,10 +96,24 @@ def prepare_ocp(
     # Initial guesses
     # 13 mai 2022 je pense qu'en ce moment il a trouve un creux qui est faux (poissone avant le carpe) et il n'en sortira pas
     # un guess initial bien informe sera probablement utile et necessaire pour reduire le temps de calcul.
-    x = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))
+    # ca fonctionne!
+    x0 = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))
+    x1 = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))
+
+    x0[10, 0] = 0.
+    x0[10, 1] = 3.  # completement carpe
+    x0[11, :] = 0.  # pas de wiggle avant la fin du carpe
+    x0[15, :] = -2 * 3.14  # commence avec du salto
+
+    x1[10, 0] = 3.
+    x1[10, 1] = 0.
+    x1[11, 0] = 0.
+    x1[15, 0] = -2 * 3.14
+    x1[15, 1] = 0.
+
     x_init = InitialGuessList()
-    x_init.add(x, interpolation=InterpolationType.LINEAR)
-    x_init.add(x, interpolation=InterpolationType.LINEAR)
+    x_init.add(x0, interpolation=InterpolationType.LINEAR)
+    x_init.add(x1, interpolation=InterpolationType.LINEAR)
 
     u_init = InitialGuessList()
     u_init.add([tau_init] * n_tau)
@@ -114,8 +128,8 @@ def prepare_ocp(
     # Contraintes de position: PHASE 0 la montee vers le carpe
 
     # deplacement
-    x_bounds[0].min[:3, :] = -.1
-    x_bounds[0].max[:3, :] = .1
+    x_bounds[0].min[:3, :] = -.2  # il semble se buter a des problemes a .1
+    x_bounds[0].max[:3, :] = .2
     x_bounds[0].min[:3, 0] = 0
     x_bounds[0].max[:3, 0] = 0
     x_bounds[0].min[2, 1:] = 0
@@ -124,8 +138,10 @@ def prepare_ocp(
     # le salto autour de x
     x_bounds[0].min[3, 0] = 0
     x_bounds[0].max[3, 0] = 0
-    x_bounds[0].min[3, 1:] = -2 * 3.14 - .1
+    x_bounds[0].min[3, 1:] = -4 * 3.14 - .1  # double salto
     x_bounds[0].max[3, 1:] = 0
+    #x_bounds[0].min[3, 2] = -4 * 3.14 - .1  # double salto
+    #x_bounds[0].max[3, 2] = -4 * 3.14 + .1
     # limitation du tilt autour de y
     x_bounds[0].min[4, 0] = 0
     x_bounds[0].max[4, 0] = 0
@@ -162,8 +178,8 @@ def prepare_ocp(
     # Contraintes de position: PHASE 1 l'ouverture et la vrille et demie
 
     # deplacement
-    x_bounds[1].min[:3, :] = -.1
-    x_bounds[1].max[:3, :] = .1
+    x_bounds[1].min[:3, :] = -.2
+    x_bounds[1].max[:3, :] = .2
     x_bounds[1].min[2, :] = 0
     x_bounds[1].max[2, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
@@ -230,8 +246,8 @@ def prepare_ocp(
     # autour de x
     x_bounds[0].min[15, :] = -100
     x_bounds[0].max[15, :] = 100
-    x_bounds[0].min[15, 0] = vrotxinit - 3.
-    x_bounds[0].max[15, 0] = vrotxinit + 3.
+    #x_bounds[0].min[15, 0] = vrotxinit - 3.
+    #x_bounds[0].max[15, 0] = vrotxinit + 3.
     # autour de y
     x_bounds[0].min[16, :] = -100
     x_bounds[0].max[16, :] = 100
@@ -333,7 +349,7 @@ def main():
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
     solver.set_linear_solver("ma57")
-    solver.set_maximum_iterations(10000)
+    solver.set_maximum_iterations(5000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
