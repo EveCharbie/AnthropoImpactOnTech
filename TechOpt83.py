@@ -100,15 +100,19 @@ def prepare_ocp(
     x0 = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))
     x1 = np.vstack((np.random.random((nb_q, 2)), np.random.random((nb_qdot, 2))))
 
+    x0[:2, :] = 0.  # pas de deplacement xy
     x0[10, 0] = 0.
     x0[10, 1] = 3.  # completement carpe
     x0[11, :] = 0.  # pas de wiggle avant la fin du carpe
-    x0[15, :] = -2 * 3.14  # commence avec du salto
 
+    x0[15, :] = -4 * 3.14  # commence avec du salto
+    x0[12:15, :] = 0.  # pas de deplacement xy
+
+    x1[:2, :] = 0.  # quelque part autour de 0
     x1[10, 0] = 3.
     x1[10, 1] = 0.
     x1[11, 0] = 0.
-    x1[15, 0] = -2 * 3.14
+    x1[15, 0] = -4 * 3.14
     x1[15, 1] = 0.
 
     x_init = InitialGuessList()
@@ -140,8 +144,8 @@ def prepare_ocp(
     x_bounds[0].max[3, 0] = 0
     x_bounds[0].min[3, 1:] = -4 * 3.14 - .1  # double salto
     x_bounds[0].max[3, 1:] = 0
-    #x_bounds[0].min[3, 2] = -4 * 3.14 - .1  # double salto
-    #x_bounds[0].max[3, 2] = -4 * 3.14 + .1
+    # x_bounds[0].min[3, 2] = -4 * 3.14 - . # double salto
+    # x_bounds[0].max[3, 2] = -4 * 3.14 + .1
     # limitation du tilt autour de y
     x_bounds[0].min[4, 0] = 0
     x_bounds[0].max[4, 0] = 0
@@ -184,10 +188,10 @@ def prepare_ocp(
     x_bounds[1].max[2, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[1].min[3, :] = -2 * 3.14 - .1
+    x_bounds[1].min[3, :] = -4 * 3.14 - .1
     x_bounds[1].max[3, :] = 0
-    x_bounds[1].min[3, 2] = -2 * 3.14 - .1  # fin un tour vers l'avant
-    x_bounds[1].max[3, 2] = -2 * 3.14 + .1
+    x_bounds[1].min[3, 2] = -4 * 3.14 - .1  # fin 2 tour vers l'avant
+    x_bounds[1].max[3, 2] = -4 * 3.14 + .1
     # limitation du tilt autour de y
     x_bounds[1].min[4, :] = - 3.14 / 4
     x_bounds[1].max[4, :] = 3.14 / 4
@@ -246,8 +250,6 @@ def prepare_ocp(
     # autour de x
     x_bounds[0].min[15, :] = -100
     x_bounds[0].max[15, :] = 100
-    #x_bounds[0].min[15, 0] = vrotxinit - 3.
-    #x_bounds[0].max[15, 0] = vrotxinit + 3.
     # autour de y
     x_bounds[0].min[16, :] = -100
     x_bounds[0].max[16, :] = 100
@@ -293,8 +295,6 @@ def prepare_ocp(
     # autour de x
     x_bounds[1].min[15, :] = -100
     x_bounds[1].max[15, :] = 100
-    # x_bounds[1].min[15, 2] = vrotxinit - 3.  # peut-être trop contraignant
-    # x_bounds[1].max[15, 2] = vrotxinit + 3.
     # autour de y
     x_bounds[1].min[16, :] = -100
     x_bounds[1].max[16, :] = 100
