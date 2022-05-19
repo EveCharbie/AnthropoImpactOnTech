@@ -3,7 +3,6 @@ import biorbd
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate
-from IPython import embed
 import bioviz
 
 """
@@ -32,6 +31,7 @@ def Quintic(t, Ti, Tj, Qi, Qj):  # Quintic est bonne
     p = Qi + tp3 * tp2
     v = 30 * tp3 * tp4**2 * tp5**2 / tp0**5
     a = 60 * tp3 * tp4 * tp5 * (Tj + Ti - 2 * t) / tp0**5
+
     return p, v, a
 
 def dynamics_root(m, X, Qddot_J):
@@ -43,22 +43,32 @@ def dynamics_root(m, X, Qddot_J):
     # Qddot_R = np.linalg.inv(mass_matrix[:6, :6]) @ NLEffects[:6]
     Qddot_R = np.linalg.solve(mass_matrix[:6, :6], -NLEffects[:6])
     Xdot = np.hstack((Qdot, Qddot_R, Qddot_J))
-    return Xdot, Qddot_R
+    return Xdot
 
-# N1 = m.NLE_effects(q, qdot)
-# Qddot_R = inv(mass_matrix[:6, :6]) @ (-N1-mass_matrix[:6, 6:] @ Qddot_J)
+def dsym2(f: np.array, h: float, out: np.array = None) -> np.array:
+    if len(f) < 5:
+        raise ValueError("len(f) must be >= 5 for this function")
 
-def bras_en_haut(m, x0, t, T0, Tf, Q0, Qf, qddot_j: list=None, qddot_r: list=None):
+    if out is None:
+        out = np.zeros(len(f))
+
+    out[0] = (f[1] - f[0]) / h  # naively first
+    out[1] = (f[2] - f[0]) / 2 / h  # symetric 1
+
+    out[2:-2] = (f[:-4] - 8 * f[1:-3] + 8 * f[3:-1] - f[4:]) / 12 / h
+
+    out[-2] = (f[-1] - f[-3]) / 2 / h
+    out[-1] = (f[-1] - f[-2]) / h
+
+    return out
+
+
+def bras_en_haut(m, x0, t, T0, Tf, Q0, Qf):
     Qddot_J = np.zeros(m.nbQ() - m.nbRoot())
-    if qddot_j is not None:  # c'est pas beau mais je veux sortir cette information de la fonction
-        qddot_j.append(Qddot_J)
-
-    x, Qddot_R = dynamics_root(m, x0, Qddot_J)
-    if qddot_r is not None:
-        qddot_r.append(Qddot_J)
+    x = dynamics_root(m, x0, Qddot_J)
     return x
 
-def bras_descendent(m, x0, t, T0, Tf, Q0, Qf, qddot_j: list=None, qddot_r: list=None):
+def bras_descendent(m, x0, t, T0, Tf, Q0, Qf):
     global GAUCHE
     global DROITE
     Kp = 10.
@@ -68,98 +78,80 @@ def bras_descendent(m, x0, t, T0, Tf, Q0, Qf, qddot_j: list=None, qddot_r: list=
     Qddot_J[GAUCHE - m.nbRoot()] = a + Kp * (p - x0[GAUCHE]) + Kv * (v - x0[m.nbQ() + GAUCHE])
     Qddot_J[DROITE - m.nbRoot()] = -a + Kp * (-p - x0[DROITE]) + Kv * (-v - x0[m.nbQ() + DROITE])
 
-    if qddot_j is not None:
-        qddot_j.append(Qddot_J)
-
-    x, Qddot_R = dynamics_root(m, x0, Qddot_J)
-    if qddot_r is not None:
-        qddot_r.append(Qddot_J)
+    x = dynamics_root(m, x0, Qddot_J)
     return x
 
-def bras_gauche_descend(m, x0, t, T0, Tf, Q0, Qf, qddot_j: list=None, qddot_r: list=None):
+def bras_gauche_descend(m, x0, t, T0, Tf, Q0, Qf):
     global GAUCHE
     Kp = 10.
     Kv = 3.
     p, v, a = Quintic(t, T0, Tf, Q0, Qf)
     Qddot_J = np.zeros(m.nbQ() - m.nbRoot())
     Qddot_J[GAUCHE - m.nbRoot()] = a + Kp * (p - x0[GAUCHE]) + Kv * (v - x0[m.nbQ() + GAUCHE])
-    if qddot_j is not None:
-        qddot_j.append(Qddot_J)
 
-    x, Qddot_R = dynamics_root(m, x0, Qddot_J)
-    if qddot_r is not None:
-        qddot_r.append(Qddot_J)
+    x = dynamics_root(m, x0, Qddot_J)
     return x
 
-def bras_droit_descend(m, x0, t, T0, Tf, Q0, Qf, qddot_j: list=None, qddot_r: list=None):
+def bras_droit_descend(m, x0, t, T0, Tf, Q0, Qf):
     global DROITE
     Kp = 10.
     Kv = 3.
     p, v, a = Quintic(t, T0, Tf, Q0, Qf)
     Qddot_J = np.zeros(m.nbQ() - m.nbRoot())
     Qddot_J[DROITE - m.nbRoot()] = -a + Kp * (-p - x0[DROITE]) + Kv * (-v - x0[m.nbQ() + DROITE])
-    if qddot_j is not None:
-        qddot_j.append(Qddot_J)
 
-    x, Qddot_R = dynamics_root(m, x0, Qddot_J)
-    if qddot_r is not None:
-        qddot_r.append(Qddot_J)
+    x = dynamics_root(m, x0, Qddot_J)
     return x
 
 #
 # Visualisation
 #
-def plot_Q_Qdot_bras(m, t, X_tous, Qddot):
+def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
+    global GAUCHE
+    global DROITE
     nb_q = m.nbQ()
-    QbrasD = X_tous[:, 15]
-    QbrasG = X_tous[:, 24]
-    QdotbrasD = X_tous[:, nb_q + 15]
-    QdotbrasG = X_tous[:, nb_q + 24]
-    QddotbrasD = Qddot[:, 15-m.nbRoot()]
-    QddotbrasG = Qddot[:, 24-m.nbRoot()]
+    QbrasD = X_tous[:, DROITE]
+    QbrasG = X_tous[:, GAUCHE]
+    QdotbrasD = X_tous[:, nb_q + DROITE]
+    QdotbrasG = X_tous[:, nb_q + GAUCHE]
+    QddotbrasD = Qddot[:, DROITE]
+    QddotbrasG = Qddot[:, GAUCHE]
 
-    fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2)
+    fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2, sharex=True)
     axQD.plot(t, QbrasD)
-    axQD.set_title("Q droit")
     axQG.plot(t, QbrasG)
-    axQG.set_title("Q gauche")
+    axQG.set_ylabel("position (rad)")
+
     axQdD.plot(t, QdotbrasD)
-    axQdD.set_title("Qdot droit")
     axQdG.plot(t, QdotbrasG)
-    axQdG.set_title("Qdot gauche")
+    axQdG.set_ylabel("vitesse (rad/s)")
+
     axQddD.plot(t, QddotbrasD)
-    axQddD.set_title("Qddot droit")
     axQddG.plot(t, QddotbrasG)
-    axQddG.set_title("Qddot gauche")
+    axQddG.set_ylabel("acceleration (rad/s$^2$)")
 
-    plt.tight_layout()
-    plt.show(block=False)
+    axQddG.set_xlabel("temps (s)")
+    axQddD.set_xlabel("temps (s)")
 
-def plot_Q_Qdot_bassin(m, t, X_tous, Qddot_R):
+    axQD.set_title("Droit")
+    axQG.set_title("Gauche")
+    suptitre = "Mouvement des bras" + f" - {titre}" if titre != "" else ""
+    fig.suptitle(suptitre)
+
+    fig.tight_layout()
+    fig.savefig(f'Videos/{suptitre}.pdf')
+    fig.show()
+
+def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     nb_q = m.nbQ()
 
+    # position
     QX = X_tous[:, 0]
     QY = X_tous[:, 1]
     QZ = X_tous[:, 2]
     QrotX = X_tous[:, 3]
     QrotY = X_tous[:, 4]
     QrotZ = X_tous[:, 5]
-
-    fig, (axX, axY, axZ) = plt.subplots(3, 1)
-    axX.plot(t, QX)
-    axX.set_title("Q X")
-    axY.plot(t, QY)
-    axY.set_title("Q Y")
-    axZ.plot(t, QZ)
-    axZ.set_title("Q Z")
-
-    figrot, (axrotX, axrotY, axrotZ) = plt.subplots(3, 1)
-    axrotX.plot(t, QrotX)
-    axrotX.set_title("Q Rot X")
-    axrotY.plot(t, QrotY)
-    axrotY.set_title("Q Rot Y")
-    axrotZ.plot(t, QrotZ)
-    axrotZ.set_title("Q Rot Z")
 
     # vitesses
     QdotX = X_tous[:, nb_q + 0]
@@ -169,48 +161,65 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot_R):
     QdotrotY = X_tous[:, nb_q + 4]
     QdotrotZ = X_tous[:, nb_q + 5]
 
-    figdot, (axdotX, axdotY, axdotZ) = plt.subplots(3, 1)
-    axdotX.plot(t, QdotX)
-    axdotX.set_title("Qdot X")
-    axdotY.plot(t, QdotY)
-    axdotY.set_title("Qdot Y")
-    axdotZ.plot(t, QdotZ)
-    axdotZ.set_title("Qdot Z")
+    # acceleration
+    QddotX = Qddot[:, 0]
+    QddotY = Qddot[:, 1]
+    QddotZ = Qddot[:, 2]
+    QddotrotX = Qddot[:, 3]
+    QddotrotY = Qddot[:, 4]
+    QddotrotZ = Qddot[:, 5]
 
-    figdotrot, (axdotrotX, axdotrotY, axdotrotZ) = plt.subplots(3, 1)
-    axdotrotX.plot(t, QdotrotX)
-    axdotrotX.set_title("Qdot Rot X")
-    axdotrotY.plot(t, QdotrotY)
-    axdotrotY.set_title("Qdot Rot Y")
-    axdotrotZ.plot(t, QdotrotZ)
-    axdotrotZ.set_title("Qdot Rot Z")
+    fig, (axp, axv, axa) = plt.subplots(3, 1, sharex=True)
+    axp.plot(t, QX, label="X")
+    axp.plot(t, QY, label="Y")
+    axp.plot(t, QZ, label="Z")
+    axp.set_ylabel("position (m)")
+    axp.legend(loc='upper left', bbox_to_anchor=(1, .5))
 
-    # accelerations
-    QddotX = Qddot_R[:, 0]
-    QddotY = Qddot_R[:, 1]
-    QddotZ = Qddot_R[:, 2]
-    QddotrotX = Qddot_R[:, 3]
-    QddotrotY = Qddot_R[:, 4]
-    QddotrotZ = Qddot_R[:, 5]
+    axv.plot(t, QdotX, label="Xdot")
+    axv.plot(t, QdotY, label="Ydot")
+    axv.plot(t, QdotZ, label="Zdot")
+    axv.set_ylabel("vitesse (m/s)")
+    axv.legend(loc='upper left', bbox_to_anchor=(1, .5))
 
-    figdot, (axddotX, axddotY, axddotZ) = plt.subplots(3, 1)
-    axddotX.plot(t, QddotX)
-    axddotX.set_title("Qddot X")
-    axddotY.plot(t, QddotY)
-    axddotY.set_title("Qddot Y")
-    axddotZ.plot(t, QddotZ)
-    axddotZ.set_title("Qddot Z")
+    axa.plot(t, QddotX, label="Xddot")
+    axa.plot(t, QddotY, label="Yddot")
+    axa.plot(t, QddotZ, label="Zddot")
+    axa.set_ylabel("acceleration (m/s$^2$)")
+    axa.legend(loc='upper left', bbox_to_anchor=(1, .5))
 
-    figddotrot, (axddotrotX, axddotrotY, axddotrotZ) = plt.subplots(3, 1)
-    axddotrotX.plot(t, QddotrotX)
-    axddotrotX.set_title("Qddot Rot X")
-    axddotrotY.plot(t, QddotrotY)
-    axddotrotY.set_title("Qddot Rot Y")
-    axddotrotZ.plot(t, QddotrotZ)
-    axddotrotZ.set_title("Qddot Rot Z")
+    axa.set_xlabel("temps (s)")
+    suptitre = "Translation du bassin" + f" - {titre}" if titre != "" else ""
+    fig.suptitle(suptitre)
+    fig.tight_layout()
+    fig.savefig(f'Videos/{suptitre}.pdf')
+    fig.show()
 
-    plt.tight_layout()
-    plt.show(block=False)
+    figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, sharex=True)
+    axprot.plot(t, QrotX, label="Rot X")
+    axprot.plot(t, QrotY, label="Rot Y")
+    axprot.plot(t, QrotZ, label="Rot Z")
+    axprot.set_ylabel("position (rad)")
+    axprot.legend(loc='upper left', bbox_to_anchor=(1, .5))
+
+    axvrot.plot(t, QdotrotX, label="Rot Xdot")
+    axvrot.plot(t, QdotrotY, label="Rot Ydot")
+    axvrot.plot(t, QdotrotZ, label="Rot Zdot")
+    axvrot.set_ylabel("vitesse (rad/s)")
+    axvrot.legend(loc='upper left', bbox_to_anchor=(1, .5))
+
+    axarot.plot(t, QddotrotX, label="Rot Xddot")
+    axarot.plot(t, QddotrotY, label="Rot Yddot")
+    axarot.plot(t, QddotrotZ, label="Rot Zddot")
+    axarot.set_ylabel("acceleration (rad/s$^2$)")
+    axarot.legend(loc='upper left', bbox_to_anchor=(1, .5))
+
+    axarot.set_xlabel("temps (s)")
+    suptitre = "Rotation du bassin" + f" - {titre}" if titre != "" else ""
+    figrot.suptitle(suptitre)
+    figrot.tight_layout()
+    figrot.savefig(f'Videos/{suptitre}.pdf')
+    figrot.show()
 
 
 #
@@ -218,12 +227,9 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot_R):
 #
 def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, viz=False):
     m.setGravity(np.array((0, 0, 0)))
-    t, dt = np.linspace(t0, tf, num=N, retstep=True)
+    t, dt = np.linspace(t0, tf, num=N+1, retstep=True)
 
-    Qddot_J = []
-    Qddot_R = []
-
-    func = lambda t, y: action_bras(m, y, t, T0, Tf, Q0, Qf, qddot_j=Qddot_J, qddot_r=Qddot_R)
+    func = lambda t, y: action_bras(m, y, t, T0, Tf, Q0, Qf)
 
     r = scipy.integrate.ode(func).set_integrator('dop853').set_initial_value(X0, t0)
     X_tous = X0
@@ -235,10 +241,13 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, viz=False):
     print(f"Salto : {X_tous[-1, 3] / 2 / np.pi}\nTilt : {X_tous[-1, 4] / 2 / np.pi}\nTwist : {X_tous[-1, 5] / 2 / np.pi}\n")
 
     if viz:
-        # Qddot_J = np.array(Qddot_J)
-        # Qddot_R = np.array(Qddot_R)
-        # plot_Q_Qdot_bras(m_JeCh, t, X_tous, Qddot_J)
-        # plot_Q_Qdot_bassin(m_JeCh, t, X_tous, Qddot_R)
+        Qddot = np.zeros(X_tous.shape)
+        dsym2(X_tous, dt, Qddot)
+        Qddot[np.logical_and(Qddot < 1e-14, Qddot > -1e-14)] = 0
+        Qddot = Qddot[:, m.nbQ():]
+
+        plot_Q_Qdot_bras(m_JeCh, t, X_tous, Qddot, titre=nom)
+        plot_Q_Qdot_bassin(m_JeCh, t, X_tous, Qddot, titre=nom)
 
         b = bioviz.Viz(model_path_JeCh, show_floor=False)
         b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
@@ -275,10 +284,10 @@ r = QCoM - Qbassin
 X0[m_JeCh.nbQ() + 3] = 2 * np.pi  # Salto rot
 X0[m_JeCh.nbQ():m_JeCh.nbQ()+3] = X0[m_JeCh.nbQ():m_JeCh.nbQ() + 3] + np.cross(r, X0[m_JeCh.nbQ()+3:m_JeCh.nbQ()+6])
 
-simuler("JeCh", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut)
-simuler("JeCh", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent)
-simuler("JeCh", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend)
-simuler("JeCh", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend)
+simuler("JeCh bras en haut", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+simuler("JeCh bras descendent", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+simuler("JeCh bras gauche descend", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+simuler("JeCh bras droit descend", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
 
 # SaMi
 # correction pour la translation
@@ -295,8 +304,8 @@ r = QCoM - Qbassin
 X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
 X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])
 
-simuler("SaMi", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut)
-simuler("SaMi", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent)
-simuler("SaMi", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend)
-simuler("SaMi", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend)
+simuler("SaMi bras en haut", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+simuler("SaMi bras descendent", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+simuler("SaMi bras gauche descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+simuler("SaMi bras droit descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
 
