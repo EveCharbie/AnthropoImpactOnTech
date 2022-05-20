@@ -300,8 +300,8 @@ external_forces 0
 	segment	CuisseM
 		parent	Pelvis
 		rotations xy
-		rangesQ	-0.16 3.
-			-0.3 0.3
+		rangesQ	-0.3 2.7
+			-0.35 0.35
 		RT
 			1  0  0  -0.00429149
 			0  1  0  0.02974073

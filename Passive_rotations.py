@@ -40,7 +40,6 @@ def dynamics_root(m, X, Qddot_J):
     Qddot = np.hstack((np.zeros((6,)), Qddot_J)) #qddot2
     NLEffects = m.InverseDynamics(Q, Qdot, Qddot).to_array()
     mass_matrix = m.massMatrix(Q).to_array()
-    # Qddot_R = np.linalg.inv(mass_matrix[:6, :6]) @ NLEffects[:6]
     Qddot_R = np.linalg.solve(mass_matrix[:6, :6], -NLEffects[:6])
     Xdot = np.hstack((Qdot, Qddot_R, Qddot_J))
     return Xdot
