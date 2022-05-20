@@ -1,10 +1,6 @@
 """
-TODO: Create a more meaningful example (make sure to translate all the variables [they should correspond to the model])
-This example uses a representation of a human body by a trunk_leg segment and two arms and has the objective to...
-It is designed to show how to use a model that has quaternions in their degrees of freedom.
+The goal of this program is to optimize de movement to acheive a rudi out pike (803<).
 """
-
-
 import numpy as np
 import biorbd_casadi as biorbd
 from casadi import MX, Function
@@ -51,23 +47,26 @@ def prepare_ocp(
     The OptimalControlProgram ready to be solved
     """
 
-    biorbd_model = ( biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path) )
+    biorbd_model = ( biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path) )
 
     # Add objective functions
     objective_functions = ObjectiveList()
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=0)  # pk Node.ALL_SHOOTING?
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=0)
     objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=1)
     objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=2)
     objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=3)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=4)
 
-    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=0)
-    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
-    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=2)
-    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=0)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=2)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
 
     # Dynamics
     dynamics = DynamicsList()
+    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
     dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
     dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
     dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
@@ -79,6 +78,7 @@ def prepare_ocp(
     dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=1)
     dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=2)
     dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=3)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=4)
 
     nb_q = biorbd_model[0].nbQ()
     nb_qdot = biorbd_model[0].nbQdot()
@@ -90,8 +90,10 @@ def prepare_ocp(
     u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
     u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
     u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
+    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
 
     u_init = InitialGuessList()
+    u_init.add([tau_init] * n_tau)
     u_init.add([tau_init] * n_tau)
     u_init.add([tau_init] * n_tau)
     u_init.add([tau_init] * n_tau)
@@ -99,6 +101,7 @@ def prepare_ocp(
 
     # Path constraint
     x_bounds = BoundsList()
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
     x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
     x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
     x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
@@ -148,8 +151,6 @@ def prepare_ocp(
     x_bounds[0].max[Xrot, DEBUT] = 0
     x_bounds[0].min[Xrot, MILIEU:] = -4 * 3.14 - .1  # salto
     x_bounds[0].max[Xrot, MILIEU:] = 0
-    x_bounds[0].min[Xrot, FIN] = -2 * 3.14 - .1 # double salto
-    x_bounds[0].max[Xrot, FIN] = -2 * 3.14 + .1
     # limitation du tilt autour de y
     x_bounds[0].min[Yrot, DEBUT] = 0
     x_bounds[0].max[Yrot, DEBUT] = 0
@@ -175,7 +176,7 @@ def prepare_ocp(
     # le carpe
     x_bounds[0].min[XrotC, DEBUT] = 0
     x_bounds[0].max[XrotC, DEBUT] = 0
-    x_bounds[0].min[XrotC, FIN] = 2.6
+    x_bounds[0].min[XrotC, FIN] = 2.5
     # x_bounds[0].max[XrotC, FIN] = 2.7  # max du modele
     # le dehanchement
     x_bounds[0].min[YrotC, DEBUT] = 0
@@ -204,8 +205,8 @@ def prepare_ocp(
     # z bassin
     x_bounds[0].min[vZ, :] = -100
     x_bounds[0].max[vZ, :] = 100
-    x_bounds[0].min[vZ, DEBUT] = vzinit - .5
-    x_bounds[0].max[vZ, DEBUT] = vzinit + .5
+    x_bounds[0].min[vZ, DEBUT] = vzinit - .1
+    x_bounds[0].max[vZ, DEBUT] = vzinit + .1
 
     # autour de x
     x_bounds[0].min[vXrot, :] = -100
@@ -244,24 +245,25 @@ def prepare_ocp(
     x_bounds[0].max[vYrotC, DEBUT] = 0
 
     #
-    # Contraintes de position: PHASE 1 l'ouverture
+    # Contraintes de position: PHASE 1 le salto carpe
     #
 
     # deplacement
-    x_bounds[1].min[:Y+1, :] = -.2
-    x_bounds[1].max[:Y+1, :] = .2
+    x_bounds[1].min[:Y + 1, :] = -.1
+    x_bounds[1].max[:Y + 1, :] = .1
     x_bounds[1].min[Z, :] = 0
     x_bounds[1].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
     x_bounds[1].min[Xrot, :] = -4 * 3.14
-    x_bounds[1].max[Xrot, :] = -2 * 3.14 - .1  # 1 salto 3/4
+    x_bounds[1].max[Xrot, :] = 0
+    x_bounds[1].max[Xrot, FIN] = -2 * 3.14 + .1
     # limitation du tilt autour de y
-    x_bounds[1].min[Yrot, :] = - 3.14 / 4
-    x_bounds[1].max[Yrot, :] = 3.14 / 4
+    x_bounds[1].min[Yrot, :] = - 3.14 / 16
+    x_bounds[1].max[Yrot, :] = 3.14 / 16
     # la vrille autour de z
-    x_bounds[1].min[Zrot, :] = 0
-    x_bounds[1].max[Zrot, :] = 3 * 3.14
+    x_bounds[1].min[Zrot, :] = -.1
+    x_bounds[1].max[Zrot, :] = .1
 
     # bras droit t=0  f4a a l'ouverture
     # x_bounds[1].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
@@ -275,17 +277,14 @@ def prepare_ocp(
     # x_bounds[1].max[ZrotG, DEBUT] = 0
 
     # le carpe
-    # x_bounds[1].min[XrotC, DEBUT] = 0
-    # x_bounds[1].max[XrotC, DEBUT] = 0
-    # x_bounds[1].min[XrotC, FIN] = 2.8  # min du modele
-    x_bounds[1].max[XrotC, FIN] = .7
+    x_bounds[1].min[XrotC, :] = 2.5
+    # x_bounds[1].max[XrotC, :] = 2.7  # contraint par le model
     # le dehanchement
-    # x_bounds[1].min[YrotC, DEBUT] = -.05
-    # x_bounds[1].max[YrotC, DEBUT] = .05
-    # x_bounds[1].min[YrotC, MILIEU:] = -.05  # f4a a l'ouverture
-    # x_bounds[1].max[YrotC, MILIEU:] = .05
+    x_bounds[1].min[YrotC, DEBUT] = -.1
+    x_bounds[1].max[YrotC, DEBUT] = .1
 
-    # Contraintes de vitesse: PHASE 1 l'ouverture
+
+    # Contraintes de vitesse: PHASE 1 le salto carpe
 
     # en xy bassin
     x_bounds[1].min[vX:vY + 1, :] = -10
@@ -318,7 +317,7 @@ def prepare_ocp(
     x_bounds[1].max[vYrotC, :] = 100
 
     #
-    # Contraintes de position: PHASE 2 la vrille et demie
+    # Contraintes de position: PHASE 2 l'ouverture
     #
 
     # deplacement
@@ -328,22 +327,16 @@ def prepare_ocp(
     x_bounds[2].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[2].min[Xrot, :] = -2 * 3.14 - 3/2 * 3.14 - .1  # 1 salto 3/4
-    x_bounds[2].max[Xrot, :] = -2 * 3.14 + .1
-    x_bounds[2].min[Xrot, FIN] = -2 * 3.14 - 3/2 * 3.14 - .1  # 1 salto 3/4
-    x_bounds[2].max[Xrot, FIN] = -2 * 3.14 - 3/2 * 3.14 + .1
+    x_bounds[2].min[Xrot, :] = -4 * 3.14
+    x_bounds[2].max[Xrot, :] = -2 * 3.14 - .1  # 1 salto 3/4
     # limitation du tilt autour de y
     x_bounds[2].min[Yrot, :] = - 3.14 / 4
     x_bounds[2].max[Yrot, :] = 3.14 / 4
-    x_bounds[2].min[Yrot, FIN] = - 3.14 / 8
-    x_bounds[2].max[Yrot, FIN] = 3.14 / 8
     # la vrille autour de z
     x_bounds[2].min[Zrot, :] = 0
     x_bounds[2].max[Zrot, :] = 3 * 3.14
-    x_bounds[2].min[Zrot, FIN] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[2].max[Zrot, FIN] = 3 * 3.14 + .1
 
-    # bras droit t=0  f4a la vrille
+    # bras droit t=0  f4a a l'ouverture
     # x_bounds[2].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
     # x_bounds[2].max[YrotD, DEBUT] = -2.9
     # x_bounds[2].min[ZrotD, DEBUT] = 0
@@ -354,18 +347,18 @@ def prepare_ocp(
     # x_bounds[2].min[ZrotG, DEBUT] = 0
     # x_bounds[2].max[ZrotG, DEBUT] = 0
 
-    # le carpe  f4a les jambes
+    # le carpe
     # x_bounds[2].min[XrotC, DEBUT] = 0
     # x_bounds[2].max[XrotC, DEBUT] = 0
     # x_bounds[2].min[XrotC, FIN] = 2.8  # min du modele
-    # x_bounds[2].max[XrotC, FIN] = .7
+    x_bounds[2].max[XrotC, FIN] = .7
     # le dehanchement
     # x_bounds[2].min[YrotC, DEBUT] = -.05
     # x_bounds[2].max[YrotC, DEBUT] = .05
     # x_bounds[2].min[YrotC, MILIEU:] = -.05  # f4a a l'ouverture
     # x_bounds[2].max[YrotC, MILIEU:] = .05
 
-    # Contraintes de vitesse: PHASE 2 la vrille et demie
+    # Contraintes de vitesse: PHASE 2 l'ouverture
 
     # en xy bassin
     x_bounds[2].min[vX:vY + 1, :] = -10
@@ -398,46 +391,54 @@ def prepare_ocp(
     x_bounds[2].max[vYrotC, :] = 100
 
     #
-    # Contraintes de position: PHASE 3 la reception
+    # Contraintes de position: PHASE 3 la vrille et demie
     #
 
     # deplacement
-    x_bounds[3].min[:Y + 1, :] = -.1
-    x_bounds[3].max[:Y + 1, :] = .1
+    x_bounds[3].min[:Y+1, :] = -.2
+    x_bounds[3].max[:Y+1, :] = .2
     x_bounds[3].min[Z, :] = 0
     x_bounds[3].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[3].min[Xrot, :] = -4 * 3.14
-    x_bounds[3].max[Xrot, :] = -2 * 3.14 - 3 / 2 * 3.14 + .2  # 1 salto 3/4
-    x_bounds[3].min[Xrot, FIN] = -4 * 3.14 - .1  # 1 salto 3/4
-    x_bounds[3].max[Xrot, FIN] = -4 * 3.14 + .1
+    x_bounds[3].min[Xrot, :] = -2 * 3.14 - 3/2 * 3.14 - .1  # 1 salto 3/4
+    x_bounds[3].max[Xrot, :] = -2 * 3.14 + .1
+    x_bounds[3].min[Xrot, FIN] = -2 * 3.14 - 3/2 * 3.14 - .1  # 1 salto 3/4
+    x_bounds[3].max[Xrot, FIN] = -2 * 3.14 - 3/2 * 3.14 + .1
     # limitation du tilt autour de y
-    x_bounds[3].min[Yrot, :] = - 3.14 / 16
-    x_bounds[3].max[Yrot, :] = 3.14 / 16
+    x_bounds[3].min[Yrot, :] = - 3.14 / 4
+    x_bounds[3].max[Yrot, :] = 3.14 / 4
+    x_bounds[3].min[Yrot, FIN] = - 3.14 / 8
+    x_bounds[3].max[Yrot, FIN] = 3.14 / 8
     # la vrille autour de z
-    x_bounds[3].min[Zrot, :] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[3].max[Zrot, :] = 3 * 3.14 + .1
+    x_bounds[3].min[Zrot, :] = 0
+    x_bounds[3].max[Zrot, :] = 3 * 3.14
+    x_bounds[3].min[Zrot, FIN] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[3].max[Zrot, FIN] = 3 * 3.14 + .1
 
-    # bras droit t=0
-    x_bounds[3].min[YrotD, FIN] = -2.9 - .1  # debut bras aux oreilles
-    x_bounds[3].max[YrotD, FIN] = -2.9 + .1
-    x_bounds[3].min[ZrotD, FIN] = -.1
-    x_bounds[3].max[ZrotD, FIN] = .1
+    # bras droit t=0  f4a la vrille
+    # x_bounds[3].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
+    # x_bounds[3].max[YrotD, DEBUT] = -2.9
+    # x_bounds[3].min[ZrotD, DEBUT] = 0
+    # x_bounds[3].max[ZrotD, DEBUT] = 0
     # bras gauche t=0
-    x_bounds[3].min[YrotG, FIN] = 2.9 - .1  # debut bras aux oreilles
-    x_bounds[3].max[YrotG, FIN] = 2.9 + .1
-    x_bounds[3].min[ZrotG, FIN] = -.1
-    x_bounds[3].max[ZrotG, FIN] = .1
+    # x_bounds[3].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
+    # x_bounds[3].max[YrotG, DEBUT] = 2.9
+    # x_bounds[3].min[ZrotG, DEBUT] = 0
+    # x_bounds[3].max[ZrotG, DEBUT] = 0
 
-    # le carpe
-    # x_bounds[3].min[XrotC, FIN] = 0  # min du modele
-    x_bounds[3].max[XrotC, FIN] = .7
+    # le carpe  f4a les jambes
+    # x_bounds[3].min[XrotC, DEBUT] = 0
+    # x_bounds[3].max[XrotC, DEBUT] = 0
+    # x_bounds[3].min[XrotC, FIN] = 2.8  # min du modele
+    # x_bounds[3].max[XrotC, FIN] = .7
     # le dehanchement
-    x_bounds[3].min[YrotC, FIN] = -.1
-    x_bounds[3].max[YrotC, FIN] = .1
+    # x_bounds[3].min[YrotC, DEBUT] = -.05
+    # x_bounds[3].max[YrotC, DEBUT] = .05
+    # x_bounds[3].min[YrotC, MILIEU:] = -.05  # f4a a l'ouverture
+    # x_bounds[3].max[YrotC, MILIEU:] = .05
 
-    # Contraintes de vitesse: PHASE 3 la reception
+    # Contraintes de vitesse: PHASE 3 la vrille et demie
 
     # en xy bassin
     x_bounds[3].min[vX:vY + 1, :] = -10
@@ -455,8 +456,8 @@ def prepare_ocp(
     x_bounds[3].max[vYrot, :] = 100
 
     # autour de z
-    x_bounds[2].min[vZrot, :] = -100
-    x_bounds[2].max[vZrot, :] = 100
+    x_bounds[3].min[vZrot, :] = -100
+    x_bounds[3].max[vZrot, :] = 100
 
     # des bras
     x_bounds[3].min[vZrotD:vYrotG + 1, :] = -100
@@ -470,14 +471,89 @@ def prepare_ocp(
     x_bounds[3].max[vYrotC, :] = 100
 
     #
+    # Contraintes de position: PHASE 4 la reception
+    #
+
+    # deplacement
+    x_bounds[4].min[:Y + 1, :] = -.1
+    x_bounds[4].max[:Y + 1, :] = .1
+    x_bounds[4].min[Z, :] = 0
+    x_bounds[4].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[4].min[Z, FIN] = 0
+    x_bounds[4].max[Z, FIN] = .1
+
+    # le salto autour de x
+    x_bounds[4].min[Xrot, :] = -4 * 3.14
+    x_bounds[4].max[Xrot, :] = -2 * 3.14 - 3 / 2 * 3.14 + .2  # 1 salto 3/4
+    x_bounds[4].min[Xrot, FIN] = -4 * 3.14 - .1  # 1 salto 3/4
+    x_bounds[4].max[Xrot, FIN] = -4 * 3.14 + .1
+    # limitation du tilt autour de y
+    x_bounds[4].min[Yrot, :] = - 3.14 / 16
+    x_bounds[4].max[Yrot, :] = 3.14 / 16
+    # la vrille autour de z
+    x_bounds[4].min[Zrot, :] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[4].max[Zrot, :] = 3 * 3.14 + .1
+
+    # bras droit t=0
+    x_bounds[4].min[YrotD, FIN] = -2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotD, FIN] = -2.9 + .1
+    x_bounds[4].min[ZrotD, FIN] = -.1
+    x_bounds[4].max[ZrotD, FIN] = .1
+    # bras gauche t=0
+    x_bounds[4].min[YrotG, FIN] = 2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotG, FIN] = 2.9 + .1
+    x_bounds[4].min[ZrotG, FIN] = -.1
+    x_bounds[4].max[ZrotG, FIN] = .1
+
+    # le carpe
+    # x_bounds[4].min[XrotC, FIN] = 0  # min du modele
+    x_bounds[4].max[XrotC, FIN] = .7
+    # le dehanchement
+    x_bounds[4].min[YrotC, FIN] = -.1
+    x_bounds[4].max[YrotC, FIN] = .1
+
+    # Contraintes de vitesse: PHASE 4 la reception
+
+    # en xy bassin
+    x_bounds[4].min[vX:vY + 1, :] = -10
+    x_bounds[4].max[vX:vY + 1, :] = 10
+
+    # z bassin
+    x_bounds[4].min[vZ, :] = -100
+    x_bounds[4].max[vZ, :] = 100
+
+    # autour de x
+    x_bounds[4].min[vXrot, :] = -100
+    x_bounds[4].max[vXrot, :] = 100
+    # autour de y
+    x_bounds[4].min[vYrot, :] = -100
+    x_bounds[4].max[vYrot, :] = 100
+
+    # autour de z
+    x_bounds[4].min[vZrot, :] = -100
+    x_bounds[4].max[vZrot, :] = 100
+
+    # des bras
+    x_bounds[4].min[vZrotD:vYrotG + 1, :] = -100
+    x_bounds[4].max[vZrotD:vYrotG + 1, :] = 100
+
+    # du carpe
+    x_bounds[4].min[vXrotC, :] = -100
+    x_bounds[4].max[vXrotC, :] = 100
+    # du dehanchement
+    x_bounds[4].min[vYrotC, :] = -100
+    x_bounds[4].max[vYrotC, :] = 100
+
+    #
     # Initial guesses
     #
     x0 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x1 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x2 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x3 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
+    x4 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
 
-    x0[Xrot, 1] = -2 * 3.14
+    # x0[Xrot, 1] = -2 * 3.14
     x0[ZrotG] = .75
     x0[ZrotD] = -.75
     x0[YrotG, 0] = 2.9
@@ -486,22 +562,29 @@ def prepare_ocp(
     x0[YrotD, 1] = -1.35
     x0[XrotC, 1] = 2.65
 
-    x1[Xrot] = -2 * 3.14
-    x1[Zrot, 1] = 3.14
-    x1[ZrotG, 0] = .75
-    x1[ZrotD, 0] = -.75
-    x1[YrotG, 0] = 1.35
-    x1[YrotD, 0] = -1.35
-    x1[XrotC, 0] = 2.65
+    x1[ZrotG] = .75
+    x1[ZrotD] = -.75
+    x1[Xrot, 1] = -2 * 3.14
+    x1[YrotG] = 1.35
+    x1[YrotD] = -1.35
+    x1[XrotC] = 2.6
 
-    x2[Xrot, 0] = -2 * 3.14
-    x2[Xrot, 1] = -2 * 3.14 - 3/2 * 3.14
-    x2[Zrot, 0] = 3.14
-    x2[Zrot, 1] = 3 * 3.14
+    x2[Xrot] = -2 * 3.14
+    x2[Zrot, 1] = 3.14
+    x2[ZrotG, 0] = .75
+    x2[ZrotD, 0] = -.75
+    x2[YrotG, 0] = 1.35
+    x2[YrotD, 0] = -1.35
+    x2[XrotC, 0] = 2.6
 
-    x3[Xrot, 0] = -2 * 3.14 - 3/2 * 3.14
-    x3[Xrot, 1] = -4 * 3.14
-    x3[Zrot] = 3 * 3.14
+    x3[Xrot, 0] = -2 * 3.14
+    x3[Xrot, 1] = -2 * 3.14 - 3/2 * 3.14
+    x3[Zrot, 0] = 3.14
+    x3[Zrot, 1] = 3 * 3.14
+
+    x4[Xrot, 0] = -2 * 3.14 - 3/2 * 3.14
+    x4[Xrot, 1] = -4 * 3.14
+    x4[Zrot] = 3 * 3.14
 
 
     x_init = InitialGuessList()
@@ -509,18 +592,19 @@ def prepare_ocp(
     x_init.add(x1, interpolation=InterpolationType.LINEAR)
     x_init.add(x2, interpolation=InterpolationType.LINEAR)
     x_init.add(x3, interpolation=InterpolationType.LINEAR)
+    x_init.add(x4, interpolation=InterpolationType.LINEAR)
 
     constraints = ConstraintList()
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
-    # # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
-    # # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
-    # # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=3)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=3)
 
     return OptimalControlProgram(
         biorbd_model,
         dynamics,
         n_shooting,
-        [final_time/4] * 4,
+        [final_time/len(biorbd_model)] * len(biorbd_model),
         x_init,
         u_init,
         x_bounds,
@@ -538,7 +622,7 @@ def main():
     Prepares and solves an ocp for a 803<. Animates the results
     """
 
-    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=(25, 25, 25, 25), final_time=1.87) #######################
+    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=(25, 25, 25, 25, 25), final_time=1.87) #######################
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
