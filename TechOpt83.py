@@ -611,7 +611,7 @@ def prepare_ocp(
         constraints,
         ode_solver=ode_solver,
         variable_mappings=dof_mappings,
-        n_threads=2
+        n_threads=31
     )
 
 
@@ -620,12 +620,12 @@ def main():
     Prepares and solves an ocp for a 803<. Animates the results
     """
 
-    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=(20, 40, 40, 25, 25), final_time=1.87) #######################
+    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=(40, 100, 100, 100, 40), final_time=1.87) #######################
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
     solver.set_linear_solver("ma57")
-    solver.set_maximum_iterations(5000)
+    solver.set_maximum_iterations(10000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
