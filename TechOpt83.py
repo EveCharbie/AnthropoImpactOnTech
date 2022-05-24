@@ -428,10 +428,8 @@ def prepare_ocp(
     # x_bounds[3].max[ZrotG, DEBUT] = 0
 
     # le carpe  f4a les jambes
-    # x_bounds[3].min[XrotC, DEBUT] = 0
-    # x_bounds[3].max[XrotC, DEBUT] = 0
-    # x_bounds[3].min[XrotC, FIN] = 2.8  # min du modele
-    # x_bounds[3].max[XrotC, FIN] = .7
+    # x_bounds[3].min[XrotC, :] = 2.8  # min du modele
+    x_bounds[3].max[XrotC, :] = .7
     # le dehanchement
     # x_bounds[3].min[YrotC, DEBUT] = -.05
     # x_bounds[3].max[YrotC, DEBUT] = .05
@@ -622,7 +620,7 @@ def main():
     Prepares and solves an ocp for a 803<. Animates the results
     """
 
-    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=(25, 25, 25, 25, 25), final_time=1.87) #######################
+    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=(20, 40, 40, 25, 25), final_time=1.87) #######################
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
