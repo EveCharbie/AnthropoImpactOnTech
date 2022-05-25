@@ -64,6 +64,9 @@ def prepare_ocp(
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
 
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='chevilleM', weight=100, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='chevilleM', weight=100, phase=0)
+
     # Dynamics
     dynamics = DynamicsList()
     dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
@@ -139,8 +142,10 @@ def prepare_ocp(
     #
 
     # deplacement
-    x_bounds[0].min[:Z+1, :] = -.1
-    x_bounds[0].max[:Z+1, :] = .1
+    x_bounds[0].min[X, :] = -.1
+    x_bounds[0].max[X, :] = .1
+    x_bounds[0].min[Y, :] = -.3
+    x_bounds[0].max[Y, :] = .3
     x_bounds[0].min[:Z+1, DEBUT] = 0
     x_bounds[0].max[:Z+1, DEBUT] = 0
     x_bounds[0].min[Z, MILIEU:] = 0
@@ -249,8 +254,10 @@ def prepare_ocp(
     #
 
     # deplacement
-    x_bounds[1].min[:Y + 1, :] = -.1
-    x_bounds[1].max[:Y + 1, :] = .1
+    x_bounds[1].min[X, :] = -.1
+    x_bounds[1].max[X, :] = .1
+    x_bounds[1].min[Y, :] = -.3
+    x_bounds[1].max[Y, :] = .3
     x_bounds[1].min[Z, :] = 0
     x_bounds[1].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
@@ -321,8 +328,10 @@ def prepare_ocp(
     #
 
     # deplacement
-    x_bounds[2].min[:Y+1, :] = -.2
-    x_bounds[2].max[:Y+1, :] = .2
+    x_bounds[2].min[X, :] = -.2
+    x_bounds[2].max[X, :] = .2
+    x_bounds[2].min[Y, :] = -.3
+    x_bounds[2].max[Y, :] = .3
     x_bounds[2].min[Z, :] = 0
     x_bounds[2].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
@@ -395,8 +404,10 @@ def prepare_ocp(
     #
 
     # deplacement
-    x_bounds[3].min[:Y+1, :] = -.2
-    x_bounds[3].max[:Y+1, :] = .2
+    x_bounds[3].min[X, :] = -.2
+    x_bounds[3].max[X, :] = .2
+    x_bounds[3].min[Y, :] = -.3
+    x_bounds[3].max[Y, :] = .3
     x_bounds[3].min[Z, :] = 0
     x_bounds[3].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
@@ -593,9 +604,11 @@ def prepare_ocp(
     x_init.add(x4, interpolation=InterpolationType.LINEAR)
 
     constraints = ConstraintList()
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, min_bound=-.3, max_bound=.3, first_marker='MidMainG', second_marker='chevilleM', phase=0)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, min_bound=-.3, max_bound=.3, first_marker='MidMainD', second_marker='chevilleM', phase=0)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, min_bound=-.3, max_bound=.3, first_marker='MidMainG', second_marker='chevilleM', phase=0)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, min_bound=-.3, max_bound=.3, first_marker='MidMainD', second_marker='chevilleM', phase=0)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.3, max_bound=.3, first_marker='MidMainG', second_marker='chevilleM', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.3, max_bound=.3, first_marker='MidMainD', second_marker='chevilleM', phase=1)
+#    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=3)
