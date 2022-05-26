@@ -52,20 +52,20 @@ def prepare_ocp(
     # Add objective functions
     objective_functions = ObjectiveList()
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=0)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=2)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=3)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=100, phase=4)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=0)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=1)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=2)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=3)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=4)
 
-    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000, phase=0)
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=2)
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
 
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='chevilleM', weight=100, phase=0)
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='chevilleM', weight=100, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='chevilleM', weight=500, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='chevilleM', weight=500, phase=0)
 
     # Dynamics
     dynamics = DynamicsList()
@@ -144,8 +144,8 @@ def prepare_ocp(
     # deplacement
     x_bounds[0].min[X, :] = -.1
     x_bounds[0].max[X, :] = .1
-    x_bounds[0].min[Y, :] = -.3
-    x_bounds[0].max[Y, :] = .3
+    x_bounds[0].min[Y, :] = -1.
+    x_bounds[0].max[Y, :] = 1.
     x_bounds[0].min[:Z+1, DEBUT] = 0
     x_bounds[0].max[:Z+1, DEBUT] = 0
     x_bounds[0].min[Z, MILIEU:] = 0
@@ -256,8 +256,8 @@ def prepare_ocp(
     # deplacement
     x_bounds[1].min[X, :] = -.1
     x_bounds[1].max[X, :] = .1
-    x_bounds[1].min[Y, :] = -.3
-    x_bounds[1].max[Y, :] = .3
+    x_bounds[1].min[Y, :] = -1.
+    x_bounds[1].max[Y, :] = 1.
     x_bounds[1].min[Z, :] = 0
     x_bounds[1].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
@@ -330,8 +330,8 @@ def prepare_ocp(
     # deplacement
     x_bounds[2].min[X, :] = -.2
     x_bounds[2].max[X, :] = .2
-    x_bounds[2].min[Y, :] = -.3
-    x_bounds[2].max[Y, :] = .3
+    x_bounds[2].min[Y, :] = -1.
+    x_bounds[2].max[Y, :] = 1.
     x_bounds[2].min[Z, :] = 0
     x_bounds[2].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
@@ -406,8 +406,8 @@ def prepare_ocp(
     # deplacement
     x_bounds[3].min[X, :] = -.2
     x_bounds[3].max[X, :] = .2
-    x_bounds[3].min[Y, :] = -.3
-    x_bounds[3].max[Y, :] = .3
+    x_bounds[3].min[Y, :] = -1.
+    x_bounds[3].max[Y, :] = 1.
     x_bounds[3].min[Z, :] = 0
     x_bounds[3].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
@@ -604,10 +604,8 @@ def prepare_ocp(
     x_init.add(x4, interpolation=InterpolationType.LINEAR)
 
     constraints = ConstraintList()
-    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, min_bound=-.3, max_bound=.3, first_marker='MidMainG', second_marker='chevilleM', phase=0)
-    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.END, min_bound=-.3, max_bound=.3, first_marker='MidMainD', second_marker='chevilleM', phase=0)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.3, max_bound=.3, first_marker='MidMainG', second_marker='chevilleM', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.3, max_bound=.3, first_marker='MidMainD', second_marker='chevilleM', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainG', second_marker='chevilleM', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainD', second_marker='chevilleM', phase=1)
 #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
@@ -635,17 +633,18 @@ def main():
     Prepares and solves an ocp for a 803<. Animates the results
     """
 
-    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=(40, 100, 100, 100, 40), final_time=1.87) #######################
+    n_shooting = (40, 100, 100, 100, 40)
+    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=n_shooting, final_time=1.87) #######################
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
-    solver.set_linear_solver("ma57")
+    solver.set_linear_solver("ma57")  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
     solver.set_maximum_iterations(10000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M%S")
-    nom = 'sol'
+    nom = 'sol' + str(n_shooting).replace(', ', '_')
     qs = sol.states[0]['q']
     qdots = sol.states[0]['qdot']
     for i in range(1, len(sol.states)):
