@@ -21,9 +21,17 @@ from bioptim import (
     CostType,
     ConstraintList,
     ConstraintFcn,
-    PenaltyNode,
+    PenaltyNodeList,
+    BiorbdInterface,
 )
 import time
+
+
+def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
+    diff = 0
+    for i, dof in enumerate(dofs):
+        diff += (all_pn.nlp.states['q'].mx[dof] - targets[i])**2
+    return BiorbdInterface.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
 
 def prepare_ocp(
     biorbd_model_path: str, n_shooting: int, final_time: float, ode_solver: OdeSolver = OdeSolver.RK4()
@@ -49,66 +57,9 @@ def prepare_ocp(
 
     biorbd_model = ( biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path) )
 
-    # Add objective functions
-    objective_functions = ObjectiveList()
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=0)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=2)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=3)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=4)
-
-    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000, phase=0)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=2)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
-
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='GenouM_G', weight=500, phase=0)
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='GenouM_D', weight=500, phase=0)
-
-    # Dynamics
-    dynamics = DynamicsList()
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-
-    # Define control path constraint
-    dof_mappings = BiMappingList()
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=0)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=1)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=2)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=3)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=4)
-
     nb_q = biorbd_model[0].nbQ()
     nb_qdot = biorbd_model[0].nbQdot()
     n_tau = nb_q - biorbd_model[0].nbRoot()
-
-    tau_min, tau_max, tau_init = -500, 500, 0
-    u_bounds = BoundsList()
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-
-    u_init = InitialGuessList()
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
-
-    # Path constraint
-    x_bounds = BoundsList()
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
 
     # Pour la lisibilite
     X = 0
@@ -143,6 +94,70 @@ def prepare_ocp(
     vYrotABG = 13 + nb_q
     vXrotC = 14 + nb_q
     vYrotC = 15 + nb_q
+
+    # Add objective functions
+    objective_functions = ObjectiveList()
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=0)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=1)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=2)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=3)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=4)
+
+    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000, phase=0)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=2)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
+    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
+
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='CibleMainG', weight=1000, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='CibleMainD', weight=1000, phase=0)
+
+    # arrete de gigoter les bras
+    les_bras = [ZrotBD, YrotBD, ZrotABD, YrotABD, ZrotBG, YrotBG, ZrotABG, YrotABG]
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=100, phase=2)
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=100, phase=3)
+
+    # Dynamics
+    dynamics = DynamicsList()
+    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
+    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
+    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
+    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
+    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
+
+    # Define control path constraint  TODO: generaliser les mapping avec for peut-etre
+    dof_mappings = BiMappingList()
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=0)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=1)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=2)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=3)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=4)
+
+    tau_min, tau_max, tau_init = -500, 500, 0
+    u_bounds = BoundsList()
+    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
+    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
+    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
+    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
+    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
+
+    u_init = InitialGuessList()
+    u_init.add([tau_init] * n_tau)
+    u_init.add([tau_init] * n_tau)
+    u_init.add([tau_init] * n_tau)
+    u_init.add([tau_init] * n_tau)
+    u_init.add([tau_init] * n_tau)
+
+    # Path constraint
+    x_bounds = BoundsList()
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+
+    # Pour la lisibilite
     DEBUT, MILIEU, FIN = 0, 1, 2
 
     #
@@ -160,8 +175,8 @@ def prepare_ocp(
     x_bounds[0].max[Z, MILIEU:] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[0].min[Xrot, DEBUT] = 0
-    x_bounds[0].max[Xrot, DEBUT] = 0
+    x_bounds[0].min[Xrot, DEBUT] = .35  # penche vers l'avant un peu carpe
+    x_bounds[0].max[Xrot, DEBUT] = .50
     x_bounds[0].min[Xrot, MILIEU:] = -4 * 3.14 - .1  # salto
     x_bounds[0].max[Xrot, MILIEU:] = 0
     # limitation du tilt autour de y
@@ -194,8 +209,8 @@ def prepare_ocp(
     x_bounds[0].max[ZrotABG:YrotABG+1, DEBUT] = 0
 
     # le carpe
-    x_bounds[0].min[XrotC, DEBUT] = 0
-    x_bounds[0].max[XrotC, DEBUT] = 0
+    x_bounds[0].min[XrotC, DEBUT] = .35  # depart un peu ferme aux hanches
+    x_bounds[0].max[XrotC, DEBUT] = .50
     x_bounds[0].min[XrotC, FIN] = 2.5
     # x_bounds[0].max[XrotC, FIN] = 2.7  # max du modele
     # le dehanchement
@@ -231,6 +246,7 @@ def prepare_ocp(
     # autour de x
     x_bounds[0].min[vXrot, :] = -100
     x_bounds[0].max[vXrot, :] = 100
+    x_bounds[0].min[vXrot, DEBUT] = 0  # pas de contre rotation au debut, juste pour etre certain
     # autour de y
     x_bounds[0].min[vYrot, :] = -100
     x_bounds[0].max[vYrot, :] = 100
@@ -647,6 +663,7 @@ def prepare_ocp(
     x0[YrotBD, 0] = -2.9
     x0[YrotBG, 1] = 1.35
     x0[YrotBD, 1] = -1.35
+    x0[XrotC, 0] = .4
     x0[XrotC, 1] = 2.65
 
     x1[ZrotBG] = .75
@@ -682,12 +699,13 @@ def prepare_ocp(
     x_init.add(x4, interpolation=InterpolationType.LINEAR)
 
     constraints = ConstraintList()
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainG', second_marker='GenouM_G', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainD', second_marker='GenouM_D', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainG', second_marker='CibleMainG', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainD', second_marker='CibleMainD', phase=1)
 #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=3)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=4)
 
     return OptimalControlProgram(
         biorbd_model,

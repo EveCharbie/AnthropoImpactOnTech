@@ -133,7 +133,7 @@ external_forces 0
 	segment	ABrasD
 		parent	BrasD
 		rotations zy
-		rangesQ	-.3 2.18
+		rangesQ	-.3 .3
 			-2.65 0.
 		RT
 			1	0	0	0.0000006432
@@ -245,7 +245,7 @@ external_forces 0
 	segment	ABrasG
 		parent	BrasG
 		rotations zy
-		rangesQ	-2.18 .3
+		rangesQ	-.3 .3
 			0. 2.65
 		RT
 			1	0	0	0.0000008108
@@ -365,6 +365,16 @@ external_forces 0
 		marker	GenouM_G
 			parent	JambeM
 			position	-0.1	0	0.1
+			technical 1
+		endmarker
+		marker	CibleMainD
+			parent	JambeM
+			position	0.1	0	.22
+			technical 1
+		endmarker
+		marker	CibleMainG
+			parent	JambeM
+			position	-0.1	0	.22
 			technical 1
 		endmarker
 
