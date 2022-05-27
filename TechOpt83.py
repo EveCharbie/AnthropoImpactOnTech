@@ -64,8 +64,8 @@ def prepare_ocp(
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
 
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='chevilleM', weight=500, phase=0)
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='chevilleM', weight=500, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='GenouM_G', weight=500, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='GenouM_D', weight=500, phase=0)
 
     # Dynamics
     dynamics = DynamicsList()
@@ -77,11 +77,11 @@ def prepare_ocp(
 
     # Define control path constraint
     dof_mappings = BiMappingList()
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=0)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=1)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=2)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=3)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5], to_first=[6, 7, 8, 9, 10, 11], phase=4)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=0)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=1)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=2)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=3)
+    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=4)
 
     nb_q = biorbd_model[0].nbQ()
     nb_qdot = biorbd_model[0].nbQdot()
@@ -117,24 +117,32 @@ def prepare_ocp(
     Xrot = 3
     Yrot = 4
     Zrot = 5
-    ZrotD = 6
-    YrotD = 7
-    ZrotG = 8
-    YrotG = 9
-    XrotC = 10
-    YrotC = 11
+    ZrotBD = 6
+    YrotBD = 7
+    ZrotABD = 8
+    YrotABD = 9
+    ZrotBG = 10
+    YrotBG = 11
+    ZrotABG = 12
+    YrotABG = 13
+    XrotC = 14
+    YrotC = 15
     vX = 0 + nb_q
     vY = 1 + nb_q
     vZ = 2 + nb_q
     vXrot = 3 + nb_q
     vYrot = 4 + nb_q
     vZrot = 5 + nb_q
-    vZrotD = 6 + nb_q
-    vYrotD = 7 + nb_q
-    vZrotG = 8 + nb_q
-    vYrotG = 9 + nb_q
-    vXrotC = 10 + nb_q
-    vYrotC = 11 + nb_q
+    vZrotBD = 6 + nb_q
+    vYrotBD = 7 + nb_q
+    vZrotABD = 8 + nb_q
+    vYrotABD = 9 + nb_q
+    vZrotBG = 10 + nb_q
+    vYrotBG = 11 + nb_q
+    vZrotABG = 12 + nb_q
+    vYrotABG = 13 + nb_q
+    vXrotC = 14 + nb_q
+    vYrotC = 15 + nb_q
     DEBUT, MILIEU, FIN = 0, 1, 2
 
     #
@@ -167,16 +175,23 @@ def prepare_ocp(
     x_bounds[0].min[Zrot, MILIEU:] = -.1  # pas de vrille dans cette phase
     x_bounds[0].max[Zrot, MILIEU:] = .1
 
-    # bras droit t=0
-    x_bounds[0].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotD, DEBUT] = -2.9
-    x_bounds[0].min[ZrotD, DEBUT] = 0
-    x_bounds[0].max[ZrotD, DEBUT] = 0
-    # bras gauche t=0
-    x_bounds[0].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotG, DEBUT] = 2.9
-    x_bounds[0].min[ZrotG, DEBUT] = 0
-    x_bounds[0].max[ZrotG, DEBUT] = 0
+    # bras droit
+    x_bounds[0].min[YrotBD, DEBUT] = -2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBD, DEBUT] = -2.9
+    x_bounds[0].min[ZrotBD, DEBUT] = 0
+    x_bounds[0].max[ZrotBD, DEBUT] = 0
+    # bras gauche
+    x_bounds[0].min[YrotBG, DEBUT] = 2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBG, DEBUT] = 2.9
+    x_bounds[0].min[ZrotBG, DEBUT] = 0
+    x_bounds[0].max[ZrotBG, DEBUT] = 0
+
+    # coude droit
+    x_bounds[0].min[ZrotABD:YrotABD+1, DEBUT] = 0
+    x_bounds[0].max[ZrotABD:YrotABD+1, DEBUT] = 0
+    # coude gauche
+    x_bounds[0].min[ZrotABG:YrotABG+1, DEBUT] = 0
+    x_bounds[0].max[ZrotABG:YrotABG+1, DEBUT] = 0
 
     # le carpe
     x_bounds[0].min[XrotC, DEBUT] = 0
@@ -232,11 +247,27 @@ def prepare_ocp(
     x_bounds[0].min[vX:vZ+1, DEBUT] = x_bounds[0].min[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].min[vXrot:vZrot+1, DEBUT])
     x_bounds[0].max[vX:vZ+1, DEBUT] = x_bounds[0].max[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].max[vXrot:vZrot+1, DEBUT])
 
-    # des bras
-    x_bounds[0].min[vZrotD:vYrotG+1, :] = -100
-    x_bounds[0].max[vZrotD:vYrotG+1, :] = 100
-    x_bounds[0].min[vZrotD:vYrotG+1, DEBUT] = 0
-    x_bounds[0].max[vZrotD:vYrotG+1, DEBUT] = 0
+    # bras droit
+    x_bounds[0].min[vZrotBD:vYrotBD+1, :] = -100
+    x_bounds[0].max[vZrotBD:vYrotBD+1, :] = 100
+    x_bounds[0].min[vZrotBD:vYrotBD+1, DEBUT] = 0
+    x_bounds[0].max[vZrotBD:vYrotBD+1, DEBUT] = 0
+    # bras droit
+    x_bounds[0].min[vZrotBG:vYrotBG+1, :] = -100
+    x_bounds[0].max[vZrotBG:vYrotBG+1, :] = 100
+    x_bounds[0].min[vZrotBG:vYrotBG+1, DEBUT] = 0
+    x_bounds[0].max[vZrotBG:vYrotBG+1, DEBUT] = 0
+
+    # coude droit
+    x_bounds[0].min[vZrotABD:vYrotABD+1, :] = -100
+    x_bounds[0].max[vZrotABD:vYrotABD+1, :] = 100
+    x_bounds[0].min[vZrotABD:vYrotABD+1, DEBUT] = 0
+    x_bounds[0].max[vZrotABD:vYrotABD+1, DEBUT] = 0
+    # coude gauche
+    x_bounds[0].min[vZrotABD:vYrotABG+1, :] = -100
+    x_bounds[0].max[vZrotABD:vYrotABG+1, :] = 100
+    x_bounds[0].min[vZrotABG:vYrotABG+1, DEBUT] = 0
+    x_bounds[0].max[vZrotABG:vYrotABG+1, DEBUT] = 0
 
     # du carpe
     x_bounds[0].min[vXrotC, :] = -100
@@ -272,12 +303,12 @@ def prepare_ocp(
     x_bounds[1].min[Zrot, :] = -.1
     x_bounds[1].max[Zrot, :] = .1
 
-    # bras droit t=0  f4a a l'ouverture
+    # bras droit  f4a a l'ouverture
     # x_bounds[1].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
     # x_bounds[1].max[YrotD, DEBUT] = -2.9
     # x_bounds[1].min[ZrotD, DEBUT] = 0
     # x_bounds[1].max[ZrotD, DEBUT] = 0
-    # bras gauche t=0
+    # bras gauche
     # x_bounds[1].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
     # x_bounds[1].max[YrotG, DEBUT] = 2.9
     # x_bounds[1].min[ZrotG, DEBUT] = 0
@@ -312,9 +343,19 @@ def prepare_ocp(
     x_bounds[1].min[vZrot, :] = -100
     x_bounds[1].max[vZrot, :] = 100
 
-    # des bras
-    x_bounds[1].min[vZrotD:vYrotG + 1, :] = -100
-    x_bounds[1].max[vZrotD:vYrotG + 1, :] = 100
+    # bras droit
+    x_bounds[1].min[vZrotBD:vYrotBD + 1, :] = -100
+    x_bounds[1].max[vZrotBD:vYrotBD + 1, :] = 100
+    # bras droit
+    x_bounds[1].min[vZrotBG:vYrotBG + 1, :] = -100
+    x_bounds[1].max[vZrotBG:vYrotBG + 1, :] = 100
+
+    # coude droit
+    x_bounds[1].min[vZrotABD:vYrotABD + 1, :] = -100
+    x_bounds[1].max[vZrotABD:vYrotABD + 1, :] = 100
+    # coude gauche
+    x_bounds[1].min[vZrotABD:vYrotABG + 1, :] = -100
+    x_bounds[1].max[vZrotABD:vYrotABG + 1, :] = 100
 
     # du carpe
     x_bounds[1].min[vXrotC, :] = -100
@@ -345,12 +386,12 @@ def prepare_ocp(
     x_bounds[2].min[Zrot, :] = 0
     x_bounds[2].max[Zrot, :] = 3 * 3.14
 
-    # bras droit t=0  f4a a l'ouverture
+    # bras droit  f4a a l'ouverture
     # x_bounds[2].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
     # x_bounds[2].max[YrotD, DEBUT] = -2.9
     # x_bounds[2].min[ZrotD, DEBUT] = 0
     # x_bounds[2].max[ZrotD, DEBUT] = 0
-    # bras gauche t=0
+    # bras gauche
     # x_bounds[2].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
     # x_bounds[2].max[YrotG, DEBUT] = 2.9
     # x_bounds[2].min[ZrotG, DEBUT] = 0
@@ -388,9 +429,19 @@ def prepare_ocp(
     x_bounds[2].min[vZrot, :] = -100
     x_bounds[2].max[vZrot, :] = 100
 
-    # des bras
-    x_bounds[2].min[vZrotD:vYrotG + 1, :] = -100
-    x_bounds[2].max[vZrotD:vYrotG + 1, :] = 100
+    # bras droit
+    x_bounds[2].min[vZrotBD:vYrotBD + 1, :] = -100
+    x_bounds[2].max[vZrotBD:vYrotBD + 1, :] = 100
+    # bras droit
+    x_bounds[2].min[vZrotBG:vYrotBG + 1, :] = -100
+    x_bounds[2].max[vZrotBG:vYrotBG + 1, :] = 100
+
+    # coude droit
+    x_bounds[2].min[vZrotABD:vYrotABD + 1, :] = -100
+    x_bounds[2].max[vZrotABD:vYrotABD + 1, :] = 100
+    # coude gauche
+    x_bounds[2].min[vZrotABD:vYrotABG + 1, :] = -100
+    x_bounds[2].max[vZrotABD:vYrotABG + 1, :] = 100
 
     # du carpe
     x_bounds[2].min[vXrotC, :] = -100
@@ -427,12 +478,12 @@ def prepare_ocp(
     x_bounds[3].min[Zrot, FIN] = 3 * 3.14 - .1  # complete la vrille
     x_bounds[3].max[Zrot, FIN] = 3 * 3.14 + .1
 
-    # bras droit t=0  f4a la vrille
+    # bras droit  f4a la vrille
     # x_bounds[3].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
     # x_bounds[3].max[YrotD, DEBUT] = -2.9
     # x_bounds[3].min[ZrotD, DEBUT] = 0
     # x_bounds[3].max[ZrotD, DEBUT] = 0
-    # bras gauche t=0
+    # bras gauche
     # x_bounds[3].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
     # x_bounds[3].max[YrotG, DEBUT] = 2.9
     # x_bounds[3].min[ZrotG, DEBUT] = 0
@@ -468,9 +519,19 @@ def prepare_ocp(
     x_bounds[3].min[vZrot, :] = -100
     x_bounds[3].max[vZrot, :] = 100
 
-    # des bras
-    x_bounds[3].min[vZrotD:vYrotG + 1, :] = -100
-    x_bounds[3].max[vZrotD:vYrotG + 1, :] = 100
+    # bras droit
+    x_bounds[3].min[vZrotBD:vYrotBD + 1, :] = -100
+    x_bounds[3].max[vZrotBD:vYrotBD + 1, :] = 100
+    # bras droit
+    x_bounds[3].min[vZrotBG:vYrotBG + 1, :] = -100
+    x_bounds[3].max[vZrotBG:vYrotBG + 1, :] = 100
+
+    # coude droit
+    x_bounds[3].min[vZrotABD:vYrotABD + 1, :] = -100
+    x_bounds[3].max[vZrotABD:vYrotABD + 1, :] = 100
+    # coude gauche
+    x_bounds[3].min[vZrotABD:vYrotABG + 1, :] = -100
+    x_bounds[3].max[vZrotABD:vYrotABG + 1, :] = 100
 
     # du carpe
     x_bounds[3].min[vXrotC, :] = -100
@@ -503,16 +564,23 @@ def prepare_ocp(
     x_bounds[4].min[Zrot, :] = 3 * 3.14 - .1  # complete la vrille
     x_bounds[4].max[Zrot, :] = 3 * 3.14 + .1
 
-    # bras droit t=0
-    x_bounds[4].min[YrotD, FIN] = -2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotD, FIN] = -2.9 + .1
-    x_bounds[4].min[ZrotD, FIN] = -.1
-    x_bounds[4].max[ZrotD, FIN] = .1
-    # bras gauche t=0
-    x_bounds[4].min[YrotG, FIN] = 2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotG, FIN] = 2.9 + .1
-    x_bounds[4].min[ZrotG, FIN] = -.1
-    x_bounds[4].max[ZrotG, FIN] = .1
+    # bras droit
+    x_bounds[4].min[YrotBD, FIN] = -2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBD, FIN] = -2.9 + .1
+    x_bounds[4].min[ZrotBD, FIN] = -.1
+    x_bounds[4].max[ZrotBD, FIN] = .1
+    # bras gauche
+    x_bounds[4].min[YrotBG, FIN] = 2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBG, FIN] = 2.9 + .1
+    x_bounds[4].min[ZrotBG, FIN] = -.1
+    x_bounds[4].max[ZrotBG, FIN] = .1
+
+    # coude droit
+    x_bounds[4].min[ZrotABD:YrotABD + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABD:YrotABD + 1, FIN] = .1
+    # coude gauche
+    x_bounds[4].min[ZrotABG:YrotABG + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABG:YrotABG + 1, FIN] = .1
 
     # le carpe
     # x_bounds[4].min[XrotC, FIN] = 0  # min du modele
@@ -542,9 +610,19 @@ def prepare_ocp(
     x_bounds[4].min[vZrot, :] = -100
     x_bounds[4].max[vZrot, :] = 100
 
-    # des bras
-    x_bounds[4].min[vZrotD:vYrotG + 1, :] = -100
-    x_bounds[4].max[vZrotD:vYrotG + 1, :] = 100
+    # bras droit
+    x_bounds[4].min[vZrotBD:vYrotBD + 1, :] = -100
+    x_bounds[4].max[vZrotBD:vYrotBD + 1, :] = 100
+    # bras droit
+    x_bounds[4].min[vZrotBG:vYrotBG + 1, :] = -100
+    x_bounds[4].max[vZrotBG:vYrotBG + 1, :] = 100
+
+    # coude droit
+    x_bounds[4].min[vZrotABD:vYrotABD + 1, :] = -100
+    x_bounds[4].max[vZrotABD:vYrotABD + 1, :] = 100
+    # coude gauche
+    x_bounds[4].min[vZrotABD:vYrotABG + 1, :] = -100
+    x_bounds[4].max[vZrotABD:vYrotABG + 1, :] = 100
 
     # du carpe
     x_bounds[4].min[vXrotC, :] = -100
@@ -563,27 +641,27 @@ def prepare_ocp(
     x4 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
 
     # x0[Xrot, 1] = -2 * 3.14
-    x0[ZrotG] = .75
-    x0[ZrotD] = -.75
-    x0[YrotG, 0] = 2.9
-    x0[YrotD, 0] = -2.9
-    x0[YrotG, 1] = 1.35
-    x0[YrotD, 1] = -1.35
+    x0[ZrotBG] = .75
+    x0[ZrotBD] = -.75
+    x0[YrotBG, 0] = 2.9
+    x0[YrotBD, 0] = -2.9
+    x0[YrotBG, 1] = 1.35
+    x0[YrotBD, 1] = -1.35
     x0[XrotC, 1] = 2.65
 
-    x1[ZrotG] = .75
-    x1[ZrotD] = -.75
+    x1[ZrotBG] = .75
+    x1[ZrotBD] = -.75
     x1[Xrot, 1] = -2 * 3.14
-    x1[YrotG] = 1.35
-    x1[YrotD] = -1.35
+    x1[YrotBG] = 1.35
+    x1[YrotBD] = -1.35
     x1[XrotC] = 2.6
 
     x2[Xrot] = -2 * 3.14
     x2[Zrot, 1] = 3.14
-    x2[ZrotG, 0] = .75
-    x2[ZrotD, 0] = -.75
-    x2[YrotG, 0] = 1.35
-    x2[YrotD, 0] = -1.35
+    x2[ZrotBG, 0] = .75
+    x2[ZrotBD, 0] = -.75
+    x2[YrotBG, 0] = 1.35
+    x2[YrotBD, 0] = -1.35
     x2[XrotC, 0] = 2.6
 
     x3[Xrot, 0] = -2 * 3.14
@@ -604,8 +682,8 @@ def prepare_ocp(
     x_init.add(x4, interpolation=InterpolationType.LINEAR)
 
     constraints = ConstraintList()
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainG', second_marker='chevilleM', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainD', second_marker='chevilleM', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainG', second_marker='GenouM_G', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainD', second_marker='GenouM_D', phase=1)
 #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
@@ -638,7 +716,7 @@ def main():
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
-    solver.set_linear_solver("ma57")  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
+    solver.set_linear_solver('ma57')  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
     solver.set_maximum_iterations(10000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
