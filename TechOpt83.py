@@ -175,8 +175,8 @@ def prepare_ocp(
     x_bounds[0].max[Z, MILIEU:] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[0].min[Xrot, DEBUT] = .35  # penche vers l'avant un peu carpe
-    x_bounds[0].max[Xrot, DEBUT] = .50
+    x_bounds[0].min[Xrot, DEBUT] = -.50  # penche vers l'avant un peu carpe
+    x_bounds[0].max[Xrot, DEBUT] = -.35
     x_bounds[0].min[Xrot, MILIEU:] = -4 * 3.14 - .1  # salto
     x_bounds[0].max[Xrot, MILIEU:] = 0
     # limitation du tilt autour de y
@@ -689,7 +689,6 @@ def prepare_ocp(
     x4[Xrot, 0] = -2 * 3.14 - 3/2 * 3.14
     x4[Xrot, 1] = -4 * 3.14
     x4[Zrot] = 3 * 3.14
-
 
     x_init = InitialGuessList()
     x_init.add(x0, interpolation=InterpolationType.LINEAR)
