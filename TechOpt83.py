@@ -34,6 +34,7 @@ def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
         diff += (all_pn.nlp.states['q'].mx[dof] - targets[i])**2
     return BiorbdInterface.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
 
+
 def prepare_ocp(
     biorbd_model_path: str, n_shooting: int, final_time: float, ode_solver: OdeSolver = OdeSolver.RK4()
 ) -> OptimalControlProgram:
@@ -116,8 +117,13 @@ def prepare_ocp(
 
     # arrete de gigoter les bras
     les_bras = [ZrotBD, YrotBD, ZrotABD, YrotABD, ZrotBG, YrotBG, ZrotABG, YrotABG]
+    les_coudes = [ZrotABD, YrotABD, ZrotABG, YrotABG]
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=0)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=2)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=3)
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=4)
+    # ouvre les hanches rapidement apres la vrille
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC], targets=[0], weight=10000, phase=3)
 
     # Dynamics
     dynamics = DynamicsList()
@@ -247,7 +253,6 @@ def prepare_ocp(
     # autour de x
     x_bounds[0].min[vXrot, :] = -100
     x_bounds[0].max[vXrot, :] = 100
-    x_bounds[0].min[vXrot, DEBUT] = 0  # pas de contre rotation au debut, juste pour etre certain
     # autour de y
     x_bounds[0].min[vYrot, :] = -100
     x_bounds[0].max[vYrot, :] = 100
