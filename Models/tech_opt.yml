@@ -1,0 +1,64 @@
+#
+# bioMod configuration for models used with TechOpt83
+#
+# This file is used by biomake to generate the bioMod from measurements.
+#
+Human:
+  fused: True
+
+Pelvis:
+  translations: xyz
+  rotations: xyz
+  meshfile: Model_mesh/pelvis.stl
+  meshrt: [-.175, 0, 0]
+  meshxyz: [0, 0, 0]
+
+Thorax:
+  meshfile: Model_mesh/thorax.stl
+  meshrt: [-.15, 0, 0]
+  meshxyz: [0, -.025, 0]
+
+Head:
+  meshfile: Model_mesh/tete.stl
+
+RightUpperArm:
+  rt: [0, .17, 0]
+  rotations: zy
+  rangesQ: [[-2.15, .5], [-.05, 3]]
+  meshfile: Model_mesh/bras.stl
+
+RightForearm:
+  rotations: zy
+  rangesQ: [[-2.8, .3], [0., 2.65]]
+  meshfile: Model_mesh/avantbras.stl
+
+RightHand:
+  meshfile: Model_mesh/main.stl
+
+LeftUpperArm:
+  rt: [0, -.17, 0]
+  rotations: zy
+  rangesQ: [[-.5, 2.15], [-3, .05]]
+  meshfile: Model_mesh/bras.stl
+
+LeftForearm:
+  rotations: zy
+  rangesQ: [[-.3, 2.8], [-2.65, 0.]]
+  meshfile: Model_mesh/avantbras.stl
+
+LeftHand:
+  meshfile: Model_mesh/main.stl
+
+Thighs:
+  rotations: xy
+  rangesQ: [[-.3, 2.7], [-.35, .35]]
+  meshfile: Model_mesh/cuisse.stl
+
+Shanks:
+  meshfile: Model_mesh/jambe.stl
+  meshrt: [pi, 0, 0]
+  meshxyz: [0, 0, 0]
+
+Feet:
+  meshfile: Model_mesh/pied.stl
+
