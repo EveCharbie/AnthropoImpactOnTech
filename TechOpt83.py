@@ -34,7 +34,7 @@ def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     return BiorbdInterface.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
 
 def prepare_ocp(
-    biorbd_model_path: str, n_shooting: int, final_time: float, ode_solver: OdeSolver = OdeSolver.RK4()
+    biorbd_model_path: str, n_shooting: int, final_time: float, n_threads: int, ode_solver: OdeSolver = OdeSolver.RK4()
 ) -> OptimalControlProgram:
     """
     Prepare the ocp
@@ -719,7 +719,7 @@ def prepare_ocp(
         constraints,
         ode_solver=ode_solver,
         variable_mappings=dof_mappings,
-        n_threads=31
+        n_threads=n_threads
     )
 
 
@@ -727,13 +727,21 @@ def main():
     """
     Prepares and solves an ocp for a 803<. Animates the results
     """
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--no-hsl", action='store_false')
+    parser.add_argument("-j", default=1, dest='n_threads', type=int)
+    args = parser.parse_args()
 
     n_shooting = (40, 100, 100, 100, 40)
-    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=n_shooting, final_time=1.87) #######################
+    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=n_shooting, n_threads=args.n_threads, final_time=1.87)
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
-    solver.set_linear_solver('ma57')  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
+    if args.no_hsl:
+        solver.set_linear_solver('ma57')  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
+    else:
+        print("Test, not using ma57")
     solver.set_maximum_iterations(10000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
@@ -752,7 +760,6 @@ def main():
     # Print the last solution
     sol.animate(n_frames=-1, show_floor=False)
     #sol.graphs()
-
 
 
 if __name__ == "__main__":
