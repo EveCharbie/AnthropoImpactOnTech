@@ -25,7 +25,13 @@ from bioptim import (
     BiorbdInterface,
 )
 import time
-import IPython
+
+try:
+    import IPython
+    IPYTHON = True
+except ImportError:
+    print("No IPython.")
+    IPYTHON = False
 
 
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
@@ -61,7 +67,7 @@ def prepare_ocp(
 
     nb_q = biorbd_model[0].nbQ()
     nb_qdot = biorbd_model[0].nbQdot()
-    n_tau = nb_q - biorbd_model[0].nbRoot()
+    n_qddot_joints = nb_q - biorbd_model[0].nbRoot()
 
     # Pour la lisibilite
     X = 0
@@ -100,11 +106,11 @@ def prepare_ocp(
     # Add objective functions
     objective_functions = ObjectiveList()
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=0)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=1)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=2)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=3)
-    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="tau", node=Node.ALL_SHOOTING, weight=1, phase=4)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=0)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=1)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=2)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=3)
+    objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=4)
 
     objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000, phase=0)
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
@@ -127,34 +133,34 @@ def prepare_ocp(
 
     # Dynamics
     dynamics = DynamicsList()
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
-    dynamics.add(DynamicsFcn.TORQUE_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
 
     # Define control path constraint  TODO: generaliser les mapping avec for peut-etre
-    dof_mappings = BiMappingList()
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=0)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=1)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=2)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=3)
-    dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=4)
+    # dof_mappings = BiMappingList()
+    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=0)
+    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=1)
+    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=2)
+    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=3)
+    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=4)
 
-    tau_min, tau_max, tau_init = -500, 500, 0
+    qddot_joints_min, qddot_joints_max, qddot_joints_init = -500, 500, 0
     u_bounds = BoundsList()
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
-    u_bounds.add([tau_min] * n_tau, [tau_max] * n_tau)
+    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
+    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
+    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
+    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
+    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
 
     u_init = InitialGuessList()
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
-    u_init.add([tau_init] * n_tau)
+    u_init.add([qddot_joints_init] * n_qddot_joints)
+    u_init.add([qddot_joints_init] * n_qddot_joints)
+    u_init.add([qddot_joints_init] * n_qddot_joints)
+    u_init.add([qddot_joints_init] * n_qddot_joints)
+    u_init.add([qddot_joints_init] * n_qddot_joints)
 
     # Path constraint
     x_bounds = BoundsList()
@@ -728,7 +734,7 @@ def prepare_ocp(
         objective_functions,
         constraints,
         ode_solver=ode_solver,
-        variable_mappings=dof_mappings,
+        # variable_mappings=dof_mappings,
         n_threads=n_threads
     )
 
@@ -767,7 +773,8 @@ def main():
         np.save(f'Solutions/{nom}-{temps}-q.npy', qs)
         np.save(f'Solutions/{nom}-{temps}-qdot.npy', qdots)
 
-    IPython.embed()  # afin de pouvoir explorer plus en details la solution
+    if IPYTHON:
+        IPython.embed()  # afin de pouvoir explorer plus en details la solution
 
     # Print the last solution
     #sol.animate(n_frames=-1, show_floor=False)
