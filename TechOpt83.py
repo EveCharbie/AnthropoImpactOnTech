@@ -139,13 +139,6 @@ def prepare_ocp(
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
 
-    # Define control path constraint  TODO: generaliser les mapping avec for peut-etre
-    # dof_mappings = BiMappingList()
-    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=0)
-    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=1)
-    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=2)
-    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=3)
-    # dof_mappings.add("tau", to_second=[None, None, None, None, None, None, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9], to_first=[6, 7, 8, 9, 10, 11, 12, 13, 14, 15], phase=4)
 
     qddot_joints_min, qddot_joints_max, qddot_joints_init = -500, 500, 0
     u_bounds = BoundsList()
