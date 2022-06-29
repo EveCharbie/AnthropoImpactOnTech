@@ -133,7 +133,7 @@ external_forces 0
 	segment	ABrasD
 		parent	BrasD
 		rotations zy
-		rangesQ	-.3 .3
+		rangesQ	-.3 2.8
 			-2.65 0.
 		RT
 			1	0	0	0.0000006432
@@ -245,7 +245,7 @@ external_forces 0
 	segment	ABrasG
 		parent	BrasG
 		rotations zy
-		rangesQ	-.3 .3
+		rangesQ	-2.8 .3
 			0. 2.65
 		RT
 			1	0	0	0.0000008108

@@ -25,6 +25,7 @@ from bioptim import (
     BiorbdInterface,
 )
 import time
+import IPython
 
 
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
@@ -32,6 +33,7 @@ def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     for i, dof in enumerate(dofs):
         diff += (all_pn.nlp.states['q'].mx[dof] - targets[i])**2
     return BiorbdInterface.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
+
 
 def prepare_ocp(
     biorbd_model_path: str, n_shooting: int, final_time: float, n_threads: int, ode_solver: OdeSolver = OdeSolver.RK4()
@@ -115,8 +117,13 @@ def prepare_ocp(
 
     # arrete de gigoter les bras
     les_bras = [ZrotBD, YrotBD, ZrotABD, YrotABD, ZrotBG, YrotBG, ZrotABG, YrotABG]
-    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=100, phase=2)
-    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=100, phase=3)
+    les_coudes = [ZrotABD, YrotABD, ZrotABG, YrotABG]
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=0)
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=2)
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=3)
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=4)
+    # ouvre les hanches rapidement apres la vrille
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC], targets=[0], weight=10000, phase=3)
 
     # Dynamics
     dynamics = DynamicsList()
@@ -176,7 +183,7 @@ def prepare_ocp(
 
     # le salto autour de x
     x_bounds[0].min[Xrot, DEBUT] = -.50  # penche vers l'avant un peu carpe
-    x_bounds[0].max[Xrot, DEBUT] = -.35
+    x_bounds[0].max[Xrot, DEBUT] = -.50
     x_bounds[0].min[Xrot, MILIEU:] = -4 * 3.14 - .1  # salto
     x_bounds[0].max[Xrot, MILIEU:] = 0
     # limitation du tilt autour de y
@@ -209,7 +216,7 @@ def prepare_ocp(
     x_bounds[0].max[ZrotABG:YrotABG+1, DEBUT] = 0
 
     # le carpe
-    x_bounds[0].min[XrotC, DEBUT] = .35  # depart un peu ferme aux hanches
+    x_bounds[0].min[XrotC, DEBUT] = .50  # depart un peu ferme aux hanches
     x_bounds[0].max[XrotC, DEBUT] = .50
     x_bounds[0].min[XrotC, FIN] = 2.5
     # x_bounds[0].max[XrotC, FIN] = 2.7  # max du modele
@@ -246,7 +253,6 @@ def prepare_ocp(
     # autour de x
     x_bounds[0].min[vXrot, :] = -100
     x_bounds[0].max[vXrot, :] = 100
-    x_bounds[0].min[vXrot, DEBUT] = 0  # pas de contre rotation au debut, juste pour etre certain
     # autour de y
     x_bounds[0].min[vYrot, :] = -100
     x_bounds[0].max[vYrot, :] = 100
@@ -561,18 +567,20 @@ def prepare_ocp(
     #
 
     # deplacement
-    x_bounds[4].min[:Y + 1, :] = -.1
-    x_bounds[4].max[:Y + 1, :] = .1
+    x_bounds[4].min[X, :] = -.1
+    x_bounds[4].max[X, :] = .1
+    x_bounds[4].min[Y, FIN] = -.1
+    x_bounds[4].max[Y, FIN] = .1
     x_bounds[4].min[Z, :] = 0
     x_bounds[4].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
     x_bounds[4].min[Z, FIN] = 0
     x_bounds[4].max[Z, FIN] = .1
 
     # le salto autour de x
-    x_bounds[4].min[Xrot, :] = -4 * 3.14
-    x_bounds[4].max[Xrot, :] = -2 * 3.14 - 3 / 2 * 3.14 + .2  # 1 salto 3/4
-    x_bounds[4].min[Xrot, FIN] = -4 * 3.14 - .1  # 1 salto 3/4
-    x_bounds[4].max[Xrot, FIN] = -4 * 3.14 + .1
+    x_bounds[4].min[Xrot, :] = .50 -4 * 3.14  # un peu carpe a la fin
+    x_bounds[4].max[Xrot, :] = .50 -2 * 3.14 - 3 / 2 * 3.14 + .2  # penche vers avant -> moins de salto
+    x_bounds[4].min[Xrot, FIN] = .50 -4 * 3.14 - .1  # 2 salto fin un peu carpe
+    x_bounds[4].max[Xrot, FIN] = .50 -4 * 3.14 + .1
     # limitation du tilt autour de y
     x_bounds[4].min[Yrot, :] = - 3.14 / 16
     x_bounds[4].max[Yrot, :] = 3.14 / 16
@@ -599,8 +607,9 @@ def prepare_ocp(
     x_bounds[4].max[ZrotABG:YrotABG + 1, FIN] = .1
 
     # le carpe
-    # x_bounds[4].min[XrotC, FIN] = 0  # min du modele
-    x_bounds[4].max[XrotC, FIN] = .7
+    x_bounds[4].max[XrotC, :] = .7
+    x_bounds[4].min[XrotC, FIN] = .40  # fin un peu carpe
+    x_bounds[4].max[XrotC, FIN] = .60
     # le dehanchement
     x_bounds[4].min[YrotC, FIN] = -.1
     x_bounds[4].max[YrotC, FIN] = .1
@@ -656,14 +665,14 @@ def prepare_ocp(
     x3 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x4 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
 
-    # x0[Xrot, 1] = -2 * 3.14
+    x0[Xrot, 0] = -.50
     x0[ZrotBG] = .75
     x0[ZrotBD] = -.75
     x0[YrotBG, 0] = 2.9
     x0[YrotBD, 0] = -2.9
     x0[YrotBG, 1] = 1.35
     x0[YrotBD, 1] = -1.35
-    x0[XrotC, 0] = .4
+    x0[XrotC, 0] = .5
     x0[XrotC, 1] = 2.65
 
     x1[ZrotBG] = .75
@@ -689,6 +698,7 @@ def prepare_ocp(
     x4[Xrot, 0] = -2 * 3.14 - 3/2 * 3.14
     x4[Xrot, 1] = -4 * 3.14
     x4[Zrot] = 3 * 3.14
+    x4[XrotC, 1] = .5
 
     x_init = InitialGuessList()
     x_init.add(x0, interpolation=InterpolationType.LINEAR)
@@ -698,8 +708,8 @@ def prepare_ocp(
     x_init.add(x4, interpolation=InterpolationType.LINEAR)
 
     constraints = ConstraintList()
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainG', second_marker='CibleMainG', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.1, max_bound=.1, first_marker='MidMainD', second_marker='CibleMainD', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainG', second_marker='CibleMainG', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainD', second_marker='CibleMainD', phase=1)
 #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
@@ -746,7 +756,7 @@ def main():
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
-    temps = time.strftime("%Y-%m-%d-%H%M%S")
+    temps = time.strftime("%Y-%m-%d-%H%M")
     nom = 'sol' + str(n_shooting).replace(', ', '_')
     qs = sol.states[0]['q']
     qdots = sol.states[0]['qdot']
@@ -757,10 +767,11 @@ def main():
         np.save(f'Solutions/{nom}-{temps}-q.npy', qs)
         np.save(f'Solutions/{nom}-{temps}-qdot.npy', qdots)
 
-    # Print the last solution
-    sol.animate(n_frames=-1, show_floor=False)
-    #sol.graphs()
+    IPython.embed()  # afin de pouvoir explorer plus en details la solution
 
+    # Print the last solution
+    #sol.animate(n_frames=-1, show_floor=False)
+    #sol.graphs()
 
 if __name__ == "__main__":
     main()
