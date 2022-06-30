@@ -34,6 +34,9 @@ RightForearm:
 
 RightHand:
   meshfile: Model_mesh/main.stl
+  markers:
+    MidMainD:
+      position: [0, 0, -.1]
 
 LeftUpperArm:
   rt: [0, -.17, 0]
@@ -48,6 +51,9 @@ LeftForearm:
 
 LeftHand:
   meshfile: Model_mesh/main.stl
+  markers:
+    MidMainG:
+      position: [0, 0, -.1]
 
 Thighs:
   rotations: xy
@@ -58,6 +64,11 @@ Shanks:
   meshfile: Model_mesh/jambe.stl
   meshrt: [pi, 0, 0]
   meshxyz: [0, 0, 0]
+  markers:
+    CibleMainD:
+      position: [.1, 0, -.22]
+    CibleMainG:
+      position: [-.1, 0, -.22]
 
 Feet:
   meshfile: Model_mesh/pied.stl

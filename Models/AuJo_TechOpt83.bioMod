@@ -87,6 +87,11 @@ segment RightHand
 	meshfile Model_mesh/main.stl
 endsegment
 
+	marker MidMainD
+		parent RightHand
+		position 0 0 -.1
+	endmarker
+
 segment LeftUpperArm
 	parent Thorax
 	rt 0 -.17 0 xyz 0.1545 0.0 0.21100000000000002
@@ -131,6 +136,11 @@ segment LeftHand
 	meshfile Model_mesh/main.stl
 endsegment
 
+	marker MidMainG
+		parent LeftHand
+		position 0 0 -.1
+	endmarker
+
 segment Thighs
 	parent Pelvis
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.11026511374798374
@@ -159,6 +169,16 @@ segment Shanks
 	meshfile Model_mesh/jambe.stl
 	meshrt pi 0 0 xyz 0 0 0
 endsegment
+
+	marker CibleMainD
+		parent Shanks
+		position 0.1 0 -.22
+	endmarker
+
+	marker CibleMainG
+		parent Shanks
+		position -.1 0 -.22
+	endmarker
 
 segment Feet
 	parent Shanks
