@@ -132,7 +132,14 @@ def prepare_ocp(
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC], targets=[0], weight=10000, phase=3)
 
     # Dynamics
+    from root_explicit_qddot_joint import root_explicit_dynamic, custom_configure_root_explicit
     dynamics = DynamicsList()
+    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
@@ -231,7 +238,7 @@ def prepare_ocp(
 
     # decalage entre le bassin et le CoM
     CoM_Q_sym = MX.sym('CoM', nb_q)
-    CoM_Q_init = np.zeros(nb_q)
+    CoM_Q_init = x_bounds[0].min[:nb_q, DEBUT]  # min ou max ne change rien a priori, au DEBUT ils sont egaux normalement
     CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].CoM(CoM_Q_sym).to_mx()])
     bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym],
                              [biorbd_model[0].globalJCS(0).to_mx()])  # retourne la RT du bassin
@@ -265,8 +272,10 @@ def prepare_ocp(
 
     # tenir compte du decalage entre bassin et CoM avec la rotation
     # Qtransdot = Qtransdot + v cross Qrotdot
-    x_bounds[0].min[vX:vZ+1, DEBUT] = x_bounds[0].min[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].min[vXrot:vZrot+1, DEBUT])
-    x_bounds[0].max[vX:vZ+1, DEBUT] = x_bounds[0].max[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].max[vXrot:vZrot+1, DEBUT])
+    borne_inf = ( x_bounds[0].min[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].min[vXrot:vZrot+1, DEBUT]) )[0]
+    borne_sup = ( x_bounds[0].max[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].max[vXrot:vZrot+1, DEBUT]) )[0]
+    x_bounds[0].min[vX:vZ+1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
+    x_bounds[0].max[vX:vZ+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
 
     # bras droit
     x_bounds[0].min[vZrotBD:vYrotBD+1, :] = -100
@@ -738,12 +747,14 @@ def main():
     """
     import argparse
     parser = argparse.ArgumentParser()
+    parser.add_argument("model", type=str)
     parser.add_argument("--no-hsl", action='store_false')
     parser.add_argument("-j", default=1, dest='n_threads', type=int)
+    parser.add_argument("--no-sol", action='store_false', dest='savesol')
     args = parser.parse_args()
 
     n_shooting = (40, 100, 100, 100, 40)
-    ocp = prepare_ocp("Models/JeCh_TechOpt83.bioMod", n_shooting=n_shooting, n_threads=args.n_threads, final_time=1.87)
+    ocp = prepare_ocp(args.model, n_shooting=n_shooting, n_threads=args.n_threads, final_time=1.87)
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
@@ -756,15 +767,15 @@ def main():
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M")
-    nom = 'sol' + str(n_shooting).replace(', ', '_')
+    nom = args.model.split('/')[-1].removesuffix('.bioMod') + "-" + str(n_shooting).replace(', ', '_')
     qs = sol.states[0]['q']
     qdots = sol.states[0]['qdot']
     for i in range(1, len(sol.states)):
         qs = np.hstack((qs, sol.states[i]['q']))
         qdots = np.hstack((qdots, sol.states[i]['qdot']))
-    if True:  # switch manuelle
+    if args.savesol:  # switch manuelle
         np.save(f'Solutions/{nom}-{temps}-q.npy', qs)
-        np.save(f'Solutions/{nom}-{temps}-qdot.npy', qdots)
+        #np.save(f'Solutions/{nom}-{temps}-qdot.npy', qdots)
 
     if IPYTHON:
         IPython.embed()  # afin de pouvoir explorer plus en details la solution
