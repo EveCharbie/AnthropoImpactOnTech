@@ -1298,14 +1298,13 @@ def parse_biomod_options(filename):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description="Convert yeadon human model to bioMod.")
-    parser.add_argument("--meas", required=True, nargs=1, dest="meas", help="measurement file of the human")
-    parser.add_argument("--bioModOptions", nargs=1, dest="bioModOptions", help="option file for the bioMod")
+    parser.add_argument("meas", help="measurement file of the human")
+    parser.add_argument("--bioModOptions", nargs=1, help="option file for the bioMod")
     args = parser.parse_args()
 
-    meas = args.meas[0]
     bioModOptions = args.bioModOptions[0] if args.bioModOptions else None
 
-    human = yeadon.Human(meas)
+    human = yeadon.Human(args.meas)
     BioHuman, human_options, segments_options = parse_biomod_options(bioModOptions)
 
     biohuman = BioHuman(human, **human_options, **segments_options)
