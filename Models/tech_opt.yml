@@ -66,9 +66,9 @@ Shanks:
   meshxyz: [0, 0, 0]
   markers:
     CibleMainD:
-      position: [.1, 0, -.22]
-    CibleMainG:
       position: [-.1, 0, -.22]
+    CibleMainG:
+      position: [.1, 0, -.22]
 
 Feet:
   meshfile: Model_mesh/pied.stl

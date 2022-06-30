@@ -172,12 +172,12 @@ endsegment
 
 	marker CibleMainD
 		parent Shanks
-		position 0.1 0 -.22
+		position -.1 0 -.22
 	endmarker
 
 	marker CibleMainG
 		parent Shanks
-		position -.1 0 -.22
+		position 0.1 0 -.22
 	endmarker
 
 segment Feet
