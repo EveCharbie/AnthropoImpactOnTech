@@ -26,6 +26,43 @@ def format_mat(mat: Mat3x3, leading=""):
            f"{leading}{mat[2, 0]} {mat[2, 1]} {mat[2, 2]}"
 
 
+class BioModMarker:
+
+    def __init__(self, label: str, parent: str, position: Vec3, technical: int, anatomical: int, axestoremove: str):
+        self.label = label
+        self.parent = parent
+        self.position = position
+        self.technical = technical
+        self.anatomical = anatomical
+        self.axestoremove = axestoremove
+
+    def __str__(self):
+        mod = f"\tmarker {self.label}\n"
+        mod += f"\t\tparent {self.parent}\n"
+        mod += f"\t\tposition {format_vec(self.position)}\n"
+        if self.technical is not None:
+            mod += f"\t\ttechnical {self.technical}\n"
+        if self.anatomical is not None:
+            mod += f"\t\tanatomical {self.anatomical}\n"
+        if self.axestoremove:
+            mod += f"\t\taxestoremove {self.axestoremove}\n"
+        mod += "\tendmarker"
+
+        return mod
+
+
+def parse_markers(parent: str, markers_desc: dict[dict]):
+    markers = []
+    for label in markers_desc:
+        position = markers_desc[label]['position']
+        technical = markers_desc[label]['technical'] if 'technical' in markers_desc[label] else None
+        anatomical = markers_desc[label]['anatomical'] if 'anatomical' in markers_desc[label] else None
+        axestoremove = markers_desc[label]['axestoremove'] if 'axestoremove' in markers_desc[label] else None
+        markers.append(BioModMarker(label, parent, position, technical, anatomical, axestoremove))
+
+    return markers
+
+
 class BioModSegment:
 
     def __init__(
@@ -46,7 +83,8 @@ class BioModSegment:
             meshscale: Vec3,
             meshrt: Vec3,
             meshxyz: Vec3,
-            patch: list[Vec3]
+            patch: list[Vec3],
+            markers: list[BioModMarker]
     ):
         self.label = label
         self.parent = parent
@@ -65,6 +103,7 @@ class BioModSegment:
         self.meshrt = meshrt
         self.meshxyz = meshxyz
         self.patch = patch
+        self.markers = markers
 
     def __str__(self):
         mod = f"segment {self.label}\n"
@@ -97,6 +136,13 @@ class BioModSegment:
                 mod += f"\tpatch {format_vec(p)}\n"
         mod += "endsegment"
 
+        if self.markers:
+            mod += "\n\n"
+            for i, m in enumerate(self.markers):
+                mod += str(m)
+                if i < len(self.markers)-1:
+                    mod += "\n\n"
+
         return mod
 
 
@@ -115,7 +161,8 @@ class Pelvis(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = Pelvis.__name__
         parent = 'ROOT'
@@ -123,6 +170,9 @@ class Pelvis(BioModSegment):
         com = O
         mass = human.P.mass
         inertia = human.P.rel_inertia
+
+        markers = parse_markers(Pelvis.__name__, markers)
+
         BioModSegment.__init__(
             self,
             label=label,
@@ -141,7 +191,8 @@ class Pelvis(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -164,7 +215,8 @@ class Thorax(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = Thorax.__name__
         parent = Pelvis.__name__
@@ -173,6 +225,8 @@ class Thorax(BioModSegment):
 
         mass, com_global, inertia_global = human.combine_inertia(('T', 's3', 's4'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Thorax.get_origin(human)
+
+        markers = parse_markers(Thorax.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -192,7 +246,8 @@ class Thorax(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -215,7 +270,8 @@ class Head(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = Head.__name__
         parent = Thorax.__name__
@@ -224,6 +280,8 @@ class Head(BioModSegment):
 
         mass, com_global, inertia_global = human.combine_inertia(('s5', 's6', 's7'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Head.get_origin(human)
+
+        markers = parse_markers(Head.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -243,7 +301,8 @@ class Head(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -270,7 +329,8 @@ class LeftUpperArm(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = LeftUpperArm.__name__
         parent = Thorax.__name__
@@ -280,6 +340,8 @@ class LeftUpperArm(BioModSegment):
         com = np.asarray(human.A1.rel_center_of_mass).reshape(3)
         mass = human.A1.mass
         inertia = human.A1.rel_inertia
+
+        markers = parse_markers(LeftUpperArm.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -299,7 +361,8 @@ class LeftUpperArm(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -322,7 +385,8 @@ class LeftForearm(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = LeftForearm.__name__
         parent = LeftUpperArm.__name__
@@ -334,6 +398,8 @@ class LeftForearm(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(LeftForearm.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -353,7 +419,8 @@ class LeftForearm(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -376,7 +443,8 @@ class LeftHand(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = LeftHand.__name__
         parent = LeftForearm.__name__
@@ -388,6 +456,8 @@ class LeftHand(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(LeftHand.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -407,7 +477,8 @@ class LeftHand(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -434,7 +505,8 @@ class RightUpperArm(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = RightUpperArm.__name__
         parent = Thorax.__name__
@@ -443,6 +515,9 @@ class RightUpperArm(BioModSegment):
         com = np.asarray(human.B1.rel_center_of_mass).reshape(3)
         mass = human.B1.mass
         inertia = human.B1.rel_inertia
+
+        markers = parse_markers(RightUpperArm.__name__, markers)
+
         BioModSegment.__init__(
             self,
             label=label,
@@ -461,7 +536,8 @@ class RightUpperArm(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -484,7 +560,8 @@ class RightForearm(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = RightForearm.__name__
         parent = RightUpperArm.__name__
@@ -496,6 +573,8 @@ class RightForearm(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(RightForearm.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -515,7 +594,8 @@ class RightForearm(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -538,7 +618,8 @@ class RightHand(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = RightHand.__name__
         parent = RightForearm.__name__
@@ -550,6 +631,8 @@ class RightHand(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(RightHand.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -569,7 +652,8 @@ class RightHand(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -596,7 +680,8 @@ class LeftThigh(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = LeftThigh.__name__
         parent = Pelvis.__name__
@@ -605,6 +690,9 @@ class LeftThigh(BioModSegment):
         com = np.asarray(human.J1.rel_center_of_mass).reshape(3)
         mass = human.J1.mass
         inertia = human.J1.rel_inertia
+
+        markers = parse_markers(LeftThigh.__name__, markers)
+
         BioModSegment.__init__(
             self,
             label=label,
@@ -623,7 +711,8 @@ class LeftThigh(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -646,7 +735,8 @@ class LeftShank(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = LeftShank.__name__
         parent = LeftThigh.__name__
@@ -658,6 +748,8 @@ class LeftShank(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(LeftShank.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -677,7 +769,8 @@ class LeftShank(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -700,7 +793,8 @@ class LeftFoot(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = LeftFoot.__name__
         parent = LeftShank.__name__
@@ -712,6 +806,8 @@ class LeftFoot(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(LeftFoot.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -731,7 +827,8 @@ class LeftFoot(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -758,7 +855,8 @@ class RightThigh(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = RightThigh.__name__
         parent = Pelvis.__name__
@@ -767,6 +865,9 @@ class RightThigh(BioModSegment):
         com = np.asarray(human.K1.rel_center_of_mass).reshape(3)
         mass = human.K1.mass
         inertia = human.K1.rel_inertia
+
+        markers = parse_markers(RightThigh.__name__, markers)
+
         BioModSegment.__init__(
             self,
             label=label,
@@ -785,7 +886,8 @@ class RightThigh(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -808,7 +910,8 @@ class RightShank(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = RightShank.__name__
         parent = RightThigh.__name__
@@ -820,6 +923,8 @@ class RightShank(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(RightShank.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -839,7 +944,8 @@ class RightShank(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -862,7 +968,8 @@ class RightFoot(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = RightFoot.__name__
         parent = RightShank.__name__
@@ -874,6 +981,8 @@ class RightFoot(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
+
+        markers = parse_markers(RightFoot.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -893,7 +1002,8 @@ class RightFoot(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -921,7 +1031,8 @@ class Thighs(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = Thighs.__name__
         parent = Pelvis.__name__
@@ -930,6 +1041,8 @@ class Thighs(BioModSegment):
 
         mass, com_global, inertia = human.combine_inertia(('J1', 'K1'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Thighs.get_origin(human)
+
+        markers = parse_markers(Thighs.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -949,7 +1062,8 @@ class Thighs(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -973,7 +1087,8 @@ class Shanks(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = Shanks.__name__
         parent = Thighs.__name__
@@ -982,6 +1097,8 @@ class Shanks(BioModSegment):
 
         mass, com_global, inertia = human.combine_inertia(('j3', 'j4', 'k3', 'k4'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Shanks.get_origin(human)
+
+        markers = parse_markers(Shanks.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -1001,7 +1118,8 @@ class Shanks(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -1025,7 +1143,8 @@ class Feet(BioModSegment):
             meshscale: Vec3 = None,
             meshrt: Vec3 = None,
             meshxyz: Vec3 = None,
-            patch: list[Vec3] = None
+            patch: list[Vec3] = None,
+            markers: dict[dict] = {}
     ):
         label = Feet.__name__
         parent = Shanks.__name__
@@ -1034,6 +1153,8 @@ class Feet(BioModSegment):
 
         mass, com_global, inertia = human.combine_inertia(('j5', 'j6', 'j7', 'j8', 'k5', 'k6', 'k7', 'k8'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Feet.get_origin(human)
+
+        markers = parse_markers(Feet.__name__, markers)
 
         BioModSegment.__init__(
             self,
@@ -1053,7 +1174,8 @@ class Feet(BioModSegment):
             meshscale=meshscale,
             meshrt=meshrt,
             meshxyz=meshxyz,
-            patch=patch
+            patch=patch,
+            markers=markers
         )
 
     @staticmethod
@@ -1189,4 +1311,3 @@ if __name__ == '__main__':
     biohuman = BioHuman(human, **human_options, **segments_options)
 
     print(biohuman)
-
