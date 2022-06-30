@@ -253,12 +253,12 @@ def prepare_ocp(
     # z bassin
     x_bounds[0].min[vZ, :] = -100
     x_bounds[0].max[vZ, :] = 100
-    x_bounds[0].min[vZ, DEBUT] = vzinit - .1
-    x_bounds[0].max[vZ, DEBUT] = vzinit + .1
+    x_bounds[0].min[vZ, DEBUT] = vzinit
+    x_bounds[0].max[vZ, DEBUT] = vzinit
 
     # autour de x
-    x_bounds[0].min[vXrot, :] = -100
-    x_bounds[0].max[vXrot, :] = 100
+    x_bounds[0].min[vXrot, :] = -4 * 3.5 / final_time
+    x_bounds[0].max[vXrot, :] = 0
     # autour de y
     x_bounds[0].min[vYrot, :] = -100
     x_bounds[0].max[vYrot, :] = 100
