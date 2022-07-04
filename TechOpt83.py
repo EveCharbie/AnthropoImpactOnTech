@@ -79,11 +79,11 @@ def prepare_ocp(
     ZrotBD = 6
     YrotBD = 7
     ZrotABD = 8
-    YrotABD = 9
+    XrotABD = 9
     ZrotBG = 10
     YrotBG = 11
     ZrotABG = 12
-    YrotABG = 13
+    XrotABG = 13
     XrotC = 14
     YrotC = 15
     vX = 0 + nb_q
@@ -122,8 +122,8 @@ def prepare_ocp(
     objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='CibleMainD', weight=1000, phase=0)
 
     # arrete de gigoter les bras
-    les_bras = [ZrotBD, YrotBD, ZrotABD, YrotABD, ZrotBG, YrotBG, ZrotABG, YrotABG]
-    les_coudes = [ZrotABD, YrotABD, ZrotABG, YrotABG]
+    les_bras = [ZrotBD, YrotBD, ZrotABD, XrotABD, ZrotBG, YrotBG, ZrotABG, XrotABG]
+    les_coudes = [ZrotABD, XrotABD, ZrotABG, XrotABG]
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=0)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=2)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=3)
@@ -132,19 +132,19 @@ def prepare_ocp(
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC], targets=[0], weight=10000, phase=3)
 
     # Dynamics
-    from root_explicit_qddot_joint import root_explicit_dynamic, custom_configure_root_explicit
     dynamics = DynamicsList()
-    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    # dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    from root_explicit_qddot_joint import root_explicit_dynamic, custom_configure_root_explicit
+    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
+    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
 
-    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
 
 
     qddot_joints_min, qddot_joints_max, qddot_joints_init = -500, 500, 0
@@ -188,10 +188,10 @@ def prepare_ocp(
     x_bounds[0].max[Z, MILIEU:] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[0].min[Xrot, DEBUT] = -.50  # penche vers l'avant un peu carpe
-    x_bounds[0].max[Xrot, DEBUT] = -.50
-    x_bounds[0].min[Xrot, MILIEU:] = -4 * 3.14 - .1  # salto
-    x_bounds[0].max[Xrot, MILIEU:] = 0
+    x_bounds[0].min[Xrot, DEBUT] = .50  # penche vers l'avant un peu carpe
+    x_bounds[0].max[Xrot, DEBUT] = .50
+    x_bounds[0].min[Xrot, MILIEU:] = 0
+    x_bounds[0].max[Xrot, MILIEU:] = 4 * 3.14 + .1  # salto
     # limitation du tilt autour de y
     x_bounds[0].min[Yrot, DEBUT] = 0
     x_bounds[0].max[Yrot, DEBUT] = 0
@@ -204,28 +204,28 @@ def prepare_ocp(
     x_bounds[0].max[Zrot, MILIEU:] = .1
 
     # bras droit
-    x_bounds[0].min[YrotBD, DEBUT] = -2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBD, DEBUT] = -2.9
+    x_bounds[0].min[YrotBD, DEBUT] = 2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBD, DEBUT] = 2.9
     x_bounds[0].min[ZrotBD, DEBUT] = 0
     x_bounds[0].max[ZrotBD, DEBUT] = 0
     # bras gauche
-    x_bounds[0].min[YrotBG, DEBUT] = 2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBG, DEBUT] = 2.9
+    x_bounds[0].min[YrotBG, DEBUT] = -2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBG, DEBUT] = -2.9
     x_bounds[0].min[ZrotBG, DEBUT] = 0
     x_bounds[0].max[ZrotBG, DEBUT] = 0
 
     # coude droit
-    x_bounds[0].min[ZrotABD:YrotABD+1, DEBUT] = 0
-    x_bounds[0].max[ZrotABD:YrotABD+1, DEBUT] = 0
+    x_bounds[0].min[ZrotABD:XrotABD+1, DEBUT] = 0
+    x_bounds[0].max[ZrotABD:XrotABD+1, DEBUT] = 0
     # coude gauche
-    x_bounds[0].min[ZrotABG:YrotABG+1, DEBUT] = 0
-    x_bounds[0].max[ZrotABG:YrotABG+1, DEBUT] = 0
+    x_bounds[0].min[ZrotABG:XrotABG+1, DEBUT] = 0
+    x_bounds[0].max[ZrotABG:XrotABG+1, DEBUT] = 0
 
     # le carpe
-    x_bounds[0].min[XrotC, DEBUT] = .50  # depart un peu ferme aux hanches
-    x_bounds[0].max[XrotC, DEBUT] = .50
-    x_bounds[0].min[XrotC, FIN] = 2.5
-    # x_bounds[0].max[XrotC, FIN] = 2.7  # max du modele
+    x_bounds[0].min[XrotC, DEBUT] = -.50  # depart un peu ferme aux hanches
+    x_bounds[0].max[XrotC, DEBUT] = -.50
+    x_bounds[0].max[XrotC, FIN] = -2.5
+    # x_bounds[0].min[XrotC, FIN] = 2.7  # min du modele
     # le dehanchement
     x_bounds[0].min[YrotC, DEBUT] = 0
     x_bounds[0].max[YrotC, DEBUT] = 0
@@ -253,12 +253,12 @@ def prepare_ocp(
     # z bassin
     x_bounds[0].min[vZ, :] = -100
     x_bounds[0].max[vZ, :] = 100
-    x_bounds[0].min[vZ, DEBUT] = vzinit
-    x_bounds[0].max[vZ, DEBUT] = vzinit
+    x_bounds[0].min[vZ, DEBUT] = vzinit - .5
+    x_bounds[0].max[vZ, DEBUT] = vzinit + .5
 
     # autour de x
-    x_bounds[0].min[vXrot, :] = -4 * 3.5 / final_time
-    x_bounds[0].max[vXrot, :] = 0
+    x_bounds[0].min[vXrot, :] = 0
+    x_bounds[0].max[vXrot, :] = 4 * 3.5 / final_time
     # autour de y
     x_bounds[0].min[vYrot, :] = -100
     x_bounds[0].max[vYrot, :] = 100
@@ -276,7 +276,7 @@ def prepare_ocp(
     borne_sup = ( x_bounds[0].max[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].max[vXrot:vZrot+1, DEBUT]) )[0]
     x_bounds[0].min[vX:vZ+1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
     x_bounds[0].max[vX:vZ+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
-
+    #breakpoint()
     # bras droit
     x_bounds[0].min[vZrotBD:vYrotBD+1, :] = -100
     x_bounds[0].max[vZrotBD:vYrotBD+1, :] = 100
@@ -323,9 +323,9 @@ def prepare_ocp(
     x_bounds[1].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[1].min[Xrot, :] = -4 * 3.14
-    x_bounds[1].max[Xrot, :] = 0
-    x_bounds[1].max[Xrot, FIN] = -2 * 3.14 + .1
+    x_bounds[1].min[Xrot, :] = 0
+    x_bounds[1].max[Xrot, :] = 4 * 3.14
+    x_bounds[1].min[Xrot, FIN] = 2 * 3.14 - .1
     # limitation du tilt autour de y
     x_bounds[1].min[Yrot, :] = - 3.14 / 16
     x_bounds[1].max[Yrot, :] = 3.14 / 16
@@ -345,8 +345,8 @@ def prepare_ocp(
     # x_bounds[1].max[ZrotG, DEBUT] = 0
 
     # le carpe
-    x_bounds[1].min[XrotC, :] = 2.5
-    # x_bounds[1].max[XrotC, :] = 2.7  # contraint par le model
+    x_bounds[1].max[XrotC, :] = -2.5
+    # x_bounds[1].min[XrotC, :] = 2.7  # contraint par le model
     # le dehanchement
     x_bounds[1].min[YrotC, DEBUT] = -.1
     x_bounds[1].max[YrotC, DEBUT] = .1
@@ -407,8 +407,8 @@ def prepare_ocp(
     x_bounds[2].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[2].min[Xrot, :] = -4 * 3.14
-    x_bounds[2].max[Xrot, :] = -2 * 3.14 - .1  # 1 salto 3/4
+    x_bounds[2].min[Xrot, :] = 2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[2].max[Xrot, :] = 4 * 3.14
     # limitation du tilt autour de y
     x_bounds[2].min[Yrot, :] = - 3.14 / 4
     x_bounds[2].max[Yrot, :] = 3.14 / 4
@@ -431,7 +431,7 @@ def prepare_ocp(
     # x_bounds[2].min[XrotC, DEBUT] = 0
     # x_bounds[2].max[XrotC, DEBUT] = 0
     # x_bounds[2].min[XrotC, FIN] = 2.8  # min du modele
-    x_bounds[2].max[XrotC, FIN] = .7
+    x_bounds[2].min[XrotC, FIN] = -.4
     # le dehanchement
     # x_bounds[2].min[YrotC, DEBUT] = -.05
     # x_bounds[2].max[YrotC, DEBUT] = .05
@@ -493,10 +493,10 @@ def prepare_ocp(
     x_bounds[3].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[3].min[Xrot, :] = -2 * 3.14 - 3/2 * 3.14 - .1  # 1 salto 3/4
-    x_bounds[3].max[Xrot, :] = -2 * 3.14 + .1
-    x_bounds[3].min[Xrot, FIN] = -2 * 3.14 - 3/2 * 3.14 - .1  # 1 salto 3/4
-    x_bounds[3].max[Xrot, FIN] = -2 * 3.14 - 3/2 * 3.14 + .1
+    x_bounds[3].min[Xrot, :] = 2 * 3.14 - .1
+    x_bounds[3].max[Xrot, :] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[3].min[Xrot, FIN] = 2 * 3.14 + 3/2 * 3.14 - .1
+    x_bounds[3].max[Xrot, FIN] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
     # limitation du tilt autour de y
     x_bounds[3].min[Yrot, :] = - 3.14 / 4
     x_bounds[3].max[Yrot, :] = 3.14 / 4
@@ -520,8 +520,8 @@ def prepare_ocp(
     # x_bounds[3].max[ZrotG, DEBUT] = 0
 
     # le carpe  f4a les jambes
-    # x_bounds[3].min[XrotC, :] = 2.8  # min du modele
-    x_bounds[3].max[XrotC, :] = .7
+    # x_bounds[3].max[XrotC, :] = 2.8  # max du modele
+    x_bounds[3].min[XrotC, :] = -.4
     # le dehanchement
     # x_bounds[3].min[YrotC, DEBUT] = -.05
     # x_bounds[3].max[YrotC, DEBUT] = .05
@@ -585,10 +585,10 @@ def prepare_ocp(
     x_bounds[4].max[Z, FIN] = .1
 
     # le salto autour de x
-    x_bounds[4].min[Xrot, :] = .50 -4 * 3.14  # un peu carpe a la fin
-    x_bounds[4].max[Xrot, :] = .50 -2 * 3.14 - 3 / 2 * 3.14 + .2  # penche vers avant -> moins de salto
-    x_bounds[4].min[Xrot, FIN] = .50 -4 * 3.14 - .1  # 2 salto fin un peu carpe
-    x_bounds[4].max[Xrot, FIN] = .50 -4 * 3.14 + .1
+    x_bounds[4].min[Xrot, :] = .50 + 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
+    x_bounds[4].max[Xrot, :] = .50 + 4 * 3.14  # un peu carpe a la fin
+    x_bounds[4].min[Xrot, FIN] = .50 + 4 * 3.14 - .1
+    x_bounds[4].max[Xrot, FIN] = .50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
     # limitation du tilt autour de y
     x_bounds[4].min[Yrot, :] = - 3.14 / 16
     x_bounds[4].max[Yrot, :] = 3.14 / 16
@@ -597,27 +597,27 @@ def prepare_ocp(
     x_bounds[4].max[Zrot, :] = 3 * 3.14 + .1
 
     # bras droit
-    x_bounds[4].min[YrotBD, FIN] = -2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBD, FIN] = -2.9 + .1
+    x_bounds[4].min[YrotBD, FIN] = 2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBD, FIN] = 2.9 + .1
     x_bounds[4].min[ZrotBD, FIN] = -.1
     x_bounds[4].max[ZrotBD, FIN] = .1
     # bras gauche
-    x_bounds[4].min[YrotBG, FIN] = 2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBG, FIN] = 2.9 + .1
+    x_bounds[4].min[YrotBG, FIN] = -2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBG, FIN] = -2.9 + .1
     x_bounds[4].min[ZrotBG, FIN] = -.1
     x_bounds[4].max[ZrotBG, FIN] = .1
 
     # coude droit
-    x_bounds[4].min[ZrotABD:YrotABD + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABD:YrotABD + 1, FIN] = .1
+    x_bounds[4].min[ZrotABD:XrotABD + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABD:XrotABD + 1, FIN] = .1
     # coude gauche
-    x_bounds[4].min[ZrotABG:YrotABG + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABG:YrotABG + 1, FIN] = .1
+    x_bounds[4].min[ZrotABG:XrotABG + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABG:XrotABG + 1, FIN] = .1
 
     # le carpe
-    x_bounds[4].max[XrotC, :] = .7
-    x_bounds[4].min[XrotC, FIN] = .40  # fin un peu carpe
-    x_bounds[4].max[XrotC, FIN] = .60
+    x_bounds[4].min[XrotC, :] = -.4
+    x_bounds[4].min[XrotC, FIN] = -.60
+    x_bounds[4].max[XrotC, FIN] = -.40  # fin un peu carpe
     # le dehanchement
     x_bounds[4].min[YrotC, FIN] = -.1
     x_bounds[4].max[YrotC, FIN] = .1
@@ -673,40 +673,40 @@ def prepare_ocp(
     x3 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x4 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
 
-    x0[Xrot, 0] = -.50
-    x0[ZrotBG] = .75
-    x0[ZrotBD] = -.75
-    x0[YrotBG, 0] = 2.9
-    x0[YrotBD, 0] = -2.9
-    x0[YrotBG, 1] = 1.35
-    x0[YrotBD, 1] = -1.35
-    x0[XrotC, 0] = .5
-    x0[XrotC, 1] = 2.65
+    x0[Xrot, 0] = .50
+    x0[ZrotBG] = -.75
+    x0[ZrotBD] = .75
+    x0[YrotBG, 0] = -2.9
+    x0[YrotBD, 0] = 2.9
+    x0[YrotBG, 1] = -1.35
+    x0[YrotBD, 1] = 1.35
+    x0[XrotC, 0] = -.5
+    x0[XrotC, 1] = -2.6
 
-    x1[ZrotBG] = .75
-    x1[ZrotBD] = -.75
-    x1[Xrot, 1] = -2 * 3.14
-    x1[YrotBG] = 1.35
-    x1[YrotBD] = -1.35
-    x1[XrotC] = 2.6
+    x1[ZrotBG] = -.75
+    x1[ZrotBD] = .75
+    x1[Xrot, 1] = 2 * 3.14
+    x1[YrotBG] = -1.35
+    x1[YrotBD] = 1.35
+    x1[XrotC] = -2.6
 
-    x2[Xrot] = -2 * 3.14
+    x2[Xrot] = 2 * 3.14
     x2[Zrot, 1] = 3.14
-    x2[ZrotBG, 0] = .75
-    x2[ZrotBD, 0] = -.75
-    x2[YrotBG, 0] = 1.35
-    x2[YrotBD, 0] = -1.35
-    x2[XrotC, 0] = 2.6
+    x2[ZrotBG, 0] = -.75
+    x2[ZrotBD, 0] = .75
+    x2[YrotBG, 0] = -1.35
+    x2[YrotBD, 0] = 1.35
+    x2[XrotC, 0] = -2.6
 
-    x3[Xrot, 0] = -2 * 3.14
-    x3[Xrot, 1] = -2 * 3.14 - 3/2 * 3.14
+    x3[Xrot, 0] = 2 * 3.14
+    x3[Xrot, 1] = 2 * 3.14 + 3/2 * 3.14
     x3[Zrot, 0] = 3.14
     x3[Zrot, 1] = 3 * 3.14
 
-    x4[Xrot, 0] = -2 * 3.14 - 3/2 * 3.14
-    x4[Xrot, 1] = -4 * 3.14
+    x4[Xrot, 0] = 2 * 3.14 + 3/2 * 3.14
+    x4[Xrot, 1] = 4 * 3.14
     x4[Zrot] = 3 * 3.14
-    x4[XrotC, 1] = .5
+    x4[XrotC, 1] = -.5
 
     x_init = InitialGuessList()
     x_init.add(x0, interpolation=InterpolationType.LINEAR)
@@ -748,7 +748,7 @@ def main():
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("model", type=str)
-    parser.add_argument("--no-hsl", action='store_false')
+    parser.add_argument("--no-hsl", dest='with_hsl', action='store_false')
     parser.add_argument("-j", default=1, dest='n_threads', type=int)
     parser.add_argument("--no-sol", action='store_false', dest='savesol')
     args = parser.parse_args()
@@ -758,10 +758,10 @@ def main():
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
-    if args.no_hsl:
+    if args.with_hsl:
         solver.set_linear_solver('ma57')  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
     else:
-        print("Test, not using ma57")
+        print("Not using ma57")
     solver.set_maximum_iterations(10000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
