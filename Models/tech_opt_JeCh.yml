@@ -17,12 +17,12 @@ Pelvis:
 Thorax:
   meshfile: Model_mesh/thorax.stl
   meshrt: [-0.15, 0, 0]
-  meshxyz: [0, -0.025, 0]
+  meshxyz: [0, -0.025, 0.12]
 
 Head:
   meshfile: Model_mesh/tete.stl
   meshrt: [0, 0, pi]
-  meshxyz: [0, 0, 0]
+  meshxyz: [0, 0, 0.03]
 
 RightUpperArm:
   rt: [0, 0.17, 0.1]
