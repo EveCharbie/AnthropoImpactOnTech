@@ -1,5 +1,5 @@
 """
-The goal of this program is to optimize de movement to acheive a rudi out pike (803<).
+The goal of this program is to optimize the movement to achieve a rudi out pike (803<).
 """
 import numpy as np
 import biorbd_casadi as biorbd
@@ -67,7 +67,7 @@ def prepare_ocp(
 
     nb_q = biorbd_model[0].nbQ()
     nb_qdot = biorbd_model[0].nbQdot()
-    n_qddot_joints = nb_q - biorbd_model[0].nbRoot()
+    nb_qddot_joints = nb_q - biorbd_model[0].nbRoot()
 
     # Pour la lisibilite
     X = 0
@@ -133,34 +133,28 @@ def prepare_ocp(
 
     # Dynamics
     dynamics = DynamicsList()
-    from root_explicit_qddot_joint import root_explicit_dynamic, custom_configure_root_explicit
-    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
-    dynamics.add(custom_configure_root_explicit, dynamic_function=root_explicit_dynamic)
 
-    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
-    # dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
+    dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
 
 
     qddot_joints_min, qddot_joints_max, qddot_joints_init = -500, 500, 0
     u_bounds = BoundsList()
-    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
-    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
-    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
-    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
-    u_bounds.add([qddot_joints_min] * n_qddot_joints, [qddot_joints_max] * n_qddot_joints)
+    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
+    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
+    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
+    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
+    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
 
     u_init = InitialGuessList()
-    u_init.add([qddot_joints_init] * n_qddot_joints)
-    u_init.add([qddot_joints_init] * n_qddot_joints)
-    u_init.add([qddot_joints_init] * n_qddot_joints)
-    u_init.add([qddot_joints_init] * n_qddot_joints)
-    u_init.add([qddot_joints_init] * n_qddot_joints)
+    u_init.add([qddot_joints_init] * nb_qddot_joints)
+    u_init.add([qddot_joints_init] * nb_qddot_joints)
+    u_init.add([qddot_joints_init] * nb_qddot_joints)
+    u_init.add([qddot_joints_init] * nb_qddot_joints)
+    u_init.add([qddot_joints_init] * nb_qddot_joints)
 
     # Path constraint
     x_bounds = BoundsList()
@@ -177,6 +171,8 @@ def prepare_ocp(
     # Contraintes de position: PHASE 0 la montee en carpe
     #
 
+    zmax = 9.81 / 8 * final_time**2 + 1  # une petite marge
+
     # deplacement
     x_bounds[0].min[X, :] = -.1
     x_bounds[0].max[X, :] = .1
@@ -185,7 +181,7 @@ def prepare_ocp(
     x_bounds[0].min[:Z+1, DEBUT] = 0
     x_bounds[0].max[:Z+1, DEBUT] = 0
     x_bounds[0].min[Z, MILIEU:] = 0
-    x_bounds[0].max[Z, MILIEU:] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[0].max[Z, MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
     x_bounds[0].min[Xrot, DEBUT] = .50  # penche vers l'avant un peu carpe
@@ -320,7 +316,7 @@ def prepare_ocp(
     x_bounds[1].min[Y, :] = -1.
     x_bounds[1].max[Y, :] = 1.
     x_bounds[1].min[Z, :] = 0
-    x_bounds[1].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[1].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
     x_bounds[1].min[Xrot, :] = 0
@@ -404,7 +400,7 @@ def prepare_ocp(
     x_bounds[2].min[Y, :] = -1.
     x_bounds[2].max[Y, :] = 1.
     x_bounds[2].min[Z, :] = 0
-    x_bounds[2].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[2].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
     x_bounds[2].min[Xrot, :] = 2 * 3.14 + .1  # 1 salto 3/4
@@ -490,7 +486,7 @@ def prepare_ocp(
     x_bounds[3].min[Y, :] = -1.
     x_bounds[3].max[Y, :] = 1.
     x_bounds[3].min[Z, :] = 0
-    x_bounds[3].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[3].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
     x_bounds[3].min[Xrot, :] = 2 * 3.14 - .1
@@ -580,12 +576,12 @@ def prepare_ocp(
     x_bounds[4].min[Y, FIN] = -.1
     x_bounds[4].max[Y, FIN] = .1
     x_bounds[4].min[Z, :] = 0
-    x_bounds[4].max[Z, :] = 20  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[4].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
     x_bounds[4].min[Z, FIN] = 0
     x_bounds[4].max[Z, FIN] = .1
 
     # le salto autour de x
-    x_bounds[4].min[Xrot, :] = .50 + 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
+    x_bounds[4].min[Xrot, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
     x_bounds[4].max[Xrot, :] = .50 + 4 * 3.14  # un peu carpe a la fin
     x_bounds[4].min[Xrot, FIN] = .50 + 4 * 3.14 - .1
     x_bounds[4].max[Xrot, FIN] = .50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
@@ -719,10 +715,10 @@ def prepare_ocp(
     constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainG', second_marker='CibleMainG', phase=1)
     constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainD', second_marker='CibleMainD', phase=1)
 #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=1)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=2)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=3)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=4)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=1)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=3)
+    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=4)
 
     return OptimalControlProgram(
         biorbd_model,
@@ -736,7 +732,7 @@ def prepare_ocp(
         objective_functions,
         constraints,
         ode_solver=ode_solver,
-        # variable_mappings=dof_mappings,
+        variable_mappings=dof_mappings,
         n_threads=n_threads
     )
 
@@ -782,7 +778,7 @@ def main():
 
     # Print the last solution
     #sol.animate(n_frames=-1, show_floor=False)
-    #sol.graphs()
+    sol.graphs(show_bounds=True)
 
 if __name__ == "__main__":
     main()
