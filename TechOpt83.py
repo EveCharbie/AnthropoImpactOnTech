@@ -582,9 +582,9 @@ def prepare_ocp(
 
     # le salto autour de x
     x_bounds[4].min[Xrot, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
-    x_bounds[4].max[Xrot, :] = .50 + 4 * 3.14  # un peu carpe a la fin
-    x_bounds[4].min[Xrot, FIN] = .50 + 4 * 3.14 - .1
-    x_bounds[4].max[Xrot, FIN] = .50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
+    x_bounds[4].max[Xrot, :] = -.50 + 4 * 3.14  # un peu carpe a la fin
+    x_bounds[4].min[Xrot, FIN] = -.50 + 4 * 3.14 - .1
+    x_bounds[4].max[Xrot, FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
     # limitation du tilt autour de y
     x_bounds[4].min[Yrot, :] = - 3.14 / 16
     x_bounds[4].max[Yrot, :] = 3.14 / 16
@@ -732,7 +732,6 @@ def prepare_ocp(
         objective_functions,
         constraints,
         ode_solver=ode_solver,
-        variable_mappings=dof_mappings,
         n_threads=n_threads
     )
 
