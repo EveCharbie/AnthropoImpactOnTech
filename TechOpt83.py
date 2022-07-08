@@ -742,17 +742,18 @@ def main():
     """
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("model", type=str)
-    parser.add_argument("--no-hsl", dest='with_hsl', action='store_false')
-    parser.add_argument("-j", default=1, dest='n_threads', type=int)
-    parser.add_argument("--no-sol", action='store_false', dest='savesol')
+    parser.add_argument("model", type=str, help="the bioMod file")
+    parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
+    parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
+    parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
+    parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
     args = parser.parse_args()
 
     n_shooting = (40, 100, 100, 100, 40)
     ocp = prepare_ocp(args.model, n_shooting=n_shooting, n_threads=args.n_threads, final_time=1.87)
     ocp.add_plot_penalty(CostType.ALL)
     ocp.print(to_graph=True)
-    solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
+    solver = Solver.IPOPT(show_online_optim=args.show_online, show_options=dict(show_bounds=True))
     if args.with_hsl:
         solver.set_linear_solver('ma57')  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
     else:
@@ -762,15 +763,15 @@ def main():
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M")
-    nom = args.model.split('/')[-1].removesuffix('.bioMod') + "-" + str(n_shooting).replace(', ', '_')
+    nom = args.model.split('/')[-1].removesuffix('.bioMod')
     qs = sol.states[0]['q']
     qdots = sol.states[0]['qdot']
     for i in range(1, len(sol.states)):
         qs = np.hstack((qs, sol.states[i]['q']))
         qdots = np.hstack((qdots, sol.states[i]['qdot']))
     if args.savesol:  # switch manuelle
-        np.save(f'Solutions/{nom}-{temps}-q.npy', qs)
-        #np.save(f'Solutions/{nom}-{temps}-qdot.npy', qdots)
+        np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-q.npy", qs)
+        np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-qdot.npy", qdots)
 
     if IPYTHON:
         IPython.embed()  # afin de pouvoir explorer plus en details la solution
