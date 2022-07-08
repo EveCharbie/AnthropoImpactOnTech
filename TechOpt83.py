@@ -239,7 +239,7 @@ def prepare_ocp(
     bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym],
                              [biorbd_model[0].globalJCS(0).to_mx()])  # retourne la RT du bassin
 
-    v = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation
+    r = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation de la RT
 
     # en xy bassin
     x_bounds[0].min[vX:vY+1, :] = -10
@@ -253,8 +253,8 @@ def prepare_ocp(
     x_bounds[0].max[vZ, DEBUT] = vzinit + .5
 
     # autour de x
-    x_bounds[0].min[vXrot, :] = 0
-    x_bounds[0].max[vXrot, :] = 4 * 3.5 / final_time
+    x_bounds[0].min[vXrot, :] = .5  # d'apres une observation video
+    x_bounds[0].max[vXrot, :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
     # autour de y
     x_bounds[0].min[vYrot, :] = -100
     x_bounds[0].max[vYrot, :] = 100
@@ -268,11 +268,11 @@ def prepare_ocp(
 
     # tenir compte du decalage entre bassin et CoM avec la rotation
     # Qtransdot = Qtransdot + v cross Qrotdot
-    borne_inf = ( x_bounds[0].min[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].min[vXrot:vZrot+1, DEBUT]) )[0]
-    borne_sup = ( x_bounds[0].max[vX:vZ+1, DEBUT] + np.cross(v, x_bounds[0].max[vXrot:vZrot+1, DEBUT]) )[0]
+    borne_inf = ( x_bounds[0].min[vX:vZ+1, DEBUT] + np.cross(r, x_bounds[0].min[vXrot:vZrot+1, DEBUT]) )[0]
+    borne_sup = ( x_bounds[0].max[vX:vZ+1, DEBUT] + np.cross(r, x_bounds[0].max[vXrot:vZrot+1, DEBUT]) )[0]
     x_bounds[0].min[vX:vZ+1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
     x_bounds[0].max[vX:vZ+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
-    #breakpoint()
+
     # bras droit
     x_bounds[0].min[vZrotBD:vYrotBD+1, :] = -100
     x_bounds[0].max[vZrotBD:vYrotBD+1, :] = 100
