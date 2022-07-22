@@ -152,6 +152,7 @@ class Pelvis(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
             rt: Vec3 = O,
             translations: str = '',
             rotations: str = '',
@@ -165,14 +166,15 @@ class Pelvis(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = Pelvis.__name__
+        label = label or Pelvis.__name__
         parent = None
+
         xyz = Pelvis.get_origin(human)
         com = O
         mass = human.P.mass
         inertia = human.P.rel_inertia
 
-        markers = parse_markers(Pelvis.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -207,6 +209,8 @@ class Thorax(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Pelvis.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -219,15 +223,15 @@ class Thorax(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = Thorax.__name__
-        parent = Pelvis.__name__
+        label = label or Thorax.__name__
+
         xyz = Thorax.get_origin(human) - Pelvis.get_origin(human)
         translations = ''
 
         mass, com_global, inertia_global = human.combine_inertia(('T', 's3', 's4'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Thorax.get_origin(human)
 
-        markers = parse_markers(Thorax.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -262,6 +266,8 @@ class Head(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Thorax.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -274,15 +280,15 @@ class Head(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = Head.__name__
-        parent = Thorax.__name__
+        label = label or Head.__name__
+
         xyz = Head.get_origin(human) - Thorax.get_origin(human)
         translations = ''
 
         mass, com_global, inertia_global = human.combine_inertia(('s5', 's6', 's7'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Head.get_origin(human)
 
-        markers = parse_markers(Head.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -321,6 +327,8 @@ class LeftUpperArm(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Thorax.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -333,8 +341,8 @@ class LeftUpperArm(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = LeftUpperArm.__name__
-        parent = Thorax.__name__
+        label = label or LeftUpperArm.__name__
+
         xyz = LeftUpperArm.get_origin(human) - Thorax.get_origin(human)
         translations = ''
 
@@ -342,7 +350,7 @@ class LeftUpperArm(BioModSegment):
         mass = human.A1.mass
         inertia = human.A1.rel_inertia
 
-        markers = parse_markers(LeftUpperArm.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -377,6 +385,8 @@ class LeftForearm(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = LeftUpperArm.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -389,8 +399,8 @@ class LeftForearm(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = LeftForearm.__name__
-        parent = LeftUpperArm.__name__
+        label = label or LeftForearm.__name__
+
         xyz = LeftForearm.get_origin(human) - LeftUpperArm.get_origin(human)
         translations = ''
 
@@ -400,7 +410,7 @@ class LeftForearm(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(LeftForearm.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -435,6 +445,8 @@ class LeftHand(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = LeftForearm.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -447,8 +459,8 @@ class LeftHand(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = LeftHand.__name__
-        parent = LeftForearm.__name__
+        label = label or LeftHand
+
         xyz = LeftHand.get_origin(human) - LeftForearm.get_origin(human)
         translations = ''
 
@@ -458,7 +470,7 @@ class LeftHand(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(LeftHand.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -497,6 +509,8 @@ class RightUpperArm(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Thorax.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -509,15 +523,15 @@ class RightUpperArm(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = RightUpperArm.__name__
-        parent = Thorax.__name__
+        label = label or RightUpperArm.__name__
+
         xyz = RightUpperArm.get_origin(human) - Thorax.get_origin(human)
         translations = ''
         com = np.asarray(human.B1.rel_center_of_mass).reshape(3)
         mass = human.B1.mass
         inertia = human.B1.rel_inertia
 
-        markers = parse_markers(RightUpperArm.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -552,6 +566,8 @@ class RightForearm(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = RightUpperArm.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -564,8 +580,8 @@ class RightForearm(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = RightForearm.__name__
-        parent = RightUpperArm.__name__
+        label = label or RightForearm.__name__
+
         xyz = RightForearm.get_origin(human) - RightUpperArm.get_origin(human)
         translations = ''
 
@@ -575,7 +591,7 @@ class RightForearm(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(RightForearm.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -610,6 +626,8 @@ class RightHand(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = RightForearm.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -622,8 +640,8 @@ class RightHand(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = RightHand.__name__
-        parent = RightForearm.__name__
+        label = label or RightHand.__name__
+
         xyz = RightHand.get_origin(human) - RightForearm.get_origin(human)
         translations = ''
 
@@ -633,7 +651,7 @@ class RightHand(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(RightHand.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -672,6 +690,8 @@ class LeftThigh(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Pelvis.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -684,15 +704,15 @@ class LeftThigh(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = LeftThigh.__name__
-        parent = Pelvis.__name__
+        label = label or LeftThigh.__name__
+
         xyz = LeftThigh.get_origin(human) - Pelvis.get_origin(human)
         translations = ''
         com = np.asarray(human.J1.rel_center_of_mass).reshape(3)
         mass = human.J1.mass
         inertia = human.J1.rel_inertia
 
-        markers = parse_markers(LeftThigh.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -727,6 +747,8 @@ class LeftShank(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = LeftThigh.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -739,8 +761,8 @@ class LeftShank(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = LeftShank.__name__
-        parent = LeftThigh.__name__
+        label = label or LeftShank.__name__
+
         xyz = LeftShank.get_origin(human) - LeftThigh.get_origin(human)
         translations = ''
 
@@ -750,7 +772,7 @@ class LeftShank(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(LeftShank.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -785,6 +807,8 @@ class LeftFoot(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = LeftShank.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -797,8 +821,8 @@ class LeftFoot(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = LeftFoot.__name__
-        parent = LeftShank.__name__
+        label = label or LeftFoot.__name__
+
         xyz = LeftFoot.get_origin(human) - LeftShank.get_origin(human)
         translations = ''
 
@@ -808,7 +832,7 @@ class LeftFoot(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(LeftFoot.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -844,9 +868,12 @@ class LeftFoot(BioModSegment):
 
 class RightThigh(BioModSegment):
 
+
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Pelvis.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -859,15 +886,15 @@ class RightThigh(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = RightThigh.__name__
-        parent = Pelvis.__name__
+        label = label or RightThigh.__name__
+
         xyz = RightThigh.get_origin(human) - Pelvis.get_origin(human)
         translations = ''
         com = np.asarray(human.K1.rel_center_of_mass).reshape(3)
         mass = human.K1.mass
         inertia = human.K1.rel_inertia
 
-        markers = parse_markers(RightThigh.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -902,6 +929,8 @@ class RightShank(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = RightThigh.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -914,8 +943,8 @@ class RightShank(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = RightShank.__name__
-        parent = RightThigh.__name__
+        label = label or RightShank.__name__
+
         xyz = RightShank.get_origin(human) - RightThigh.get_origin(human)
         translations = ''
 
@@ -925,7 +954,7 @@ class RightShank(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(RightShank.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -960,6 +989,8 @@ class RightFoot(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = RightShank.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -972,8 +1003,8 @@ class RightFoot(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = RightFoot.__name__
-        parent = RightShank.__name__
+        label = label or RightFoot.__name__
+
         xyz = RightFoot.get_origin(human) - RightShank.get_origin(human)
         translations = ''
 
@@ -983,7 +1014,7 @@ class RightFoot(BioModSegment):
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
 
-        markers = parse_markers(RightFoot.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -1023,6 +1054,8 @@ class Thighs(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Pelvis.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -1035,15 +1068,14 @@ class Thighs(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = Thighs.__name__
-        parent = Pelvis.__name__
+        label = label or Thighs.__name__
         xyz = Thighs.get_origin(human) - Pelvis.get_origin(human)
         translations = ''
 
         mass, com_global, inertia = human.combine_inertia(('J1', 'K1'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Thighs.get_origin(human)
 
-        markers = parse_markers(Thighs.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -1074,11 +1106,13 @@ class Thighs(BioModSegment):
 
 
 class Shanks(BioModSegment):
-    """The shanks and feet of a human if they must remain together."""
+    """The shanks of a human if they must remain together."""
 
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Thighs.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -1091,15 +1125,14 @@ class Shanks(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = Shanks.__name__
-        parent = Thighs.__name__
+        label = label or Shanks.__name__
         xyz = Shanks.get_origin(human) - Thighs.get_origin(human)
         translations = ''
 
         mass, com_global, inertia = human.combine_inertia(('j3', 'j4', 'k3', 'k4'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Shanks.get_origin(human)
 
-        markers = parse_markers(Shanks.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -1135,6 +1168,8 @@ class Feet(BioModSegment):
     def __init__(
             self,
             human: yeadon.Human,
+            label: str = '',
+            parent: str = Shanks.__name__,
             rt: Vec3 = O,
             rotations: str = '',
             rangesQ: list[Vec2] = None,
@@ -1147,15 +1182,15 @@ class Feet(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = Feet.__name__
-        parent = Shanks.__name__
+        label = label or Feet.__name__
+
         xyz = Feet.get_origin(human) - Shanks.get_origin(human)
         translations = ''
 
         mass, com_global, inertia = human.combine_inertia(('j5', 'j6', 'j7', 'j8', 'k5', 'k6', 'k7', 'k8'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Feet.get_origin(human)
 
-        markers = parse_markers(Feet.__name__, markers)
+        markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -1194,23 +1229,23 @@ class Feet(BioModSegment):
 
 class BioModHuman:
 
-    def __init__(self, human: yeadon.Human, gravity: Vec3 = None, **options):
+    def __init__(self, human: yeadon.Human, gravity: Vec3 = None, **segments_options):
         self.gravity = gravity
-        self.head = Head(human, **options[Head.__name__] if Head.__name__ in options else {})
-        self.thorax = Thorax(human, **options[Thorax.__name__] if Thorax.__name__ in options else {})
-        self.pelvis = Pelvis(human, **options[Pelvis.__name__] if Pelvis.__name__ in options else {})
-        self.right_upper_arm = RightUpperArm(human, **options[RightUpperArm.__name__] if RightUpperArm.__name__ in options else {})
-        self.right_forearm = RightForearm(human, **options[RightForearm.__name__] if RightForearm.__name__ in options else {})
-        self.right_hand = RightHand(human, **options[RightHand.__name__] if RightHand.__name__ in options else {})
-        self.left_upper_arm = LeftUpperArm(human, **options[LeftUpperArm.__name__] if LeftUpperArm.__name__ in options else {})
-        self.left_forearm = LeftForearm(human, **options[LeftForearm.__name__] if LeftForearm.__name__ in options else {})
-        self.left_hand = LeftHand(human, **options[LeftHand.__name__] if LeftHand.__name__ in options else {})
-        self.right_thigh = RightThigh(human, **options[RightThigh.__name__] if RightThigh.__name__ in options else {})
-        self.right_shank = RightShank(human, **options[RightShank.__name__] if RightShank.__name__ in options else {})
-        self.right_foot = RightFoot(human, **options[RightFoot.__name__] if RightFoot.__name__ in options else {})
-        self.left_thigh = LeftThigh(human, **options[LeftThigh.__name__] if LeftThigh.__name__ in options else {})
-        self.left_shank = LeftShank(human, **options[LeftShank.__name__] if LeftShank.__name__ in options else {})
-        self.left_foot = LeftFoot(human, **options[LeftFoot.__name__] if LeftFoot.__name__ in options else {})
+        self.pelvis = Pelvis(human, **segments_options[Pelvis.__name__] if Pelvis.__name__ in segments_options else {})
+        self.thorax = Thorax(human, parent=self.pelvis.label, **segments_options[Thorax.__name__] if Thorax.__name__ in segments_options else {})
+        self.head = Head(human, parent=self.thorax.label, **segments_options[Head.__name__] if Head.__name__ in segments_options else {})
+        self.right_upper_arm = RightUpperArm(human, parent=self.thorax.label, **segments_options[RightUpperArm.__name__] if RightUpperArm.__name__ in segments_options else {})
+        self.right_forearm = RightForearm(human, parent=self.right_upper_arm.label, **segments_options[RightForearm.__name__] if RightForearm.__name__ in segments_options else {})
+        self.right_hand = RightHand(human, parent=self.right_forearm.label, **segments_options[RightHand.__name__] if RightHand.__name__ in segments_options else {})
+        self.left_upper_arm = LeftUpperArm(human, parent=self.thorax.label, **segments_options[LeftUpperArm.__name__] if LeftUpperArm.__name__ in segments_options else {})
+        self.left_forearm = LeftForearm(human, parent=self.left_upper_arm.label, **segments_options[LeftForearm.__name__] if LeftForearm.__name__ in segments_options else {})
+        self.left_hand = LeftHand(human, parent=self.left_forearm.label, **segments_options[LeftHand.__name__] if LeftHand.__name__ in segments_options else {})
+        self.right_thigh = RightThigh(human, parent=self.pelvis.label, **segments_options[RightThigh.__name__] if RightThigh.__name__ in segments_options else {})
+        self.right_shank = RightShank(human, parent=self.right_thigh.label, **segments_options[RightShank.__name__] if RightShank.__name__ in segments_options else {})
+        self.right_foot = RightFoot(human, parent=self.right_shank.label, **segments_options[RightFoot.__name__] if RightFoot.__name__ in segments_options else {})
+        self.left_thigh = LeftThigh(human, parent=self.pelvis.label, **segments_options[LeftThigh.__name__] if LeftThigh.__name__ in segments_options else {})
+        self.left_shank = LeftShank(human, parent=self.left_thigh.label, **segments_options[LeftShank.__name__] if LeftShank.__name__ in segments_options else {})
+        self.left_foot = LeftFoot(human, parent=self.left_shank.label, **segments_options[LeftFoot.__name__] if LeftFoot.__name__ in segments_options else {})
 
     def __str__(self):
         biomod = "version 4\n\nroot_actuated 0\nexternal_forces 0\n\n"
@@ -1237,20 +1272,20 @@ class BioModHuman:
 
 class BioModHumanFusedLegs:
 
-    def __init__(self, human: yeadon.Human, gravity: Vec3 = None, **options):
+    def __init__(self, human: yeadon.Human, gravity: Vec3 = None, **segments_options):
         self.gravity = gravity
-        self.head = Head(human, **options[Head.__name__] if Head.__name__ in options else {})
-        self.thorax = Thorax(human, **options[Thorax.__name__] if Thorax.__name__ in options else {})
-        self.pelvis = Pelvis(human, **options[Pelvis.__name__] if Pelvis.__name__ in options else {})
-        self.right_upper_arm = RightUpperArm(human, **options[RightUpperArm.__name__] if RightUpperArm.__name__ in options else {})
-        self.right_forearm = RightForearm(human, **options[RightForearm.__name__] if RightForearm.__name__ in options else {})
-        self.right_hand = RightHand(human, **options[RightHand.__name__] if RightHand.__name__ in options else {})
-        self.left_upper_arm = LeftUpperArm(human, **options[LeftUpperArm.__name__] if LeftUpperArm.__name__ in options else {})
-        self.left_forearm = LeftForearm(human, **options[LeftForearm.__name__] if LeftForearm.__name__ in options else {})
-        self.left_hand = LeftHand(human, **options[LeftHand.__name__] if LeftHand.__name__ in options else {})
-        self.thighs = Thighs(human, **options[Thighs.__name__] if Thighs.__name__ in options else {})
-        self.shanks = Shanks(human, **options[Shanks.__name__] if Shanks.__name__ in options else {})
-        self.feet = Feet(human, **options[Feet.__name__] if Feet.__name__ in options else {})
+        self.pelvis = Pelvis(human, **segments_options[Pelvis.__name__] if Pelvis.__name__ in segments_options else {})
+        self.thorax = Thorax(human, parent=self.pelvis.label, **segments_options[Thorax.__name__] if Thorax.__name__ in segments_options else {})
+        self.head = Head(human, parent=self.thorax.label, **segments_options[Head.__name__] if Head.__name__ in segments_options else {})
+        self.right_upper_arm = RightUpperArm(human, parent=self.thorax.label, **segments_options[RightUpperArm.__name__] if RightUpperArm.__name__ in segments_options else {})
+        self.right_forearm = RightForearm(human, parent=self.right_upper_arm.label, **segments_options[RightForearm.__name__] if RightForearm.__name__ in segments_options else {})
+        self.right_hand = RightHand(human, parent=self.right_forearm.label, **segments_options[RightHand.__name__] if RightHand.__name__ in segments_options else {})
+        self.left_upper_arm = LeftUpperArm(human, parent=self.thorax.label, **segments_options[LeftUpperArm.__name__] if LeftUpperArm.__name__ in segments_options else {})
+        self.left_forearm = LeftForearm(human, parent=self.left_upper_arm.label, **segments_options[LeftForearm.__name__] if LeftForearm.__name__ in segments_options else {})
+        self.left_hand = LeftHand(human, parent=self.left_forearm.label, **segments_options[LeftHand.__name__] if LeftHand.__name__ in segments_options else {})
+        self.thighs = Thighs(human, parent=self.pelvis.label, **segments_options[Thighs.__name__] if Thighs.__name__ in segments_options else {})
+        self.shanks = Shanks(human, parent=self.thighs.label, **segments_options[Shanks.__name__] if Shanks.__name__ in segments_options else {})
+        self.feet = Feet(human, parent=self.shanks.label, **segments_options[Feet.__name__] if Feet.__name__ in segments_options else {})
 
     def __str__(self):
         biomod = "version 4\n\nroot_actuated 0\nexternal_forces 0\n\n"
@@ -1293,6 +1328,7 @@ def parse_biomod_options(filename):
 
     segments_options = biomod_options
 
+    # TODO: have segments_options be more defined to be able to clean BioModHuman's __init__
     return Human, human_options, segments_options
 
 
