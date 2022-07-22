@@ -755,7 +755,7 @@ def main():
     ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=args.show_online, show_options=dict(show_bounds=True))
     if args.with_hsl:
-        solver.set_linear_solver('ma57')  # depend de HSL qui depend de gfortran 7 qui est difficile a obtenir, ultimement facultatif
+        solver.set_linear_solver('ma57')
     else:
         print("Not using ma57")
     solver.set_maximum_iterations(10000)
@@ -772,13 +772,14 @@ def main():
     if args.savesol:  # switch manuelle
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-q.npy", qs)
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-qdot.npy", qdots)
+        np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-t.npy", sol.phase_time)
 
     if IPYTHON:
         IPython.embed()  # afin de pouvoir explorer plus en details la solution
 
     # Print the last solution
     #sol.animate(n_frames=-1, show_floor=False)
-    sol.graphs(show_bounds=True)
+    # sol.graphs(show_bounds=True)
 
 if __name__ == "__main__":
     main()
