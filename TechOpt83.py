@@ -70,38 +70,70 @@ def prepare_ocp(
     nb_qddot_joints = nb_q - biorbd_model[0].nbRoot()
 
     # Pour la lisibilite
-    X = 0
-    Y = 1
-    Z = 2
-    Xrot = 3
-    Yrot = 4
-    Zrot = 5
-    ZrotBD = 6
-    YrotBD = 7
-    ZrotABD = 8
-    XrotABD = 9
-    ZrotBG = 10
-    YrotBG = 11
-    ZrotABG = 12
-    XrotABG = 13
-    XrotC = 14
-    YrotC = 15
-    vX = 0 + nb_q
-    vY = 1 + nb_q
-    vZ = 2 + nb_q
-    vXrot = 3 + nb_q
-    vYrot = 4 + nb_q
-    vZrot = 5 + nb_q
-    vZrotBD = 6 + nb_q
-    vYrotBD = 7 + nb_q
-    vZrotABD = 8 + nb_q
-    vYrotABD = 9 + nb_q
-    vZrotBG = 10 + nb_q
-    vYrotBG = 11 + nb_q
-    vZrotABG = 12 + nb_q
-    vYrotABG = 13 + nb_q
-    vXrotC = 14 + nb_q
-    vYrotC = 15 + nb_q
+    X_AuJo = 0
+    Y_AuJo = 1
+    Z_AuJo = 2
+    Xrot_AuJo = 3
+    Yrot_AuJo = 4
+    Zrot_AuJo = 5
+    ZrotBD_AuJo = 6
+    YrotBD_AuJo = 7
+    ZrotABD_AuJo = 8
+    XrotABD_AuJo = 9
+    ZrotBG_AuJo = 10
+    YrotBG_AuJo = 11
+    ZrotABG_AuJo = 12
+    XrotABG_AuJo = 13
+    XrotC_AuJo = 14
+    YrotC_AuJo = 15
+    X_JeCh = 16
+    Y_JeCh = 17
+    Z_JeCh = 18
+    Xrot_JeCh = 19
+    Yrot_JeCh = 20
+    Zrot_JeCh = 21
+    ZrotBD_JeCh = 22
+    YrotBD_JeCh = 23
+    ZrotABD_JeCh = 24
+    XrotABD_JeCh = 25
+    ZrotBG_JeCh = 26
+    YrotBG_JeCh = 27
+    ZrotABG_JeCh = 28
+    XrotABG_JeCh = 29
+    XrotC_JeCh = 30
+    YrotC_JeCh = 31
+    vX_AuJo = 0 + nb_q
+    vY_AuJo = 1 + nb_q
+    vZ_AuJo = 2 + nb_q
+    vXrot_AuJo = 3 + nb_q
+    vYrot_AuJo = 4 + nb_q
+    vZrot_AuJo = 5 + nb_q
+    vZrotBD_AuJo = 6 + nb_q
+    vYrotBD_AuJo = 7 + nb_q
+    vZrotABD_AuJo = 8 + nb_q
+    vYrotABD_AuJo = 9 + nb_q
+    vZrotBG_AuJo = 10 + nb_q
+    vYrotBG_AuJo = 11 + nb_q
+    vZrotABG_AuJo = 12 + nb_q
+    vYrotABG_AuJo = 13 + nb_q
+    vXrotC_AuJo = 14 + nb_q
+    vYrotC_AuJo = 15 + nb_q
+    vX_JeCh = 16 + nb_q
+    vY_JeCh = 17 + nb_q
+    vZ_JeCh = 18 + nb_q
+    vXrot_JeCh = 19 + nb_q
+    vYrot_JeCh = 20 + nb_q
+    vZrot_JeCh = 21 + nb_q
+    vZrotBD_JeCh = 22 + nb_q
+    vYrotBD_JeCh = 23 + nb_q
+    vZrotABD_JeCh = 24 + nb_q
+    vYrotABD_JeCh = 25 + nb_q
+    vZrotBG_JeCh = 26 + nb_q
+    vYrotBG_JeCh = 27 + nb_q
+    vZrotABG_JeCh = 28 + nb_q
+    vYrotABG_JeCh = 29 + nb_q
+    vXrotC_JeCh = 30 + nb_q
+    vYrotC_JeCh = 31 + nb_q
 
     # Add objective functions
     objective_functions = ObjectiveList()
@@ -113,23 +145,23 @@ def prepare_ocp(
     objective_functions.add(ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=4)
 
     objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000, phase=0)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=2)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
 
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG', second_marker='CibleMainG', weight=1000, phase=0)
-    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainD', second_marker='CibleMainD', weight=1000, phase=0)
+    # TODO: peut-etre changer le nom des cibles pour plus generique
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainGAuJo', second_marker='CibleMainGAuJo', weight=1000, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainDAuJo', second_marker='CibleMainDAuJo', weight=1000, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainGJeCh', second_marker='CibleMainGJeCh', weight=1000, phase=0)
+    objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainDJeCh', second_marker='CibleMainDJeCh', weight=1000, phase=0)
 
     # arrete de gigoter les bras
-    les_bras = [ZrotBD, YrotBD, ZrotABD, XrotABD, ZrotBG, YrotBG, ZrotABG, XrotABG]
-    les_coudes = [ZrotABD, XrotABD, ZrotABG, XrotABG]
+    les_bras = [ZrotBD_AuJo, YrotBD_AuJo, ZrotABD_AuJo, XrotABD_AuJo, ZrotBG_AuJo, YrotBG_AuJo, ZrotABG_AuJo, XrotABG_AuJo,
+                ZrotBD_JeCh, YrotBD_JeCh, ZrotABD_JeCh, XrotABD_JeCh, ZrotBG_JeCh, YrotBG_JeCh, ZrotABG_JeCh, XrotABG_JeCh]
+    les_coudes = [ZrotABD_AuJo, XrotABD_AuJo, ZrotABG_AuJo, XrotABG_AuJo, ZrotABD_JeCh, XrotABD_JeCh, ZrotABG_JeCh, XrotABG_JeCh]
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=0)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=2)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=3)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=4)
     # ouvre les hanches rapidement apres la vrille
-    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC], targets=[0], weight=10000, phase=3)
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC_AuJo, XrotC_JeCh], targets=[0], weight=10000, phase=3)
 
     # Dynamics
     dynamics = DynamicsList()
@@ -174,59 +206,112 @@ def prepare_ocp(
     zmax = 9.81 / 8 * final_time**2 + 1  # une petite marge
 
     # deplacement
-    x_bounds[0].min[X, :] = -.1
-    x_bounds[0].max[X, :] = .1
-    x_bounds[0].min[Y, :] = -1.
-    x_bounds[0].max[Y, :] = 1.
-    x_bounds[0].min[:Z+1, DEBUT] = 0
-    x_bounds[0].max[:Z+1, DEBUT] = 0
-    x_bounds[0].min[Z, MILIEU:] = 0
-    x_bounds[0].max[Z, MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[0].min[X_AuJo, :] = -.1
+    x_bounds[0].max[X_AuJo, :] = .1
+    x_bounds[0].min[Y_AuJo, :] = -1.
+    x_bounds[0].max[Y_AuJo, :] = 1.
+    x_bounds[0].min[:Z_AuJo+1, DEBUT] = 0
+    x_bounds[0].max[:Z_AuJo+1, DEBUT] = 0
+    x_bounds[0].min[Z_AuJo, MILIEU:] = 0
+    x_bounds[0].max[Z_AuJo, MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[0].min[X_JeCh, :] = -.1
+    x_bounds[0].max[X_JeCh, :] = .1
+    x_bounds[0].min[Y_JeCh, :] = -1.
+    x_bounds[0].max[Y_JeCh, :] = 1.
+    x_bounds[0].min[:Z_JeCh + 1, DEBUT] = 0
+    x_bounds[0].max[:Z_JeCh + 1, DEBUT] = 0
+    x_bounds[0].min[Z_JeCh, MILIEU:] = 0
+    x_bounds[0].max[Z_JeCh, MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[0].min[Xrot, DEBUT] = .50  # penche vers l'avant un peu carpe
-    x_bounds[0].max[Xrot, DEBUT] = .50
-    x_bounds[0].min[Xrot, MILIEU:] = 0
-    x_bounds[0].max[Xrot, MILIEU:] = 4 * 3.14 + .1  # salto
+    x_bounds[0].min[Xrot_AuJo, DEBUT] = .50  # penche vers l'avant un peu carpe
+    x_bounds[0].max[Xrot_AuJo, DEBUT] = .50
+    x_bounds[0].min[Xrot_AuJo, MILIEU:] = 0
+    x_bounds[0].max[Xrot_AuJo, MILIEU:] = 4 * 3.14 + .1  # salto
+
+    x_bounds[0].min[Xrot_JeCh, DEBUT] = .50  # penche vers l'avant un peu carpe
+    x_bounds[0].max[Xrot_JeCh, DEBUT] = .50
+    x_bounds[0].min[Xrot_JeCh, MILIEU:] = 0
+    x_bounds[0].max[Xrot_JeCh, MILIEU:] = 4 * 3.14 + .1  # salto
+
     # limitation du tilt autour de y
-    x_bounds[0].min[Yrot, DEBUT] = 0
-    x_bounds[0].max[Yrot, DEBUT] = 0
-    x_bounds[0].min[Yrot, MILIEU:] = - 3.14 / 16  # vraiment pas suppose tilte
-    x_bounds[0].max[Yrot, MILIEU:] = 3.14 / 16
+    x_bounds[0].min[Yrot_AuJo, DEBUT] = 0
+    x_bounds[0].max[Yrot_AuJo, DEBUT] = 0
+    x_bounds[0].min[Yrot_AuJo, MILIEU:] = - 3.14 / 16  # vraiment pas suppose tilte
+    x_bounds[0].max[Yrot_AuJo, MILIEU:] = 3.14 / 16
+
+    x_bounds[0].min[Yrot_JeCh, DEBUT] = 0
+    x_bounds[0].max[Yrot_JeCh, DEBUT] = 0
+    x_bounds[0].min[Yrot_JeCh, MILIEU:] = - 3.14 / 16  # vraiment pas suppose tilte
+    x_bounds[0].max[Yrot_JeCh, MILIEU:] = 3.14 / 16
+
     # la vrille autour de z
-    x_bounds[0].min[Zrot, DEBUT] = 0
-    x_bounds[0].max[Zrot, DEBUT] = 0
-    x_bounds[0].min[Zrot, MILIEU:] = -.1  # pas de vrille dans cette phase
-    x_bounds[0].max[Zrot, MILIEU:] = .1
+    x_bounds[0].min[Zrot_AuJo, DEBUT] = 0
+    x_bounds[0].max[Zrot_AuJo, DEBUT] = 0
+    x_bounds[0].min[Zrot_AuJo, MILIEU:] = -.1  # pas de vrille dans cette phase
+    x_bounds[0].max[Zrot_AuJo, MILIEU:] = .1
+
+    x_bounds[0].min[Zrot_JeCh, DEBUT] = 0
+    x_bounds[0].max[Zrot_JeCh, DEBUT] = 0
+    x_bounds[0].min[Zrot_JeCh, MILIEU:] = -.1  # pas de vrille dans cette phase
+    x_bounds[0].max[Zrot_JeCh, MILIEU:] = .1
 
     # bras droit
-    x_bounds[0].min[YrotBD, DEBUT] = 2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBD, DEBUT] = 2.9
-    x_bounds[0].min[ZrotBD, DEBUT] = 0
-    x_bounds[0].max[ZrotBD, DEBUT] = 0
+    x_bounds[0].min[YrotBD_AuJo, DEBUT] = 2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBD_AuJo, DEBUT] = 2.9
+    x_bounds[0].min[ZrotBD_AuJo, DEBUT] = 0
+    x_bounds[0].max[ZrotBD_AuJo, DEBUT] = 0
+
+    x_bounds[0].min[YrotBD_JeCh, DEBUT] = 2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBD_JeCh, DEBUT] = 2.9
+    x_bounds[0].min[ZrotBD_JeCh, DEBUT] = 0
+    x_bounds[0].max[ZrotBD_JeCh, DEBUT] = 0
+
     # bras gauche
-    x_bounds[0].min[YrotBG, DEBUT] = -2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBG, DEBUT] = -2.9
-    x_bounds[0].min[ZrotBG, DEBUT] = 0
-    x_bounds[0].max[ZrotBG, DEBUT] = 0
+    x_bounds[0].min[YrotBG_AuJo, DEBUT] = -2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBG_AuJo, DEBUT] = -2.9
+    x_bounds[0].min[ZrotBG_AuJo, DEBUT] = 0
+    x_bounds[0].max[ZrotBG_AuJo, DEBUT] = 0
+
+    x_bounds[0].min[YrotBG_JeCh, DEBUT] = -2.9  # debut bras aux oreilles
+    x_bounds[0].max[YrotBG_JeCh, DEBUT] = -2.9
+    x_bounds[0].min[ZrotBG_JeCh, DEBUT] = 0
+    x_bounds[0].max[ZrotBG_JeCh, DEBUT] = 0
 
     # coude droit
-    x_bounds[0].min[ZrotABD:XrotABD+1, DEBUT] = 0
-    x_bounds[0].max[ZrotABD:XrotABD+1, DEBUT] = 0
+    x_bounds[0].min[ZrotABD_AuJo:XrotABD_AuJo+1, DEBUT] = 0
+    x_bounds[0].max[ZrotABD_AuJo:XrotABD_AuJo+1, DEBUT] = 0
+
+    x_bounds[0].min[ZrotABD_JeCh:XrotABD_JeCh + 1, DEBUT] = 0
+    x_bounds[0].max[ZrotABD_JeCh:XrotABD_JeCh + 1, DEBUT] = 0
+
     # coude gauche
-    x_bounds[0].min[ZrotABG:XrotABG+1, DEBUT] = 0
-    x_bounds[0].max[ZrotABG:XrotABG+1, DEBUT] = 0
+    x_bounds[0].min[ZrotABG_AuJo:XrotABG_AuJo+1, DEBUT] = 0
+    x_bounds[0].max[ZrotABG_AuJo:XrotABG_AuJo+1, DEBUT] = 0
+
+    x_bounds[0].min[ZrotABG_JeCh:XrotABG_JeCh + 1, DEBUT] = 0
+    x_bounds[0].max[ZrotABG_JeCh:XrotABG_JeCh + 1, DEBUT] = 0
 
     # le carpe
-    x_bounds[0].min[XrotC, DEBUT] = -.50  # depart un peu ferme aux hanches
-    x_bounds[0].max[XrotC, DEBUT] = -.50
-    x_bounds[0].max[XrotC, FIN] = -2.5
-    # x_bounds[0].min[XrotC, FIN] = 2.7  # min du modele
+    x_bounds[0].min[XrotC_AuJo, DEBUT] = -.50  # depart un peu ferme aux hanches
+    x_bounds[0].max[XrotC_AuJo, DEBUT] = -.50
+    x_bounds[0].max[XrotC_AuJo, FIN] = -2.5
+
+    x_bounds[0].min[XrotC_JeCh, DEBUT] = -.50  # depart un peu ferme aux hanches
+    x_bounds[0].max[XrotC_JeCh, DEBUT] = -.50
+    x_bounds[0].max[XrotC_JeCh, FIN] = -2.5
+
     # le dehanchement
-    x_bounds[0].min[YrotC, DEBUT] = 0
-    x_bounds[0].max[YrotC, DEBUT] = 0
-    x_bounds[0].min[YrotC, MILIEU:] = -.1
-    x_bounds[0].max[YrotC, MILIEU:] = .1
+    x_bounds[0].min[YrotC_AuJo, DEBUT] = 0
+    x_bounds[0].max[YrotC_AuJo, DEBUT] = 0
+    x_bounds[0].min[YrotC_AuJo, MILIEU:] = -.1
+    x_bounds[0].max[YrotC_AuJo, MILIEU:] = .1
+
+    x_bounds[0].min[YrotC_JeCh, DEBUT] = 0
+    x_bounds[0].max[YrotC_JeCh, DEBUT] = 0
+    x_bounds[0].min[YrotC_JeCh, MILIEU:] = -.1
+    x_bounds[0].max[YrotC_JeCh, MILIEU:] = .1
 
     # Contraintes de vitesse: PHASE 0 la montee en carpe
 
@@ -242,423 +327,709 @@ def prepare_ocp(
     r = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation de la RT
 
     # en xy bassin
-    x_bounds[0].min[vX:vY+1, :] = -10
-    x_bounds[0].max[vX:vY+1, :] = 10
-    x_bounds[0].min[vX:vY+1, DEBUT] = -.5
-    x_bounds[0].max[vX:vY+1, DEBUT] = .5
+    x_bounds[0].min[vX_AuJo:vY_AuJo+1, :] = -10
+    x_bounds[0].max[vX_AuJo:vY_AuJo+1, :] = 10
+    x_bounds[0].min[vX_AuJo:vY_AuJo+1, DEBUT] = -.5
+    x_bounds[0].max[vX_AuJo:vY_AuJo+1, DEBUT] = .5
+
+    x_bounds[0].min[vX_JeCh:vY_JeCh + 1, :] = -10
+    x_bounds[0].max[vX_JeCh:vY_JeCh + 1, :] = 10
+    x_bounds[0].min[vX_JeCh:vY_JeCh + 1, DEBUT] = -.5
+    x_bounds[0].max[vX_JeCh:vY_JeCh + 1, DEBUT] = .5
+
     # z bassin
-    x_bounds[0].min[vZ, :] = -100
-    x_bounds[0].max[vZ, :] = 100
-    x_bounds[0].min[vZ, DEBUT] = vzinit - .5
-    x_bounds[0].max[vZ, DEBUT] = vzinit + .5
+    x_bounds[0].min[vZ_AuJo, :] = -100
+    x_bounds[0].max[vZ_AuJo, :] = 100
+    x_bounds[0].min[vZ_AuJo, DEBUT] = vzinit - .5
+    x_bounds[0].max[vZ_AuJo, DEBUT] = vzinit + .5
+
+    x_bounds[0].min[vZ_JeCh, :] = -100
+    x_bounds[0].max[vZ_JeCh, :] = 100
+    x_bounds[0].min[vZ_JeCh, DEBUT] = vzinit - .5
+    x_bounds[0].max[vZ_JeCh, DEBUT] = vzinit + .5
 
     # autour de x
-    x_bounds[0].min[vXrot, :] = .5  # d'apres une observation video
-    x_bounds[0].max[vXrot, :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
+    x_bounds[0].min[vXrot_AuJo, :] = .5  # d'apres une observation video
+    x_bounds[0].max[vXrot_AuJo, :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
+
+    x_bounds[0].min[vXrot_JeCh, :] = .5  # d'apres une observation video
+    x_bounds[0].max[vXrot_JeCh, :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
+
     # autour de y
-    x_bounds[0].min[vYrot, :] = -100
-    x_bounds[0].max[vYrot, :] = 100
-    x_bounds[0].min[vYrot, DEBUT] = 0
-    x_bounds[0].max[vYrot, DEBUT] = 0
+    x_bounds[0].min[vYrot_AuJo, :] = -100
+    x_bounds[0].max[vYrot_AuJo, :] = 100
+    x_bounds[0].min[vYrot_AuJo, DEBUT] = 0
+    x_bounds[0].max[vYrot_AuJo, DEBUT] = 0
+
+    x_bounds[0].min[vYrot_JeCh, :] = -100
+    x_bounds[0].max[vYrot_JeCh, :] = 100
+    x_bounds[0].min[vYrot_JeCh, DEBUT] = 0
+    x_bounds[0].max[vYrot_JeCh, DEBUT] = 0
+
     # autour de z
-    x_bounds[0].min[vZrot, :] = -100
-    x_bounds[0].max[vZrot, :] = 100
-    x_bounds[0].min[vZrot, DEBUT] = 0
-    x_bounds[0].max[vZrot, DEBUT] = 0
+    x_bounds[0].min[vZrot_AuJo, :] = -100
+    x_bounds[0].max[vZrot_AuJo, :] = 100
+    x_bounds[0].min[vZrot_AuJo, DEBUT] = 0
+    x_bounds[0].max[vZrot_AuJo, DEBUT] = 0
+
+    x_bounds[0].min[vZrot_JeCh, :] = -100
+    x_bounds[0].max[vZrot_JeCh, :] = 100
+    x_bounds[0].min[vZrot_JeCh, DEBUT] = 0
+    x_bounds[0].max[vZrot_JeCh, DEBUT] = 0
 
     # tenir compte du decalage entre bassin et CoM avec la rotation
     # Qtransdot = Qtransdot + v cross Qrotdot
-    borne_inf = ( x_bounds[0].min[vX:vZ+1, DEBUT] + np.cross(r, x_bounds[0].min[vXrot:vZrot+1, DEBUT]) )[0]
-    borne_sup = ( x_bounds[0].max[vX:vZ+1, DEBUT] + np.cross(r, x_bounds[0].max[vXrot:vZrot+1, DEBUT]) )[0]
-    x_bounds[0].min[vX:vZ+1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
-    x_bounds[0].max[vX:vZ+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
+    borne_inf = ( x_bounds[0].min[vX_AuJo:vZ_AuJo+1, DEBUT] + np.cross(r, x_bounds[0].min[vXrot_AuJo:vZrot_AuJo+1, DEBUT]) )[0]
+    borne_sup = ( x_bounds[0].max[vX_AuJo:vZ_AuJo+1, DEBUT] + np.cross(r, x_bounds[0].max[vXrot_AuJo:vZrot_AuJo+1, DEBUT]) )[0]
+    x_bounds[0].min[vX_AuJo:vZ_AuJo+1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
+    x_bounds[0].max[vX_AuJo:vZ_AuJo+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
+
+    borne_inf = (x_bounds[0].min[vX_JeCh:vZ_JeCh + 1, DEBUT] + np.cross(r, x_bounds[0].min[vXrot_JeCh:vZrot_JeCh + 1, DEBUT]))[0]
+    borne_sup = (x_bounds[0].max[vX_JeCh:vZ_JeCh + 1, DEBUT] + np.cross(r, x_bounds[0].max[vXrot_JeCh:vZrot_JeCh + 1, DEBUT]))[0]
+    x_bounds[0].min[vX_JeCh:vZ_JeCh + 1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
+    x_bounds[0].max[vX_JeCh:vZ_JeCh + 1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
 
     # bras droit
-    x_bounds[0].min[vZrotBD:vYrotBD+1, :] = -100
-    x_bounds[0].max[vZrotBD:vYrotBD+1, :] = 100
-    x_bounds[0].min[vZrotBD:vYrotBD+1, DEBUT] = 0
-    x_bounds[0].max[vZrotBD:vYrotBD+1, DEBUT] = 0
+    x_bounds[0].min[vZrotBD_AuJo:vYrotBD_AuJo+1, :] = -100
+    x_bounds[0].max[vZrotBD_AuJo:vYrotBD_AuJo+1, :] = 100
+    x_bounds[0].min[vZrotBD_AuJo:vYrotBD_AuJo+1, DEBUT] = 0
+    x_bounds[0].max[vZrotBD_AuJo:vYrotBD_AuJo+1, DEBUT] = 0
+
+    x_bounds[0].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
+    x_bounds[0].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
+    x_bounds[0].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, DEBUT] = 0
+    x_bounds[0].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, DEBUT] = 0
+
     # bras droit
-    x_bounds[0].min[vZrotBG:vYrotBG+1, :] = -100
-    x_bounds[0].max[vZrotBG:vYrotBG+1, :] = 100
-    x_bounds[0].min[vZrotBG:vYrotBG+1, DEBUT] = 0
-    x_bounds[0].max[vZrotBG:vYrotBG+1, DEBUT] = 0
+    x_bounds[0].min[vZrotBG_AuJo:vYrotBG_AuJo+1, :] = -100
+    x_bounds[0].max[vZrotBG_AuJo:vYrotBG_AuJo+1, :] = 100
+    x_bounds[0].min[vZrotBG_AuJo:vYrotBG_AuJo+1, DEBUT] = 0
+    x_bounds[0].max[vZrotBG_AuJo:vYrotBG_AuJo+1, DEBUT] = 0
+
+    x_bounds[0].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
+    x_bounds[0].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
+    x_bounds[0].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, DEBUT] = 0
+    x_bounds[0].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, DEBUT] = 0
 
     # coude droit
-    x_bounds[0].min[vZrotABD:vYrotABD+1, :] = -100
-    x_bounds[0].max[vZrotABD:vYrotABD+1, :] = 100
-    x_bounds[0].min[vZrotABD:vYrotABD+1, DEBUT] = 0
-    x_bounds[0].max[vZrotABD:vYrotABD+1, DEBUT] = 0
+    x_bounds[0].min[vZrotABD_AuJo:vYrotABD_AuJo+1, :] = -100
+    x_bounds[0].max[vZrotABD_AuJo:vYrotABD_AuJo+1, :] = 100
+    x_bounds[0].min[vZrotABD_AuJo:vYrotABD_AuJo+1, DEBUT] = 0
+    x_bounds[0].max[vZrotABD_AuJo:vYrotABD_AuJo+1, DEBUT] = 0
+
+    x_bounds[0].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
+    x_bounds[0].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
+    x_bounds[0].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, DEBUT] = 0
+    x_bounds[0].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, DEBUT] = 0
     # coude gauche
-    x_bounds[0].min[vZrotABD:vYrotABG+1, :] = -100
-    x_bounds[0].max[vZrotABD:vYrotABG+1, :] = 100
-    x_bounds[0].min[vZrotABG:vYrotABG+1, DEBUT] = 0
-    x_bounds[0].max[vZrotABG:vYrotABG+1, DEBUT] = 0
+    x_bounds[0].min[vZrotABD_AuJo:vYrotABG_AuJo+1, :] = -100
+    x_bounds[0].max[vZrotABD_AuJo:vYrotABG_AuJo+1, :] = 100
+    x_bounds[0].min[vZrotABG_AuJo:vYrotABG_AuJo+1, DEBUT] = 0
+    x_bounds[0].max[vZrotABG_AuJo:vYrotABG_AuJo+1, DEBUT] = 0
+
+    x_bounds[0].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
+    x_bounds[0].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
+    x_bounds[0].min[vZrotABG_JeCh:vYrotABG_JeCh + 1, DEBUT] = 0
+    x_bounds[0].max[vZrotABG_JeCh:vYrotABG_JeCh + 1, DEBUT] = 0
 
     # du carpe
-    x_bounds[0].min[vXrotC, :] = -100
-    x_bounds[0].max[vXrotC, :] = 100
-    x_bounds[0].min[vXrotC, DEBUT] = 0
-    x_bounds[0].max[vXrotC, DEBUT] = 0
+    x_bounds[0].min[vXrotC_AuJo, :] = -100
+    x_bounds[0].max[vXrotC_AuJo, :] = 100
+    x_bounds[0].min[vXrotC_AuJo, DEBUT] = 0
+    x_bounds[0].max[vXrotC_AuJo, DEBUT] = 0
+
+    x_bounds[0].min[vXrotC_JeCh, :] = -100
+    x_bounds[0].max[vXrotC_JeCh, :] = 100
+    x_bounds[0].min[vXrotC_JeCh, DEBUT] = 0
+    x_bounds[0].max[vXrotC_JeCh, DEBUT] = 0
+
     # du dehanchement
-    x_bounds[0].min[vYrotC, :] = -100
-    x_bounds[0].max[vYrotC, :] = 100
-    x_bounds[0].min[vYrotC, DEBUT] = 0
-    x_bounds[0].max[vYrotC, DEBUT] = 0
+    x_bounds[0].min[vYrotC_AuJo, :] = -100
+    x_bounds[0].max[vYrotC_AuJo, :] = 100
+    x_bounds[0].min[vYrotC_AuJo, DEBUT] = 0
+    x_bounds[0].max[vYrotC_AuJo, DEBUT] = 0
+
+    x_bounds[0].min[vYrotC_JeCh, :] = -100
+    x_bounds[0].max[vYrotC_JeCh, :] = 100
+    x_bounds[0].min[vYrotC_JeCh, DEBUT] = 0
+    x_bounds[0].max[vYrotC_JeCh, DEBUT] = 0
 
     #
     # Contraintes de position: PHASE 1 le salto carpe
     #
 
     # deplacement
-    x_bounds[1].min[X, :] = -.1
-    x_bounds[1].max[X, :] = .1
-    x_bounds[1].min[Y, :] = -1.
-    x_bounds[1].max[Y, :] = 1.
-    x_bounds[1].min[Z, :] = 0
-    x_bounds[1].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[1].min[X_AuJo, :] = -.1
+    x_bounds[1].max[X_AuJo, :] = .1
+    x_bounds[1].min[Y_AuJo, :] = -1.
+    x_bounds[1].max[Y_AuJo, :] = 1.
+    x_bounds[1].min[Z_AuJo, :] = 0
+    x_bounds[1].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[1].min[X_JeCh, :] = -.1
+    x_bounds[1].max[X_JeCh, :] = .1
+    x_bounds[1].min[Y_JeCh, :] = -1.
+    x_bounds[1].max[Y_JeCh, :] = 1.
+    x_bounds[1].min[Z_JeCh, :] = 0
+    x_bounds[1].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[1].min[Xrot, :] = 0
-    x_bounds[1].max[Xrot, :] = 4 * 3.14
-    x_bounds[1].min[Xrot, FIN] = 2 * 3.14 - .1
-    # limitation du tilt autour de y
-    x_bounds[1].min[Yrot, :] = - 3.14 / 16
-    x_bounds[1].max[Yrot, :] = 3.14 / 16
-    # la vrille autour de z
-    x_bounds[1].min[Zrot, :] = -.1
-    x_bounds[1].max[Zrot, :] = .1
+    x_bounds[1].min[Xrot_AuJo, :] = 0
+    x_bounds[1].max[Xrot_AuJo, :] = 4 * 3.14
+    x_bounds[1].min[Xrot_AuJo, FIN] = 2 * 3.14 - .1
 
-    # bras droit  f4a a l'ouverture
-    # x_bounds[1].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
-    # x_bounds[1].max[YrotD, DEBUT] = -2.9
-    # x_bounds[1].min[ZrotD, DEBUT] = 0
-    # x_bounds[1].max[ZrotD, DEBUT] = 0
-    # bras gauche
-    # x_bounds[1].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
-    # x_bounds[1].max[YrotG, DEBUT] = 2.9
-    # x_bounds[1].min[ZrotG, DEBUT] = 0
-    # x_bounds[1].max[ZrotG, DEBUT] = 0
+    x_bounds[1].min[Xrot_JeCh, :] = 0
+    x_bounds[1].max[Xrot_JeCh, :] = 4 * 3.14
+    x_bounds[1].min[Xrot_JeCh, FIN] = 2 * 3.14 - .1
+
+    # limitation du tilt autour de y
+    x_bounds[1].min[Yrot_AuJo, :] = - 3.14 / 16
+    x_bounds[1].max[Yrot_AuJo, :] = 3.14 / 16
+
+    x_bounds[1].min[Yrot_JeCh, :] = - 3.14 / 16
+    x_bounds[1].max[Yrot_JeCh, :] = 3.14 / 16
+    # la vrille autour de z
+    x_bounds[1].min[Zrot_AuJo, :] = -.1
+    x_bounds[1].max[Zrot_AuJo, :] = .1
+
+    x_bounds[1].min[Zrot_JeCh, :] = -.1
+    x_bounds[1].max[Zrot_JeCh, :] = .1
+
+    # bras f4a a l'ouverture
 
     # le carpe
-    x_bounds[1].max[XrotC, :] = -2.5
-    # x_bounds[1].min[XrotC, :] = 2.7  # contraint par le model
+    x_bounds[1].max[XrotC_AuJo, :] = -2.5
+    x_bounds[1].max[XrotC_JeCh, :] = -2.5
+
     # le dehanchement
-    x_bounds[1].min[YrotC, DEBUT] = -.1
-    x_bounds[1].max[YrotC, DEBUT] = .1
+    x_bounds[1].min[YrotC_AuJo, DEBUT] = -.1
+    x_bounds[1].max[YrotC_AuJo, DEBUT] = .1
+
+    x_bounds[1].min[YrotC_JeCh, DEBUT] = -.1
+    x_bounds[1].max[YrotC_JeCh, DEBUT] = .1
 
 
     # Contraintes de vitesse: PHASE 1 le salto carpe
 
     # en xy bassin
-    x_bounds[1].min[vX:vY + 1, :] = -10
-    x_bounds[1].max[vX:vY + 1, :] = 10
+    x_bounds[1].min[vX_AuJo:vY_AuJo + 1, :] = -10
+    x_bounds[1].max[vX_AuJo:vY_AuJo + 1, :] = 10
+
+    x_bounds[1].min[vX_JeCh:vY_JeCh + 1, :] = -10
+    x_bounds[1].max[vX_JeCh:vY_JeCh + 1, :] = 10
 
     # z bassin
-    x_bounds[1].min[vZ, :] = -100
-    x_bounds[1].max[vZ, :] = 100
+    x_bounds[1].min[vZ_AuJo, :] = -100
+    x_bounds[1].max[vZ_AuJo, :] = 100
+
+    x_bounds[1].min[vZ_JeCh, :] = -100
+    x_bounds[1].max[vZ_JeCh, :] = 100
 
     # autour de x
-    x_bounds[1].min[vXrot, :] = -100
-    x_bounds[1].max[vXrot, :] = 100
+    x_bounds[1].min[vXrot_AuJo, :] = -100
+    x_bounds[1].max[vXrot_AuJo, :] = 100
+
+    x_bounds[1].min[vXrot_JeCh, :] = -100
+    x_bounds[1].max[vXrot_JeCh, :] = 100
+
     # autour de y
-    x_bounds[1].min[vYrot, :] = -100
-    x_bounds[1].max[vYrot, :] = 100
+    x_bounds[1].min[vYrot_AuJo, :] = -100
+    x_bounds[1].max[vYrot_AuJo, :] = 100
+
+    x_bounds[1].min[vYrot_JeCh, :] = -100
+    x_bounds[1].max[vYrot_JeCh, :] = 100
 
     # autour de z
-    x_bounds[1].min[vZrot, :] = -100
-    x_bounds[1].max[vZrot, :] = 100
+    x_bounds[1].min[vZrot_AuJo, :] = -100
+    x_bounds[1].max[vZrot_AuJo, :] = 100
+
+    x_bounds[1].min[vZrot_JeCh, :] = -100
+    x_bounds[1].max[vZrot_JeCh, :] = 100
 
     # bras droit
-    x_bounds[1].min[vZrotBD:vYrotBD + 1, :] = -100
-    x_bounds[1].max[vZrotBD:vYrotBD + 1, :] = 100
+    x_bounds[1].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
+    x_bounds[1].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
+
+    x_bounds[1].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
+    x_bounds[1].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
+
     # bras droit
-    x_bounds[1].min[vZrotBG:vYrotBG + 1, :] = -100
-    x_bounds[1].max[vZrotBG:vYrotBG + 1, :] = 100
+    x_bounds[1].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
+    x_bounds[1].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
+
+    x_bounds[1].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
+    x_bounds[1].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
 
     # coude droit
-    x_bounds[1].min[vZrotABD:vYrotABD + 1, :] = -100
-    x_bounds[1].max[vZrotABD:vYrotABD + 1, :] = 100
+    x_bounds[1].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
+    x_bounds[1].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
+
+    x_bounds[1].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
+    x_bounds[1].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
+
     # coude gauche
-    x_bounds[1].min[vZrotABD:vYrotABG + 1, :] = -100
-    x_bounds[1].max[vZrotABD:vYrotABG + 1, :] = 100
+    x_bounds[1].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
+    x_bounds[1].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
+
+    x_bounds[1].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
+    x_bounds[1].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
 
     # du carpe
-    x_bounds[1].min[vXrotC, :] = -100
-    x_bounds[1].max[vXrotC, :] = 100
+    x_bounds[1].min[vXrotC_AuJo, :] = -100
+    x_bounds[1].max[vXrotC_AuJo, :] = 100
+
+    x_bounds[1].min[vXrotC_JeCh, :] = -100
+    x_bounds[1].max[vXrotC_JeCh, :] = 100
+
     # du dehanchement
-    x_bounds[1].min[vYrotC, :] = -100
-    x_bounds[1].max[vYrotC, :] = 100
+    x_bounds[1].min[vYrotC_AuJo, :] = -100
+    x_bounds[1].max[vYrotC_AuJo, :] = 100
+
+    x_bounds[1].min[vYrotC_JeCh, :] = -100
+    x_bounds[1].max[vYrotC_JeCh, :] = 100
 
     #
     # Contraintes de position: PHASE 2 l'ouverture
     #
 
     # deplacement
-    x_bounds[2].min[X, :] = -.2
-    x_bounds[2].max[X, :] = .2
-    x_bounds[2].min[Y, :] = -1.
-    x_bounds[2].max[Y, :] = 1.
-    x_bounds[2].min[Z, :] = 0
-    x_bounds[2].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[2].min[X_AuJo, :] = -.2
+    x_bounds[2].max[X_AuJo, :] = .2
+    x_bounds[2].min[Y_AuJo, :] = -1.
+    x_bounds[2].max[Y_AuJo, :] = 1.
+    x_bounds[2].min[Z_AuJo, :] = 0
+    x_bounds[2].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[2].min[X_JeCh, :] = -.2
+    x_bounds[2].max[X_JeCh, :] = .2
+    x_bounds[2].min[Y_JeCh, :] = -1.
+    x_bounds[2].max[Y_JeCh, :] = 1.
+    x_bounds[2].min[Z_JeCh, :] = 0
+    x_bounds[2].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[2].min[Xrot, :] = 2 * 3.14 + .1  # 1 salto 3/4
-    x_bounds[2].max[Xrot, :] = 4 * 3.14
-    # limitation du tilt autour de y
-    x_bounds[2].min[Yrot, :] = - 3.14 / 4
-    x_bounds[2].max[Yrot, :] = 3.14 / 4
-    # la vrille autour de z
-    x_bounds[2].min[Zrot, :] = 0
-    x_bounds[2].max[Zrot, :] = 3 * 3.14
+    x_bounds[2].min[Xrot_AuJo, :] = 2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[2].max[Xrot_AuJo, :] = 4 * 3.14
 
-    # bras droit  f4a a l'ouverture
-    # x_bounds[2].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
-    # x_bounds[2].max[YrotD, DEBUT] = -2.9
-    # x_bounds[2].min[ZrotD, DEBUT] = 0
-    # x_bounds[2].max[ZrotD, DEBUT] = 0
-    # bras gauche
-    # x_bounds[2].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
-    # x_bounds[2].max[YrotG, DEBUT] = 2.9
-    # x_bounds[2].min[ZrotG, DEBUT] = 0
-    # x_bounds[2].max[ZrotG, DEBUT] = 0
+    x_bounds[2].min[Xrot_JeCh, :] = 2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[2].max[Xrot_JeCh, :] = 4 * 3.14
+
+    # limitation du tilt autour de y
+    x_bounds[2].min[Yrot_AuJo, :] = - 3.14 / 4
+    x_bounds[2].max[Yrot_AuJo, :] = 3.14 / 4
+
+    x_bounds[2].min[Yrot_JeCh, :] = - 3.14 / 4
+    x_bounds[2].max[Yrot_JeCh, :] = 3.14 / 4
+
+    # la vrille autour de z
+    x_bounds[2].min[Zrot_AuJo, :] = 0
+    x_bounds[2].max[Zrot_AuJo, :] = 3 * 3.14
+
+    x_bounds[2].min[Zrot_JeCh, :] = 0
+    x_bounds[2].max[Zrot_JeCh, :] = 3 * 3.14
+
+    # bras f4a a l'ouverture
 
     # le carpe
-    # x_bounds[2].min[XrotC, DEBUT] = 0
-    # x_bounds[2].max[XrotC, DEBUT] = 0
-    # x_bounds[2].min[XrotC, FIN] = 2.8  # min du modele
-    x_bounds[2].min[XrotC, FIN] = -.4
-    # le dehanchement
-    # x_bounds[2].min[YrotC, DEBUT] = -.05
-    # x_bounds[2].max[YrotC, DEBUT] = .05
-    # x_bounds[2].min[YrotC, MILIEU:] = -.05  # f4a a l'ouverture
-    # x_bounds[2].max[YrotC, MILIEU:] = .05
+    x_bounds[2].min[XrotC_AuJo, FIN] = -.4
+    x_bounds[2].min[XrotC_JeCh, FIN] = -.4
+
+    # le dehanchement f4a a l'ouverture
 
     # Contraintes de vitesse: PHASE 2 l'ouverture
 
     # en xy bassin
-    x_bounds[2].min[vX:vY + 1, :] = -10
-    x_bounds[2].max[vX:vY + 1, :] = 10
+    x_bounds[2].min[vX_AuJo:vY_AuJo + 1, :] = -10
+    x_bounds[2].max[vX_AuJo:vY_AuJo + 1, :] = 10
+
+    x_bounds[2].min[vX_JeCh:vY_JeCh + 1, :] = -10
+    x_bounds[2].max[vX_JeCh:vY_JeCh + 1, :] = 10
 
     # z bassin
-    x_bounds[2].min[vZ, :] = -100
-    x_bounds[2].max[vZ, :] = 100
+    x_bounds[2].min[vZ_AuJo, :] = -100
+    x_bounds[2].max[vZ_AuJo, :] = 100
+
+    x_bounds[2].min[vZ_JeCh, :] = -100
+    x_bounds[2].max[vZ_JeCh, :] = 100
 
     # autour de x
-    x_bounds[2].min[vXrot, :] = -100
-    x_bounds[2].max[vXrot, :] = 100
+    x_bounds[2].min[vXrot_AuJo, :] = -100
+    x_bounds[2].max[vXrot_AuJo, :] = 100
+
+    x_bounds[2].min[vXrot_JeCh, :] = -100
+    x_bounds[2].max[vXrot_JeCh, :] = 100
+
     # autour de y
-    x_bounds[2].min[vYrot, :] = -100
-    x_bounds[2].max[vYrot, :] = 100
+    x_bounds[2].min[vYrot_AuJo, :] = -100
+    x_bounds[2].max[vYrot_AuJo, :] = 100
+
+    x_bounds[2].min[vYrot_JeCh, :] = -100
+    x_bounds[2].max[vYrot_JeCh, :] = 100
 
     # autour de z
-    x_bounds[2].min[vZrot, :] = -100
-    x_bounds[2].max[vZrot, :] = 100
+    x_bounds[2].min[vZrot_AuJo, :] = -100
+    x_bounds[2].max[vZrot_AuJo, :] = 100
+
+    x_bounds[2].min[vZrot_JeCh, :] = -100
+    x_bounds[2].max[vZrot_JeCh, :] = 100
 
     # bras droit
-    x_bounds[2].min[vZrotBD:vYrotBD + 1, :] = -100
-    x_bounds[2].max[vZrotBD:vYrotBD + 1, :] = 100
+    x_bounds[2].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
+    x_bounds[2].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
+
+    x_bounds[2].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
+    x_bounds[2].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
+
     # bras droit
-    x_bounds[2].min[vZrotBG:vYrotBG + 1, :] = -100
-    x_bounds[2].max[vZrotBG:vYrotBG + 1, :] = 100
+    x_bounds[2].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
+    x_bounds[2].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
+
+    x_bounds[2].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
+    x_bounds[2].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
 
     # coude droit
-    x_bounds[2].min[vZrotABD:vYrotABD + 1, :] = -100
-    x_bounds[2].max[vZrotABD:vYrotABD + 1, :] = 100
+    x_bounds[2].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
+    x_bounds[2].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
+
+    x_bounds[2].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
+    x_bounds[2].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
+
     # coude gauche
-    x_bounds[2].min[vZrotABD:vYrotABG + 1, :] = -100
-    x_bounds[2].max[vZrotABD:vYrotABG + 1, :] = 100
+    x_bounds[2].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
+    x_bounds[2].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
+
+    x_bounds[2].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
+    x_bounds[2].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
 
     # du carpe
-    x_bounds[2].min[vXrotC, :] = -100
-    x_bounds[2].max[vXrotC, :] = 100
+    x_bounds[2].min[vXrotC_AuJo, :] = -100
+    x_bounds[2].max[vXrotC_AuJo, :] = 100
+
+    x_bounds[2].min[vXrotC_JeCh, :] = -100
+    x_bounds[2].max[vXrotC_JeCh, :] = 100
+
     # du dehanchement
-    x_bounds[2].min[vYrotC, :] = -100
-    x_bounds[2].max[vYrotC, :] = 100
+    x_bounds[2].min[vYrotC_AuJo, :] = -100
+    x_bounds[2].max[vYrotC_AuJo, :] = 100
+
+    x_bounds[2].min[vYrotC_JeCh, :] = -100
+    x_bounds[2].max[vYrotC_JeCh, :] = 100
 
     #
     # Contraintes de position: PHASE 3 la vrille et demie
     #
 
     # deplacement
-    x_bounds[3].min[X, :] = -.2
-    x_bounds[3].max[X, :] = .2
-    x_bounds[3].min[Y, :] = -1.
-    x_bounds[3].max[Y, :] = 1.
-    x_bounds[3].min[Z, :] = 0
-    x_bounds[3].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[3].min[X_AuJo, :] = -.2
+    x_bounds[3].max[X_AuJo, :] = .2
+    x_bounds[3].min[Y_AuJo, :] = -1.
+    x_bounds[3].max[Y_AuJo, :] = 1.
+    x_bounds[3].min[Z_AuJo, :] = 0
+    x_bounds[3].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[3].min[X_JeCh, :] = -.2
+    x_bounds[3].max[X_JeCh, :] = .2
+    x_bounds[3].min[Y_JeCh, :] = -1.
+    x_bounds[3].max[Y_JeCh, :] = 1.
+    x_bounds[3].min[Z_JeCh, :] = 0
+    x_bounds[3].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[3].min[Xrot, :] = 2 * 3.14 - .1
-    x_bounds[3].max[Xrot, :] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
-    x_bounds[3].min[Xrot, FIN] = 2 * 3.14 + 3/2 * 3.14 - .1
-    x_bounds[3].max[Xrot, FIN] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[3].min[Xrot_AuJo, :] = 2 * 3.14 - .1
+    x_bounds[3].max[Xrot_AuJo, :] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[3].min[Xrot_AuJo, FIN] = 2 * 3.14 + 3/2 * 3.14 - .1
+    x_bounds[3].max[Xrot_AuJo, FIN] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
+
+    x_bounds[3].min[Xrot_JeCh, :] = 2 * 3.14 - .1
+    x_bounds[3].max[Xrot_JeCh, :] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[3].min[Xrot_JeCh, FIN] = 2 * 3.14 + 3 / 2 * 3.14 - .1
+    x_bounds[3].max[Xrot_JeCh, FIN] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
+
     # limitation du tilt autour de y
-    x_bounds[3].min[Yrot, :] = - 3.14 / 4
-    x_bounds[3].max[Yrot, :] = 3.14 / 4
-    x_bounds[3].min[Yrot, FIN] = - 3.14 / 8
-    x_bounds[3].max[Yrot, FIN] = 3.14 / 8
+    x_bounds[3].min[Yrot_AuJo, :] = - 3.14 / 4
+    x_bounds[3].max[Yrot_AuJo, :] = 3.14 / 4
+    x_bounds[3].min[Yrot_AuJo, FIN] = - 3.14 / 8
+    x_bounds[3].max[Yrot_AuJo, FIN] = 3.14 / 8
+
+    x_bounds[3].min[Yrot_JeCh, :] = - 3.14 / 4
+    x_bounds[3].max[Yrot_JeCh, :] = 3.14 / 4
+    x_bounds[3].min[Yrot_JeCh, FIN] = - 3.14 / 8
+    x_bounds[3].max[Yrot_JeCh, FIN] = 3.14 / 8
+
     # la vrille autour de z
-    x_bounds[3].min[Zrot, :] = 0
-    x_bounds[3].max[Zrot, :] = 3 * 3.14
-    x_bounds[3].min[Zrot, FIN] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[3].max[Zrot, FIN] = 3 * 3.14 + .1
+    x_bounds[3].min[Zrot_AuJo, :] = 0
+    x_bounds[3].max[Zrot_AuJo, :] = 3 * 3.14
+    x_bounds[3].min[Zrot_AuJo, FIN] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[3].max[Zrot_AuJo, FIN] = 3 * 3.14 + .1
 
-    # bras droit  f4a la vrille
-    # x_bounds[3].min[YrotD, DEBUT] = -2.9  # debut bras aux oreilles
-    # x_bounds[3].max[YrotD, DEBUT] = -2.9
-    # x_bounds[3].min[ZrotD, DEBUT] = 0
-    # x_bounds[3].max[ZrotD, DEBUT] = 0
-    # bras gauche
-    # x_bounds[3].min[YrotG, DEBUT] = 2.9  # debut bras aux oreilles
-    # x_bounds[3].max[YrotG, DEBUT] = 2.9
-    # x_bounds[3].min[ZrotG, DEBUT] = 0
-    # x_bounds[3].max[ZrotG, DEBUT] = 0
+    x_bounds[3].min[Zrot_JeCh, :] = 0
+    x_bounds[3].max[Zrot_JeCh, :] = 3 * 3.14
+    x_bounds[3].min[Zrot_JeCh, FIN] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[3].max[Zrot_JeCh, FIN] = 3 * 3.14 + .1
 
-    # le carpe  f4a les jambes
-    # x_bounds[3].max[XrotC, :] = 2.8  # max du modele
-    x_bounds[3].min[XrotC, :] = -.4
-    # le dehanchement
-    # x_bounds[3].min[YrotC, DEBUT] = -.05
-    # x_bounds[3].max[YrotC, DEBUT] = .05
-    # x_bounds[3].min[YrotC, MILIEU:] = -.05  # f4a a l'ouverture
-    # x_bounds[3].max[YrotC, MILIEU:] = .05
+    # bras f4a la vrille
+
+    # le carpe
+    x_bounds[3].min[XrotC_AuJo, :] = -.4
+
+    # le dehanchement f4a la vrille
 
     # Contraintes de vitesse: PHASE 3 la vrille et demie
 
     # en xy bassin
-    x_bounds[3].min[vX:vY + 1, :] = -10
-    x_bounds[3].max[vX:vY + 1, :] = 10
+    x_bounds[3].min[vX_AuJo:vY_AuJo + 1, :] = -10
+    x_bounds[3].max[vX_AuJo:vY_AuJo + 1, :] = 10
+
+    x_bounds[3].min[vX_JeCh:vY_JeCh + 1, :] = -10
+    x_bounds[3].max[vX_JeCh:vY_JeCh + 1, :] = 10
 
     # z bassin
-    x_bounds[3].min[vZ, :] = -100
-    x_bounds[3].max[vZ, :] = 100
+    x_bounds[3].min[vZ_AuJo, :] = -100
+    x_bounds[3].max[vZ_AuJo, :] = 100
+
+    x_bounds[3].min[vZ_JeCh, :] = -100
+    x_bounds[3].max[vZ_JeCh, :] = 100
 
     # autour de x
-    x_bounds[3].min[vXrot, :] = -100
-    x_bounds[3].max[vXrot, :] = 100
+    x_bounds[3].min[vXrot_AuJo, :] = -100
+    x_bounds[3].max[vXrot_AuJo, :] = 100
+
+    x_bounds[3].min[vXrot_JeCh, :] = -100
+    x_bounds[3].max[vXrot_JeCh, :] = 100
+
     # autour de y
-    x_bounds[3].min[vYrot, :] = -100
-    x_bounds[3].max[vYrot, :] = 100
+    x_bounds[3].min[vYrot_AuJo, :] = -100
+    x_bounds[3].max[vYrot_AuJo, :] = 100
+
+    x_bounds[3].min[vYrot_JeCh, :] = -100
+    x_bounds[3].max[vYrot_JeCh, :] = 100
 
     # autour de z
-    x_bounds[3].min[vZrot, :] = -100
-    x_bounds[3].max[vZrot, :] = 100
+    x_bounds[3].min[vZrot_AuJo, :] = -100
+    x_bounds[3].max[vZrot_AuJo, :] = 100
+
+    x_bounds[3].min[vZrot_JeCh, :] = -100
+    x_bounds[3].max[vZrot_JeCh, :] = 100
 
     # bras droit
-    x_bounds[3].min[vZrotBD:vYrotBD + 1, :] = -100
-    x_bounds[3].max[vZrotBD:vYrotBD + 1, :] = 100
+    x_bounds[3].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
+    x_bounds[3].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
+
+    x_bounds[3].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
+    x_bounds[3].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
+
     # bras droit
-    x_bounds[3].min[vZrotBG:vYrotBG + 1, :] = -100
-    x_bounds[3].max[vZrotBG:vYrotBG + 1, :] = 100
+    x_bounds[3].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
+    x_bounds[3].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
+
+    x_bounds[3].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
+    x_bounds[3].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
 
     # coude droit
-    x_bounds[3].min[vZrotABD:vYrotABD + 1, :] = -100
-    x_bounds[3].max[vZrotABD:vYrotABD + 1, :] = 100
+    x_bounds[3].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
+    x_bounds[3].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
+
+    x_bounds[3].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
+    x_bounds[3].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
+
     # coude gauche
-    x_bounds[3].min[vZrotABD:vYrotABG + 1, :] = -100
-    x_bounds[3].max[vZrotABD:vYrotABG + 1, :] = 100
+    x_bounds[3].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
+    x_bounds[3].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
+
+    x_bounds[3].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
+    x_bounds[3].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
 
     # du carpe
-    x_bounds[3].min[vXrotC, :] = -100
-    x_bounds[3].max[vXrotC, :] = 100
+    x_bounds[3].min[vXrotC_AuJo, :] = -100
+    x_bounds[3].max[vXrotC_AuJo, :] = 100
+
+    x_bounds[3].min[vXrotC_JeCh, :] = -100
+    x_bounds[3].max[vXrotC_JeCh, :] = 100
+
     # du dehanchement
-    x_bounds[3].min[vYrotC, :] = -100
-    x_bounds[3].max[vYrotC, :] = 100
+    x_bounds[3].min[vYrotC_AuJo, :] = -100
+    x_bounds[3].max[vYrotC_AuJo, :] = 100
+
+    x_bounds[3].min[vYrotC_JeCh, :] = -100
+    x_bounds[3].max[vYrotC_JeCh, :] = 100
 
     #
     # Contraintes de position: PHASE 4 la reception
     #
 
     # deplacement
-    x_bounds[4].min[X, :] = -.1
-    x_bounds[4].max[X, :] = .1
-    x_bounds[4].min[Y, FIN] = -.1
-    x_bounds[4].max[Y, FIN] = .1
-    x_bounds[4].min[Z, :] = 0
-    x_bounds[4].max[Z, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-    x_bounds[4].min[Z, FIN] = 0
-    x_bounds[4].max[Z, FIN] = .1
+    x_bounds[4].min[X_AuJo, :] = -.1
+    x_bounds[4].max[X_AuJo, :] = .1
+    x_bounds[4].min[Y_AuJo, FIN] = -.1
+    x_bounds[4].max[Y_AuJo, FIN] = .1
+    x_bounds[4].min[Z_AuJo, :] = 0
+    x_bounds[4].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[4].min[Z_AuJo, FIN] = 0
+    x_bounds[4].max[Z_AuJo, FIN] = .1
+
+    x_bounds[4].min[X_JeCh, :] = -.1
+    x_bounds[4].max[X_JeCh, :] = .1
+    x_bounds[4].min[Y_JeCh, FIN] = -.1
+    x_bounds[4].max[Y_JeCh, FIN] = .1
+    x_bounds[4].min[Z_JeCh, :] = 0
+    x_bounds[4].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[4].min[Z_JeCh, FIN] = 0
+    x_bounds[4].max[Z_JeCh, FIN] = .1
 
     # le salto autour de x
-    x_bounds[4].min[Xrot, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
-    x_bounds[4].max[Xrot, :] = -.50 + 4 * 3.14  # un peu carpe a la fin
-    x_bounds[4].min[Xrot, FIN] = -.50 + 4 * 3.14 - .1
-    x_bounds[4].max[Xrot, FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
+    x_bounds[4].min[Xrot_AuJo, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
+    x_bounds[4].max[Xrot_AuJo, :] = -.50 + 4 * 3.14  # un peu carpe a la fin
+    x_bounds[4].min[Xrot_AuJo, FIN] = -.50 + 4 * 3.14 - .1
+    x_bounds[4].max[Xrot_AuJo, FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
+
+    x_bounds[4].min[Xrot_JeCh, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
+    x_bounds[4].max[Xrot_JeCh, :] = -.50 + 4 * 3.14  # un peu carpe a la fin
+    x_bounds[4].min[Xrot_JeCh, FIN] = -.50 + 4 * 3.14 - .1
+    x_bounds[4].max[Xrot_JeCh, FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
+
     # limitation du tilt autour de y
-    x_bounds[4].min[Yrot, :] = - 3.14 / 16
-    x_bounds[4].max[Yrot, :] = 3.14 / 16
+    x_bounds[4].min[Yrot_AuJo, :] = - 3.14 / 16
+    x_bounds[4].max[Yrot_AuJo, :] = 3.14 / 16
+
+    x_bounds[4].min[Yrot_JeCh, :] = - 3.14 / 16
+    x_bounds[4].max[Yrot_JeCh, :] = 3.14 / 16
+
     # la vrille autour de z
-    x_bounds[4].min[Zrot, :] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[4].max[Zrot, :] = 3 * 3.14 + .1
+    x_bounds[4].min[Zrot_AuJo, :] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[4].max[Zrot_AuJo, :] = 3 * 3.14 + .1
+
+    x_bounds[4].min[Zrot_JeCh, :] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[4].max[Zrot_JeCh, :] = 3 * 3.14 + .1
 
     # bras droit
-    x_bounds[4].min[YrotBD, FIN] = 2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBD, FIN] = 2.9 + .1
-    x_bounds[4].min[ZrotBD, FIN] = -.1
-    x_bounds[4].max[ZrotBD, FIN] = .1
+    x_bounds[4].min[YrotBD_AuJo, FIN] = 2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBD_AuJo, FIN] = 2.9 + .1
+    x_bounds[4].min[ZrotBD_AuJo, FIN] = -.1
+    x_bounds[4].max[ZrotBD_AuJo, FIN] = .1
+
+    x_bounds[4].min[YrotBD_JeCh, FIN] = 2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBD_JeCh, FIN] = 2.9 + .1
+    x_bounds[4].min[ZrotBD_JeCh, FIN] = -.1
+    x_bounds[4].max[ZrotBD_JeCh, FIN] = .1
+
     # bras gauche
-    x_bounds[4].min[YrotBG, FIN] = -2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBG, FIN] = -2.9 + .1
-    x_bounds[4].min[ZrotBG, FIN] = -.1
-    x_bounds[4].max[ZrotBG, FIN] = .1
+    x_bounds[4].min[YrotBG_AuJo, FIN] = -2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBG_AuJo, FIN] = -2.9 + .1
+    x_bounds[4].min[ZrotBG_AuJo, FIN] = -.1
+    x_bounds[4].max[ZrotBG_AuJo, FIN] = .1
+
+    x_bounds[4].min[YrotBG_JeCh, FIN] = -2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[YrotBG_JeCh, FIN] = -2.9 + .1
+    x_bounds[4].min[ZrotBG_JeCh, FIN] = -.1
+    x_bounds[4].max[ZrotBG_JeCh, FIN] = .1
 
     # coude droit
-    x_bounds[4].min[ZrotABD:XrotABD + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABD:XrotABD + 1, FIN] = .1
+    x_bounds[4].min[ZrotABD_AuJo:XrotABD_AuJo + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABD_AuJo:XrotABD_AuJo + 1, FIN] = .1
+
+    x_bounds[4].min[ZrotABD_JeCh:XrotABD_JeCh + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABD_JeCh:XrotABD_JeCh + 1, FIN] = .1
     # coude gauche
-    x_bounds[4].min[ZrotABG:XrotABG + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABG:XrotABG + 1, FIN] = .1
+    x_bounds[4].min[ZrotABG_AuJo:XrotABG_AuJo + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABG_AuJo:XrotABG_AuJo + 1, FIN] = .1
+
+    x_bounds[4].min[ZrotABG_JeCh:XrotABG_JeCh + 1, FIN] = -.1
+    x_bounds[4].max[ZrotABG_JeCh:XrotABG_JeCh + 1, FIN] = .1
 
     # le carpe
-    x_bounds[4].min[XrotC, :] = -.4
-    x_bounds[4].min[XrotC, FIN] = -.60
-    x_bounds[4].max[XrotC, FIN] = -.40  # fin un peu carpe
+    x_bounds[4].min[XrotC_AuJo, :] = -.4
+    x_bounds[4].min[XrotC_AuJo, FIN] = -.60
+    x_bounds[4].max[XrotC_AuJo, FIN] = -.40  # fin un peu carpe
+
+    x_bounds[4].min[XrotC_JeCh, :] = -.4
+    x_bounds[4].min[XrotC_JeCh, FIN] = -.60
+    x_bounds[4].max[XrotC_JeCh, FIN] = -.40  # fin un peu carpe
+
     # le dehanchement
-    x_bounds[4].min[YrotC, FIN] = -.1
-    x_bounds[4].max[YrotC, FIN] = .1
+    x_bounds[4].min[YrotC_AuJo, FIN] = -.1
+    x_bounds[4].max[YrotC_AuJo, FIN] = .1
+
+    x_bounds[4].min[YrotC_JeCh, FIN] = -.1
+    x_bounds[4].max[YrotC_JeCh, FIN] = .1
 
     # Contraintes de vitesse: PHASE 4 la reception
 
     # en xy bassin
-    x_bounds[4].min[vX:vY + 1, :] = -10
-    x_bounds[4].max[vX:vY + 1, :] = 10
+    x_bounds[4].min[vX_AuJo:vY_AuJo + 1, :] = -10
+    x_bounds[4].max[vX_AuJo:vY_AuJo + 1, :] = 10
+
+    x_bounds[4].min[vX_JeCh:vY_JeCh + 1, :] = -10
+    x_bounds[4].max[vX_JeCh:vY_JeCh + 1, :] = 10
 
     # z bassin
-    x_bounds[4].min[vZ, :] = -100
-    x_bounds[4].max[vZ, :] = 100
+    x_bounds[4].min[vZ_AuJo, :] = -100
+    x_bounds[4].max[vZ_AuJo, :] = 100
+
+    x_bounds[4].min[vZ_JeCh, :] = -100
+    x_bounds[4].max[vZ_JeCh, :] = 100
 
     # autour de x
-    x_bounds[4].min[vXrot, :] = -100
-    x_bounds[4].max[vXrot, :] = 100
+    x_bounds[4].min[vXrot_AuJo, :] = -100
+    x_bounds[4].max[vXrot_AuJo, :] = 100
+
+    x_bounds[4].min[vXrot_JeCh, :] = -100
+    x_bounds[4].max[vXrot_JeCh, :] = 100
+
     # autour de y
-    x_bounds[4].min[vYrot, :] = -100
-    x_bounds[4].max[vYrot, :] = 100
+    x_bounds[4].min[vYrot_AuJo, :] = -100
+    x_bounds[4].max[vYrot_AuJo, :] = 100
+
+    x_bounds[4].min[vYrot_JeCh, :] = -100
+    x_bounds[4].max[vYrot_JeCh, :] = 100
 
     # autour de z
-    x_bounds[4].min[vZrot, :] = -100
-    x_bounds[4].max[vZrot, :] = 100
+    x_bounds[4].min[vZrot_AuJo, :] = -100
+    x_bounds[4].max[vZrot_AuJo, :] = 100
+
+    x_bounds[4].min[vZrot_JeCh, :] = -100
+    x_bounds[4].max[vZrot_JeCh, :] = 100
 
     # bras droit
-    x_bounds[4].min[vZrotBD:vYrotBD + 1, :] = -100
-    x_bounds[4].max[vZrotBD:vYrotBD + 1, :] = 100
+    x_bounds[4].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
+    x_bounds[4].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
+
+    x_bounds[4].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
+    x_bounds[4].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
+
     # bras droit
-    x_bounds[4].min[vZrotBG:vYrotBG + 1, :] = -100
-    x_bounds[4].max[vZrotBG:vYrotBG + 1, :] = 100
+    x_bounds[4].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
+    x_bounds[4].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
+
+    x_bounds[4].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
+    x_bounds[4].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
 
     # coude droit
-    x_bounds[4].min[vZrotABD:vYrotABD + 1, :] = -100
-    x_bounds[4].max[vZrotABD:vYrotABD + 1, :] = 100
+    x_bounds[4].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
+    x_bounds[4].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
+
+    x_bounds[4].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
+    x_bounds[4].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
+
     # coude gauche
-    x_bounds[4].min[vZrotABD:vYrotABG + 1, :] = -100
-    x_bounds[4].max[vZrotABD:vYrotABG + 1, :] = 100
+    x_bounds[4].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
+    x_bounds[4].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
+
+    x_bounds[4].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
+    x_bounds[4].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
 
     # du carpe
-    x_bounds[4].min[vXrotC, :] = -100
-    x_bounds[4].max[vXrotC, :] = 100
+    x_bounds[4].min[vXrotC_AuJo, :] = -100
+    x_bounds[4].max[vXrotC_AuJo, :] = 100
+
+    x_bounds[4].min[vXrotC_JeCh, :] = -100
+    x_bounds[4].max[vXrotC_JeCh, :] = 100
+
     # du dehanchement
-    x_bounds[4].min[vYrotC, :] = -100
-    x_bounds[4].max[vYrotC, :] = 100
+    x_bounds[4].min[vYrotC_AuJo, :] = -100
+    x_bounds[4].max[vYrotC_AuJo, :] = 100
+
+    x_bounds[4].min[vYrotC_JeCh, :] = -100
+    x_bounds[4].max[vYrotC_JeCh, :] = 100
 
     #
     # Initial guesses
@@ -669,40 +1040,75 @@ def prepare_ocp(
     x3 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x4 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
 
-    x0[Xrot, 0] = .50
-    x0[ZrotBG] = -.75
-    x0[ZrotBD] = .75
-    x0[YrotBG, 0] = -2.9
-    x0[YrotBD, 0] = 2.9
-    x0[YrotBG, 1] = -1.35
-    x0[YrotBD, 1] = 1.35
-    x0[XrotC, 0] = -.5
-    x0[XrotC, 1] = -2.6
+    x0[Xrot_AuJo, 0] = .50
+    x0[ZrotBG_AuJo] = -.75
+    x0[ZrotBD_AuJo] = .75
+    x0[YrotBG_AuJo, 0] = -2.9
+    x0[YrotBD_AuJo, 0] = 2.9
+    x0[YrotBG_AuJo, 1] = -1.35
+    x0[YrotBD_AuJo, 1] = 1.35
+    x0[XrotC_AuJo, 0] = -.5
+    x0[XrotC_AuJo, 1] = -2.6
 
-    x1[ZrotBG] = -.75
-    x1[ZrotBD] = .75
-    x1[Xrot, 1] = 2 * 3.14
-    x1[YrotBG] = -1.35
-    x1[YrotBD] = 1.35
-    x1[XrotC] = -2.6
+    x0[Xrot_JeCh, 0] = .50
+    x0[ZrotBG_JeCh] = -.75
+    x0[ZrotBD_JeCh] = .75
+    x0[YrotBG_JeCh, 0] = -2.9
+    x0[YrotBD_JeCh, 0] = 2.9
+    x0[YrotBG_JeCh, 1] = -1.35
+    x0[YrotBD_JeCh, 1] = 1.35
+    x0[XrotC_JeCh, 0] = -.5
+    x0[XrotC_JeCh, 1] = -2.6
 
-    x2[Xrot] = 2 * 3.14
-    x2[Zrot, 1] = 3.14
-    x2[ZrotBG, 0] = -.75
-    x2[ZrotBD, 0] = .75
-    x2[YrotBG, 0] = -1.35
-    x2[YrotBD, 0] = 1.35
-    x2[XrotC, 0] = -2.6
+    x1[ZrotBG_AuJo] = -.75
+    x1[ZrotBD_AuJo] = .75
+    x1[Xrot_AuJo, 1] = 2 * 3.14
+    x1[YrotBG_AuJo] = -1.35
+    x1[YrotBD_AuJo] = 1.35
+    x1[XrotC_AuJo] = -2.6
 
-    x3[Xrot, 0] = 2 * 3.14
-    x3[Xrot, 1] = 2 * 3.14 + 3/2 * 3.14
-    x3[Zrot, 0] = 3.14
-    x3[Zrot, 1] = 3 * 3.14
+    x1[ZrotBG_JeCh] = -.75
+    x1[ZrotBD_JeCh] = .75
+    x1[Xrot_JeCh, 1] = 2 * 3.14
+    x1[YrotBG_JeCh] = -1.35
+    x1[YrotBD_JeCh] = 1.35
+    x1[XrotC_JeCh] = -2.6
 
-    x4[Xrot, 0] = 2 * 3.14 + 3/2 * 3.14
-    x4[Xrot, 1] = 4 * 3.14
-    x4[Zrot] = 3 * 3.14
-    x4[XrotC, 1] = -.5
+    x2[Xrot_AuJo] = 2 * 3.14
+    x2[Zrot_AuJo, 1] = 3.14
+    x2[ZrotBG_AuJo, 0] = -.75
+    x2[ZrotBD_AuJo, 0] = .75
+    x2[YrotBG_AuJo, 0] = -1.35
+    x2[YrotBD_AuJo, 0] = 1.35
+    x2[XrotC_AuJo, 0] = -2.6
+
+    x2[Xrot_JeCh] = 2 * 3.14
+    x2[Zrot_JeCh, 1] = 3.14
+    x2[ZrotBG_JeCh, 0] = -.75
+    x2[ZrotBD_JeCh, 0] = .75
+    x2[YrotBG_JeCh, 0] = -1.35
+    x2[YrotBD_JeCh, 0] = 1.35
+    x2[XrotC_JeCh, 0] = -2.6
+
+    x3[Xrot_AuJo, 0] = 2 * 3.14
+    x3[Xrot_AuJo, 1] = 2 * 3.14 + 3/2 * 3.14
+    x3[Zrot_AuJo, 0] = 3.14
+    x3[Zrot_AuJo, 1] = 3 * 3.14
+
+    x3[Xrot_JeCh, 0] = 2 * 3.14
+    x3[Xrot_JeCh, 1] = 2 * 3.14 + 3 / 2 * 3.14
+    x3[Zrot_JeCh, 0] = 3.14
+    x3[Zrot_JeCh, 1] = 3 * 3.14
+
+    x4[Xrot_AuJo, 0] = 2 * 3.14 + 3/2 * 3.14
+    x4[Xrot_AuJo, 1] = 4 * 3.14
+    x4[Zrot_AuJo] = 3 * 3.14
+    x4[XrotC_AuJo, 1] = -.5
+
+    x4[Xrot_JeCh, 0] = 2 * 3.14 + 3 / 2 * 3.14
+    x4[Xrot_JeCh, 1] = 4 * 3.14
+    x4[Zrot_JeCh] = 3 * 3.14
+    x4[XrotC_JeCh, 1] = -.5
 
     x_init = InitialGuessList()
     x_init.add(x0, interpolation=InterpolationType.LINEAR)
@@ -712,8 +1118,10 @@ def prepare_ocp(
     x_init.add(x4, interpolation=InterpolationType.LINEAR)
 
     constraints = ConstraintList()
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainG', second_marker='CibleMainG', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainD', second_marker='CibleMainD', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainGAuJo', second_marker='CibleMainGAuJo', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainDAuJo', second_marker='CibleMainDAuJo', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainGJeCh', second_marker='CibleMainGJeCh', phase=1)
+    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainDJeCh', second_marker='CibleMainDJeCh', phase=1)
 #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=1)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
