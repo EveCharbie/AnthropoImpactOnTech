@@ -161,7 +161,7 @@ def prepare_ocp(
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=3)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=4)
     # ouvre les hanches rapidement apres la vrille
-    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC_AuJo, XrotC_JeCh], targets=[0], weight=10000, phase=3)
+    objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC_AuJo, XrotC_JeCh], targets=[0, 0], weight=10000, phase=3)
 
     # Dynamics
     dynamics = DynamicsList()
