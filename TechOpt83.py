@@ -747,12 +747,14 @@ def main():
     parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
     parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
     parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
+    parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
     args = parser.parse_args()
 
     n_shooting = (40, 100, 100, 100, 40)
     ocp = prepare_ocp(args.model, n_shooting=n_shooting, n_threads=args.n_threads, final_time=1.87)
     ocp.add_plot_penalty(CostType.ALL)
-    ocp.print(to_graph=True)
+    if args.print_ocp:
+        ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=args.show_online, show_options=dict(show_bounds=True))
     if args.with_hsl:
         solver.set_linear_solver('ma57')
