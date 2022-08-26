@@ -1,0 +1,4 @@
+# source repo: https://github.com/Sciancisco/biomake
+# with yeadon installed
+
+python3 biomake.py AuJo.txt --bio tech_opt.yml > model.bioMod
