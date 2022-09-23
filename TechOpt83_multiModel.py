@@ -1,5 +1,6 @@
 """
 The goal of this program is to optimize the movement to achieve a rudi out pike (803<).
+Simultaneously for two anthorpometric models.
 """
 import numpy as np
 import biorbd_casadi as biorbd
@@ -1145,26 +1146,21 @@ def prepare_ocp(
 
 
 def main():
-    """
-    Prepares and solves an ocp for a 803<. Animates the results
-    """
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("model", type=str, help="the bioMod file")
-    parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
-    parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
-    parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
-    parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
-    parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
-    args = parser.parse_args()
+
+    model_path = 
+    n_threads = 4
+    print_ocp_FLAG = True
+    show_online_FLAG = True
+    HSL_FLAG = True
+    save_sol_FLAG = True
 
     n_shooting = (40, 100, 100, 100, 40)
-    ocp = prepare_ocp(args.model, n_shooting=n_shooting, n_threads=args.n_threads, final_time=1.87)
+    ocp = prepare_ocp(model_path, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     ocp.add_plot_penalty(CostType.ALL)
-    if args.print_ocp:
+    if print_ocp_FLAG:
         ocp.print(to_graph=True)
-    solver = Solver.IPOPT(show_online_optim=args.show_online, show_options=dict(show_bounds=True))
-    if args.with_hsl:
+    solver = Solver.IPOPT(show_online_optim=show_online_FLAG, show_options=dict(show_bounds=True))
+    if HSL_FLAG:
         solver.set_linear_solver('ma57')
     else:
         print("Not using ma57")
@@ -1173,13 +1169,13 @@ def main():
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M")
-    nom = args.model.split('/')[-1].removesuffix('.bioMod')
+    nom = model_path.split('/')[-1].removesuffix('.bioMod')
     qs = sol.states[0]['q']
     qdots = sol.states[0]['qdot']
     for i in range(1, len(sol.states)):
         qs = np.hstack((qs, sol.states[i]['q']))
         qdots = np.hstack((qdots, sol.states[i]['qdot']))
-    if args.savesol:  # switch manuelle
+    if save_sol_FLAG:  # switch manuelle
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-q.npy", qs)
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-qdot.npy", qdots)
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-t.npy", sol.phase_time)
