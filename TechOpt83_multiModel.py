@@ -42,6 +42,1018 @@ def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     return BiorbdInterface.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
 
 
+def set_fancy_names_index():
+    """
+    For readability
+    """
+    fancy_names_index = {}
+    fancy_names_index["X_AuJo"] = 0
+    fancy_names_index["Y_AuJo"] = 1
+    fancy_names_index["Z_AuJo"] = 2
+    fancy_names_index["Xrot_AuJo"] = 3
+    fancy_names_index["Yrot_AuJo"] = 4
+    fancy_names_index["Zrot_AuJo"] = 5
+    fancy_names_index["ZrotBD_AuJo"] = 6
+    fancy_names_index["YrotBD_AuJo"] = 7
+    fancy_names_index["ZrotABD_AuJo"] = 8
+    fancy_names_index["XrotABD_AuJo"] = 9
+    fancy_names_index["ZrotBG_AuJo"] = 10
+    fancy_names_index["YrotBG_AuJo"] = 11
+    fancy_names_index["ZrotABG_AuJo"] = 12
+    fancy_names_index["XrotABG_AuJo"] = 13
+    fancy_names_index["XrotC_AuJo"] = 14
+    fancy_names_index["YrotC_AuJo"] = 15
+    fancy_names_index["X_JeCh"] = 16
+    fancy_names_index["Y_JeCh"] = 17
+    fancy_names_index["Z_JeCh"] = 18
+    fancy_names_index["Xrot_JeCh"] = 19
+    fancy_names_index["Yrot_JeCh"] = 20
+    fancy_names_index["Zrot_JeCh"] = 21
+    fancy_names_index["ZrotBD_JeCh"] = 22
+    fancy_names_index["YrotBD_JeCh"] = 23
+    fancy_names_index["ZrotABD_JeCh"] = 24
+    fancy_names_index["XrotABD_JeCh"] = 25
+    fancy_names_index["ZrotBG_JeCh"] = 26
+    fancy_names_index["YrotBG_JeCh"] = 27
+    fancy_names_index["ZrotABG_JeCh"] = 28
+    fancy_names_index["XrotABG_JeCh"] = 29
+    fancy_names_index["XrotC_JeCh"] = 30
+    fancy_names_index["YrotC_JeCh"] = 31
+    fancy_names_index["vX_AuJo"] = 0 + nb_q
+    fancy_names_index["vY_AuJo"] = 1 + nb_q
+    fancy_names_index["vZ_AuJo"] = 2 + nb_q
+    fancy_names_index["vXrot_AuJo"] = 3 + nb_q
+    fancy_names_index["vYrot_AuJo"] = 4 + nb_q
+    fancy_names_index["vZrot_AuJo"] = 5 + nb_q
+    fancy_names_index["vZrotBD_AuJo"] = 6 + nb_q
+    fancy_names_index["vYrotBD_AuJo"] = 7 + nb_q
+    fancy_names_index["vZrotABD_AuJo"] = 8 + nb_q
+    fancy_names_index["vYrotABD_AuJo"] = 9 + nb_q
+    fancy_names_index["vZrotBG_AuJo"] = 10 + nb_q
+    fancy_names_index["vYrotBG_AuJo"] = 11 + nb_q
+    fancy_names_index["vZrotABG_AuJo"] = 12 + nb_q
+    fancy_names_index["vYrotABG_AuJo"] = 13 + nb_q
+    fancy_names_index["vXrotC_AuJo"] = 14 + nb_q
+    fancy_names_index["vYrotC_AuJo"] = 15 + nb_q
+    fancy_names_index["vX_JeCh"] = 16 + nb_q
+    fancy_names_index["vY_JeCh"] = 17 + nb_q
+    fancy_names_index["vZ_JeCh"] = 18 + nb_q
+    fancy_names_index["vXrot_JeCh"] = 19 + nb_q
+    fancy_names_index["vYrot_JeCh"] = 20 + nb_q
+    fancy_names_index["vZrot_JeCh"] = 21 + nb_q
+    fancy_names_index["vZrotBD_JeCh"] = 22 + nb_q
+    fancy_names_index["vYrotBD_JeCh"] = 23 + nb_q
+    fancy_names_index["vZrotABD_JeCh"] = 24 + nb_q
+    fancy_names_index["vYrotABD_JeCh"] = 25 + nb_q
+    fancy_names_index["vZrotBG_JeCh"] = 26 + nb_q
+    fancy_names_index["vYrotBG_JeCh"] = 27 + nb_q
+    fancy_names_index["vZrotABG_JeCh"] = 28 + nb_q
+    fancy_names_index["vYrotABG_JeCh"] = 29 + nb_q
+    fancy_names_index["vXrotC_JeCh"] = 30 + nb_q
+    fancy_names_index["vYrotC_JeCh"] = 31 + nb_q
+
+    return fancy_names_index
+
+def set_x_bounds(biorbd_model, fancy_names_index):
+
+    # Path constraint
+    x_bounds = BoundsList()
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+
+    # Pour la lisibilite
+    DEBUT, MILIEU, FIN = 0, 1, 2
+
+    #
+    # Contraintes de position: PHASE 0 la montee en carpe
+    #
+
+    zmax = 9.81 / 8 * final_time**2 + 1  # une petite marge
+
+    # deplacement
+    x_bounds[0].min[fancy_names_index["X_AuJo"], :] = -.1
+    x_bounds[0].max[fancy_names_index["X_AuJo"], :] = .1
+    x_bounds[0].min[fancy_names_index["Y_AuJo"], :] = -1.
+    x_bounds[0].max[fancy_names_index["Y_AuJo"], :] = 1.
+    x_bounds[0].min[:fancy_names_index["Z_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].max[:fancy_names_index["Z_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["Z_AuJo"], MILIEU:] = 0
+    x_bounds[0].max[fancy_names_index["Z_AuJo"], MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[0].min[fancy_names_index["X_JeCh"], :] = -.1
+    x_bounds[0].max[fancy_names_index["X_JeCh"], :] = .1
+    x_bounds[0].min[fancy_names_index["Y_JeCh"], :] = -1.
+    x_bounds[0].max[fancy_names_index["Y_JeCh"], :] = 1.
+    x_bounds[0].min[:fancy_names_index["Z_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].max[:fancy_names_index["Z_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["Z_JeCh"], MILIEU:] = 0
+    x_bounds[0].max[fancy_names_index["Z_JeCh"], MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    # le salto autour de x
+    x_bounds[0].min[fancy_names_index["Xrot_AuJo"], DEBUT] = .50  # penche vers l'avant un peu carpe
+    x_bounds[0].max[fancy_names_index["Xrot_AuJo"], DEBUT] = .50
+    x_bounds[0].min[fancy_names_index["Xrot_AuJo"], MILIEU:] = 0
+    x_bounds[0].max[fancy_names_index["Xrot_AuJo"], MILIEU:] = 4 * 3.14 + .1  # salto
+
+    x_bounds[0].min[fancy_names_index["Xrot_JeCh"], DEBUT] = .50  # penche vers l'avant un peu carpe
+    x_bounds[0].max[fancy_names_index["Xrot_JeCh"], DEBUT] = .50
+    x_bounds[0].min[fancy_names_index["Xrot_JeCh"], MILIEU:] = 0
+    x_bounds[0].max[fancy_names_index["Xrot_JeCh"], MILIEU:] = 4 * 3.14 + .1  # salto
+
+    # limitation du tilt autour de y
+    x_bounds[0].min[fancy_names_index["Yrot_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["Yrot_AuJo"], DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["Yrot_AuJo"], MILIEU:] = - 3.14 / 16  # vraiment pas suppose tilte
+    x_bounds[0].max[fancy_names_index["Yrot_AuJo"], MILIEU:] = 3.14 / 16
+
+    x_bounds[0].min[fancy_names_index["Yrot_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["Yrot_JeCh"], DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["Yrot_JeCh"], MILIEU:] = - 3.14 / 16  # vraiment pas suppose tilte
+    x_bounds[0].max[fancy_names_index["Yrot_JeCh"], MILIEU:] = 3.14 / 16
+
+    # la vrille autour de z
+    x_bounds[0].min[fancy_names_index["Zrot_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["Zrot_AuJo"], DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["Zrot_AuJo"], MILIEU:] = -.1  # pas de vrille dans cette phase
+    x_bounds[0].max[fancy_names_index["Zrot_AuJo"], MILIEU:] = .1
+
+    x_bounds[0].min[fancy_names_index["Zrot_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["Zrot_JeCh"], DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["Zrot_JeCh"], MILIEU:] = -.1  # pas de vrille dans cette phase
+    x_bounds[0].max[fancy_names_index["Zrot_JeCh"], MILIEU:] = .1
+
+    # bras droit
+    x_bounds[0].min[fancy_names_index["YrotBD_AuJo"], DEBUT] = 2.9  # debut bras aux oreilles
+    x_bounds[0].max[fancy_names_index["YrotBD_AuJo"], DEBUT] = 2.9
+    x_bounds[0].min[fancy_names_index["ZrotBD_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotBD_AuJo"], DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["YrotBD_JeCh"], DEBUT] = 2.9  # debut bras aux oreilles
+    x_bounds[0].max[fancy_names_index["YrotBD_JeCh"], DEBUT] = 2.9
+    x_bounds[0].min[fancy_names_index["ZrotBD_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotBD_JeCh"], DEBUT] = 0
+
+    # bras gauche
+    x_bounds[0].min[fancy_names_index["YrotBG_AuJo"], DEBUT] = -2.9  # debut bras aux oreilles
+    x_bounds[0].max[fancy_names_index["YrotBG_AuJo"], DEBUT] = -2.9
+    x_bounds[0].min[fancy_names_index["ZrotBG_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotBG_AuJo"], DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["YrotBG_JeCh"], DEBUT] = -2.9  # debut bras aux oreilles
+    x_bounds[0].max[fancy_names_index["YrotBG_JeCh"], DEBUT] = -2.9
+    x_bounds[0].min[fancy_names_index["ZrotBG_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotBG_JeCh"], DEBUT] = 0
+
+    # coude droit
+    x_bounds[0].min[fancy_names_index["ZrotABD_AuJo"]:fancy_names_index["XrotABD_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotABD_AuJo"]:fancy_names_index["XrotABD_AuJo"]+1, DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["ZrotABD_JeCh"]:fancy_names_index["XrotABD_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotABD_JeCh"]:fancy_names_index["XrotABD_JeCh"] + 1, DEBUT] = 0
+
+    # coude gauche
+    x_bounds[0].min[fancy_names_index["ZrotABG_AuJo"]:fancy_names_index["XrotABG_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotABG_AuJo"]:fancy_names_index["XrotABG_AuJo"]+1, DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["ZrotABG_JeCh"]:fancy_names_index["XrotABG_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotABG_JeCh"]:fancy_names_index["XrotABG_JeCh"] + 1, DEBUT] = 0
+
+    # le carpe
+    x_bounds[0].min[fancy_names_index["XrotC_AuJo"], DEBUT] = -.50  # depart un peu ferme aux hanches
+    x_bounds[0].max[fancy_names_index["XrotC_AuJo"], DEBUT] = -.50
+    x_bounds[0].min[fancy_names_index["XrotC_AuJo"], FIN] = -2.35
+    x_bounds[0].max[fancy_names_index["XrotC_AuJo"], FIN] = -2.35
+
+    x_bounds[0].min[fancy_names_index["XrotC_JeCh"], DEBUT] = -.50  # depart un peu ferme aux hanches
+    x_bounds[0].max[fancy_names_index["XrotC_JeCh"], DEBUT] = -.50
+    x_bounds[0].min[fancy_names_index["XrotC_JeCh"], FIN] = -2.35
+    x_bounds[0].max[fancy_names_index["XrotC_JeCh"], FIN] = -2.35
+
+    # le dehanchement
+    x_bounds[0].min[fancy_names_index["YrotC_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["YrotC_AuJo"], DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["YrotC_AuJo"], MILIEU:] = -.1
+    x_bounds[0].max[fancy_names_index["YrotC_AuJo"], MILIEU:] = .1
+
+    x_bounds[0].min[fancy_names_index["YrotC_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["YrotC_JeCh"], DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["YrotC_JeCh"], MILIEU:] = -.1
+    x_bounds[0].max[fancy_names_index["YrotC_JeCh"], MILIEU:] = .1
+
+    # Contraintes de vitesse: PHASE 0 la montee en carpe
+
+    vzinit = 9.81 / 2 * final_time  # vitesse initiale en z du CoM pour revenir a terre au temps final
+
+    # decalage entre le bassin et le CoM
+    CoM_Q_sym = MX.sym('CoM', nb_q)
+    CoM_Q_init = x_bounds[0].min[:nb_q, DEBUT]  # min ou max ne change rien a priori, au DEBUT ils sont egaux normalement
+    CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].CoM(CoM_Q_sym).to_mx()])
+    bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym],
+                             [biorbd_model[0].globalJCS(0).to_mx()])  # retourne la RT du bassin
+
+    r = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation de la RT
+
+    # en xy bassin
+    x_bounds[0].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"]+1, :] = -10
+    x_bounds[0].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"]+1, :] = 10
+    x_bounds[0].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"]+1, DEBUT] = -.5
+    x_bounds[0].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"]+1, DEBUT] = .5
+
+    x_bounds[0].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = -10
+    x_bounds[0].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = 10
+    x_bounds[0].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, DEBUT] = -.5
+    x_bounds[0].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, DEBUT] = .5
+
+    # z bassin
+    x_bounds[0].min[fancy_names_index["vZ_AuJo"], :] = -100
+    x_bounds[0].max[fancy_names_index["vZ_AuJo"], :] = 100
+    x_bounds[0].min[fancy_names_index["vZ_AuJo"], DEBUT] = vzinit - .5
+    x_bounds[0].max[fancy_names_index["vZ_AuJo"], DEBUT] = vzinit + .5
+
+    x_bounds[0].min[fancy_names_index["vZ_JeCh"], :] = -100
+    x_bounds[0].max[fancy_names_index["vZ_JeCh"], :] = 100
+    x_bounds[0].min[fancy_names_index["vZ_JeCh"], DEBUT] = vzinit - .5
+    x_bounds[0].max[fancy_names_index["vZ_JeCh"], DEBUT] = vzinit + .5
+
+    # autour de x
+    x_bounds[0].min[fancy_names_index["vXrot_AuJo"], :] = .5  # d'apres une observation video
+    x_bounds[0].max[fancy_names_index["vXrot_AuJo"], :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
+
+    x_bounds[0].min[fancy_names_index["vXrot_JeCh"], :] = .5  # d'apres une observation video
+    x_bounds[0].max[fancy_names_index["vXrot_JeCh"], :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
+
+    # autour de y
+    x_bounds[0].min[fancy_names_index["vYrot_AuJo"], :] = -100
+    x_bounds[0].max[fancy_names_index["vYrot_AuJo"], :] = 100
+    x_bounds[0].min[fancy_names_index["vYrot_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vYrot_AuJo"], DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vYrot_JeCh"], :] = -100
+    x_bounds[0].max[fancy_names_index["vYrot_JeCh"], :] = 100
+    x_bounds[0].min[fancy_names_index["vYrot_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vYrot_JeCh"], DEBUT] = 0
+
+    # autour de z
+    x_bounds[0].min[fancy_names_index["vZrot_AuJo"], :] = -100
+    x_bounds[0].max[fancy_names_index["vZrot_AuJo"], :] = 100
+    x_bounds[0].min[fancy_names_index["vZrot_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrot_AuJo"], DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vZrot_JeCh"], :] = -100
+    x_bounds[0].max[fancy_names_index["vZrot_JeCh"], :] = 100
+    x_bounds[0].min[fancy_names_index["vZrot_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrot_JeCh"], DEBUT] = 0
+
+    # tenir compte du decalage entre bassin et CoM avec la rotation
+    # Qtransdot = Qtransdot + v cross Qrotdot
+    borne_inf = ( x_bounds[0].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vZ_AuJo"]+1, DEBUT] + np.cross(r, x_bounds[0].min[fancy_names_index["vXrot_AuJo"]:fancy_names_index["vZrot_AuJo"]+1, DEBUT]) )[0]
+    borne_sup = ( x_bounds[0].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vZ_AuJo"]+1, DEBUT] + np.cross(r, x_bounds[0].max[fancy_names_index["vXrot_AuJo"]:fancy_names_index["vZrot_AuJo"]+1, DEBUT]) )[0]
+    x_bounds[0].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vZ_AuJo"]+1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
+    x_bounds[0].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vZ_AuJo"]+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
+
+    borne_inf = (x_bounds[0].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vZ_JeCh"] + 1, DEBUT] + np.cross(r, x_bounds[0].min[fancy_names_index["vXrot_JeCh"]:fancy_names_index["vZrot_JeCh"] + 1, DEBUT]))[0]
+    borne_sup = (x_bounds[0].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vZ_JeCh"] + 1, DEBUT] + np.cross(r, x_bounds[0].max[fancy_names_index["vXrot_JeCh"]:fancy_names_index["vZrot_JeCh"] + 1, DEBUT]))[0]
+    x_bounds[0].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vZ_JeCh"] + 1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
+    x_bounds[0].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vZ_JeCh"] + 1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
+
+    # bras droit
+    x_bounds[0].min[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"]+1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"]+1, DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, DEBUT] = 0
+
+    # bras droit
+    x_bounds[0].min[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"]+1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"]+1, DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, DEBUT] = 0
+
+    # coude droit
+    x_bounds[0].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"]+1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"]+1, DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, DEBUT] = 0
+    # coude gauche
+    x_bounds[0].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"]+1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotABG_AuJo"]:fancy_names_index["vYrotABG_AuJo"]+1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotABG_AuJo"]:fancy_names_index["vYrotABG_AuJo"]+1, DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = -100
+    x_bounds[0].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotABG_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotABG_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, DEBUT] = 0
+
+    # du carpe
+    x_bounds[0].min[fancy_names_index["vXrotC_AuJo"], :] = -100
+    x_bounds[0].max[fancy_names_index["vXrotC_AuJo"], :] = 100
+    x_bounds[0].min[fancy_names_index["vXrotC_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vXrotC_AuJo"], DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vXrotC_JeCh"], :] = -100
+    x_bounds[0].max[fancy_names_index["vXrotC_JeCh"], :] = 100
+    x_bounds[0].min[fancy_names_index["vXrotC_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vXrotC_JeCh"], DEBUT] = 0
+
+    # du dehanchement
+    x_bounds[0].min[fancy_names_index["vYrotC_AuJo"], :] = -100
+    x_bounds[0].max[fancy_names_index["vYrotC_AuJo"], :] = 100
+    x_bounds[0].min[fancy_names_index["vYrotC_AuJo"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vYrotC_AuJo"], DEBUT] = 0
+
+    x_bounds[0].min[fancy_names_index["vYrotC_JeCh"], :] = -100
+    x_bounds[0].max[fancy_names_index["vYrotC_JeCh"], :] = 100
+    x_bounds[0].min[fancy_names_index["vYrotC_JeCh"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vYrotC_JeCh"], DEBUT] = 0
+
+    #
+    # Contraintes de position: PHASE 1 le salto carpe
+    #
+
+    # deplacement
+    x_bounds[1].min[fancy_names_index["X_AuJo"], :] = -.1
+    x_bounds[1].max[fancy_names_index["X_AuJo"], :] = .1
+    x_bounds[1].min[fancy_names_index["Y_AuJo"], :] = -1.
+    x_bounds[1].max[fancy_names_index["Y_AuJo"], :] = 1.
+    x_bounds[1].min[fancy_names_index["Z_AuJo"], :] = 0
+    x_bounds[1].max[fancy_names_index["Z_AuJo"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[1].min[fancy_names_index["X_JeCh"], :] = -.1
+    x_bounds[1].max[fancy_names_index["X_JeCh"], :] = .1
+    x_bounds[1].min[fancy_names_index["Y_JeCh"], :] = -1.
+    x_bounds[1].max[fancy_names_index["Y_JeCh"], :] = 1.
+    x_bounds[1].min[fancy_names_index["Z_JeCh"], :] = 0
+    x_bounds[1].max[fancy_names_index["Z_JeCh"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    # le salto autour de x
+    x_bounds[1].min[fancy_names_index["Xrot_AuJo"], :] = 0
+    x_bounds[1].max[fancy_names_index["Xrot_AuJo"], :] = 4 * 3.14
+    x_bounds[1].min[fancy_names_index["Xrot_AuJo"], FIN] = 2 * 3.14 - .1
+
+    x_bounds[1].min[fancy_names_index["Xrot_JeCh"], :] = 0
+    x_bounds[1].max[fancy_names_index["Xrot_JeCh"], :] = 4 * 3.14
+    x_bounds[1].min[fancy_names_index["Xrot_JeCh"], FIN] = 2 * 3.14 - .1
+
+    # limitation du tilt autour de y
+    x_bounds[1].min[fancy_names_index["Yrot_AuJo"], :] = - 3.14 / 16
+    x_bounds[1].max[fancy_names_index["Yrot_AuJo"], :] = 3.14 / 16
+
+    x_bounds[1].min[fancy_names_index["Yrot_JeCh"], :] = - 3.14 / 16
+    x_bounds[1].max[fancy_names_index["Yrot_JeCh"], :] = 3.14 / 16
+    # la vrille autour de z
+    x_bounds[1].min[fancy_names_index["Zrot_AuJo"], :] = -.1
+    x_bounds[1].max[fancy_names_index["Zrot_AuJo"], :] = .1
+
+    x_bounds[1].min[fancy_names_index["Zrot_JeCh"], :] = -.1
+    x_bounds[1].max[fancy_names_index["Zrot_JeCh"], :] = .1
+
+    # bras f4a a l'ouverture
+
+    # le carpe
+    x_bounds[1].min[fancy_names_index["XrotC_AuJo"], :] = -2.35 - 0.1
+    x_bounds[1].max[fancy_names_index["XrotC_AuJo"], :] = -2.35 + 0.1
+    x_bounds[1].min[fancy_names_index["XrotC_JeCh"], :] = -2.35 - 0.1
+    x_bounds[1].max[fancy_names_index["XrotC_JeCh"], :] = -2.35 + 0.1
+
+    # le dehanchement
+    x_bounds[1].min[fancy_names_index["YrotC_AuJo"], DEBUT] = -.1
+    x_bounds[1].max[fancy_names_index["YrotC_AuJo"], DEBUT] = .1
+
+    x_bounds[1].min[fancy_names_index["YrotC_JeCh"], DEBUT] = -.1
+    x_bounds[1].max[fancy_names_index["YrotC_JeCh"], DEBUT] = .1
+
+
+    # Contraintes de vitesse: PHASE 1 le salto carpe
+
+    # en xy bassin
+    x_bounds[1].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = -10
+    x_bounds[1].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = 10
+
+    x_bounds[1].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = -10
+    x_bounds[1].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = 10
+
+    # z bassin
+    x_bounds[1].min[fancy_names_index["vZ_AuJo"], :] = -100
+    x_bounds[1].max[fancy_names_index["vZ_AuJo"], :] = 100
+
+    x_bounds[1].min[fancy_names_index["vZ_JeCh"], :] = -100
+    x_bounds[1].max[fancy_names_index["vZ_JeCh"], :] = 100
+
+    # autour de x
+    x_bounds[1].min[fancy_names_index["vXrot_AuJo"], :] = -100
+    x_bounds[1].max[fancy_names_index["vXrot_AuJo"], :] = 100
+
+    x_bounds[1].min[fancy_names_index["vXrot_JeCh"], :] = -100
+    x_bounds[1].max[fancy_names_index["vXrot_JeCh"], :] = 100
+
+    # autour de y
+    x_bounds[1].min[fancy_names_index["vYrot_AuJo"], :] = -100
+    x_bounds[1].max[fancy_names_index["vYrot_AuJo"], :] = 100
+
+    x_bounds[1].min[fancy_names_index["vYrot_JeCh"], :] = -100
+    x_bounds[1].max[fancy_names_index["vYrot_JeCh"], :] = 100
+
+    # autour de z
+    x_bounds[1].min[fancy_names_index["vZrot_AuJo"], :] = -100
+    x_bounds[1].max[fancy_names_index["vZrot_AuJo"], :] = 100
+
+    x_bounds[1].min[fancy_names_index["vZrot_JeCh"], :] = -100
+    x_bounds[1].max[fancy_names_index["vZrot_JeCh"], :] = 100
+
+    # bras droit
+    x_bounds[1].min[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = 100
+
+    x_bounds[1].min[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = 100
+
+    # bras droit
+    x_bounds[1].min[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = 100
+
+    x_bounds[1].min[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = 100
+
+    # coude droit
+    x_bounds[1].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = 100
+
+    x_bounds[1].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = 100
+
+    # coude gauche
+    x_bounds[1].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = 100
+
+    x_bounds[1].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = -100
+    x_bounds[1].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = 100
+
+    # du carpe
+    x_bounds[1].min[fancy_names_index["vXrotC_AuJo"], :] = -100
+    x_bounds[1].max[fancy_names_index["vXrotC_AuJo"], :] = 100
+
+    x_bounds[1].min[fancy_names_index["vXrotC_JeCh"], :] = -100
+    x_bounds[1].max[fancy_names_index["vXrotC_JeCh"], :] = 100
+
+    # du dehanchement
+    x_bounds[1].min[fancy_names_index["vYrotC_AuJo"], :] = -100
+    x_bounds[1].max[fancy_names_index["vYrotC_AuJo"], :] = 100
+
+    x_bounds[1].min[fancy_names_index["vYrotC_JeCh"], :] = -100
+    x_bounds[1].max[fancy_names_index["vYrotC_JeCh"], :] = 100
+
+    #
+    # Contraintes de position: PHASE 2 l'ouverture
+    #
+
+    # deplacement
+    x_bounds[2].min[fancy_names_index["X_AuJo"], :] = -.2
+    x_bounds[2].max[fancy_names_index["X_AuJo"], :] = .2
+    x_bounds[2].min[fancy_names_index["Y_AuJo"], :] = -1.
+    x_bounds[2].max[fancy_names_index["Y_AuJo"], :] = 1.
+    x_bounds[2].min[fancy_names_index["Z_AuJo"], :] = 0
+    x_bounds[2].max[fancy_names_index["Z_AuJo"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[2].min[fancy_names_index["X_JeCh"], :] = -.2
+    x_bounds[2].max[fancy_names_index["X_JeCh"], :] = .2
+    x_bounds[2].min[fancy_names_index["Y_JeCh"], :] = -1.
+    x_bounds[2].max[fancy_names_index["Y_JeCh"], :] = 1.
+    x_bounds[2].min[fancy_names_index["Z_JeCh"], :] = 0
+    x_bounds[2].max[fancy_names_index["Z_JeCh"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    # le salto autour de x
+    x_bounds[2].min[fancy_names_index["Xrot_AuJo"], :] = 2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[2].max[fancy_names_index["Xrot_AuJo"], :] = 4 * 3.14
+
+    x_bounds[2].min[fancy_names_index["Xrot_JeCh"], :] = 2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[2].max[fancy_names_index["Xrot_JeCh"], :] = 4 * 3.14
+
+    # limitation du tilt autour de y
+    x_bounds[2].min[fancy_names_index["Yrot_AuJo"], :] = - 3.14 / 4
+    x_bounds[2].max[fancy_names_index["Yrot_AuJo"], :] = 3.14 / 4
+
+    x_bounds[2].min[fancy_names_index["Yrot_JeCh"], :] = - 3.14 / 4
+    x_bounds[2].max[fancy_names_index["Yrot_JeCh"], :] = 3.14 / 4
+
+    # la vrille autour de z
+    x_bounds[2].min[fancy_names_index["Zrot_AuJo"], :] = 0
+    x_bounds[2].max[fancy_names_index["Zrot_AuJo"], :] = 3 * 3.14
+
+    x_bounds[2].min[fancy_names_index["Zrot_JeCh"], :] = 0
+    x_bounds[2].max[fancy_names_index["Zrot_JeCh"], :] = 3 * 3.14
+
+    # bras f4a a l'ouverture
+
+    # le carpe
+    x_bounds[2].min[fancy_names_index["XrotC_AuJo"], FIN] = -.4
+    x_bounds[2].min[fancy_names_index["XrotC_JeCh"], FIN] = -.4
+
+    # le dehanchement f4a a l'ouverture
+
+    # Contraintes de vitesse: PHASE 2 l'ouverture
+
+    # en xy bassin
+    x_bounds[2].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = -10
+    x_bounds[2].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = 10
+
+    x_bounds[2].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = -10
+    x_bounds[2].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = 10
+
+    # z bassin
+    x_bounds[2].min[fancy_names_index["vZ_AuJo"], :] = -100
+    x_bounds[2].max[fancy_names_index["vZ_AuJo"], :] = 100
+
+    x_bounds[2].min[fancy_names_index["vZ_JeCh"], :] = -100
+    x_bounds[2].max[fancy_names_index["vZ_JeCh"], :] = 100
+
+    # autour de x
+    x_bounds[2].min[fancy_names_index["vXrot_AuJo"], :] = -100
+    x_bounds[2].max[fancy_names_index["vXrot_AuJo"], :] = 100
+
+    x_bounds[2].min[fancy_names_index["vXrot_JeCh"], :] = -100
+    x_bounds[2].max[fancy_names_index["vXrot_JeCh"], :] = 100
+
+    # autour de y
+    x_bounds[2].min[fancy_names_index["vYrot_AuJo"], :] = -100
+    x_bounds[2].max[fancy_names_index["vYrot_AuJo"], :] = 100
+
+    x_bounds[2].min[fancy_names_index["vYrot_JeCh"], :] = -100
+    x_bounds[2].max[fancy_names_index["vYrot_JeCh"], :] = 100
+
+    # autour de z
+    x_bounds[2].min[fancy_names_index["vZrot_AuJo"], :] = -100
+    x_bounds[2].max[fancy_names_index["vZrot_AuJo"], :] = 100
+
+    x_bounds[2].min[fancy_names_index["vZrot_JeCh"], :] = -100
+    x_bounds[2].max[fancy_names_index["vZrot_JeCh"], :] = 100
+
+    # bras droit
+    x_bounds[2].min[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = 100
+
+    x_bounds[2].min[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = 100
+
+    # bras droit
+    x_bounds[2].min[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = 100
+
+    x_bounds[2].min[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = 100
+
+    # coude droit
+    x_bounds[2].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = 100
+
+    x_bounds[2].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = 100
+
+    # coude gauche
+    x_bounds[2].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = 100
+
+    x_bounds[2].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = -100
+    x_bounds[2].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = 100
+
+    # du carpe
+    x_bounds[2].min[fancy_names_index["vXrotC_AuJo"], :] = -100
+    x_bounds[2].max[fancy_names_index["vXrotC_AuJo"], :] = 100
+
+    x_bounds[2].min[fancy_names_index["vXrotC_JeCh"], :] = -100
+    x_bounds[2].max[fancy_names_index["vXrotC_JeCh"], :] = 100
+
+    # du dehanchement
+    x_bounds[2].min[fancy_names_index["vYrotC_AuJo"], :] = -100
+    x_bounds[2].max[fancy_names_index["vYrotC_AuJo"], :] = 100
+
+    x_bounds[2].min[fancy_names_index["vYrotC_JeCh"], :] = -100
+    x_bounds[2].max[fancy_names_index["vYrotC_JeCh"], :] = 100
+
+    #
+    # Contraintes de position: PHASE 3 la vrille et demie
+    #
+
+    # deplacement
+    x_bounds[3].min[fancy_names_index["X_AuJo"], :] = -.2
+    x_bounds[3].max[fancy_names_index["X_AuJo"], :] = .2
+    x_bounds[3].min[fancy_names_index["Y_AuJo"], :] = -1.
+    x_bounds[3].max[fancy_names_index["Y_AuJo"], :] = 1.
+    x_bounds[3].min[fancy_names_index["Z_AuJo"], :] = 0
+    x_bounds[3].max[fancy_names_index["Z_AuJo"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    x_bounds[3].min[fancy_names_index["X_JeCh"], :] = -.2
+    x_bounds[3].max[fancy_names_index["X_JeCh"], :] = .2
+    x_bounds[3].min[fancy_names_index["Y_JeCh"], :] = -1.
+    x_bounds[3].max[fancy_names_index["Y_JeCh"], :] = 1.
+    x_bounds[3].min[fancy_names_index["Z_JeCh"], :] = 0
+    x_bounds[3].max[fancy_names_index["Z_JeCh"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+
+    # le salto autour de x
+    x_bounds[3].min[fancy_names_index["Xrot_AuJo"], :] = 2 * 3.14 - .1
+    x_bounds[3].max[fancy_names_index["Xrot_AuJo"], :] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[3].min[fancy_names_index["Xrot_AuJo"], FIN] = 2 * 3.14 + 3/2 * 3.14 - .1
+    x_bounds[3].max[fancy_names_index["Xrot_AuJo"], FIN] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
+
+    x_bounds[3].min[fancy_names_index["Xrot_JeCh"], :] = 2 * 3.14 - .1
+    x_bounds[3].max[fancy_names_index["Xrot_JeCh"], :] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
+    x_bounds[3].min[fancy_names_index["Xrot_JeCh"], FIN] = 2 * 3.14 + 3 / 2 * 3.14 - .1
+    x_bounds[3].max[fancy_names_index["Xrot_JeCh"], FIN] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
+
+    # limitation du tilt autour de y
+    x_bounds[3].min[fancy_names_index["Yrot_AuJo"], :] = - 3.14 / 4
+    x_bounds[3].max[fancy_names_index["Yrot_AuJo"], :] = 3.14 / 4
+    x_bounds[3].min[fancy_names_index["Yrot_AuJo"], FIN] = - 3.14 / 8
+    x_bounds[3].max[fancy_names_index["Yrot_AuJo"], FIN] = 3.14 / 8
+
+    x_bounds[3].min[fancy_names_index["Yrot_JeCh"], :] = - 3.14 / 4
+    x_bounds[3].max[fancy_names_index["Yrot_JeCh"], :] = 3.14 / 4
+    x_bounds[3].min[fancy_names_index["Yrot_JeCh"], FIN] = - 3.14 / 8
+    x_bounds[3].max[fancy_names_index["Yrot_JeCh"], FIN] = 3.14 / 8
+
+    # la vrille autour de z
+    x_bounds[3].min[fancy_names_index["Zrot_AuJo"], :] = 0
+    x_bounds[3].max[fancy_names_index["Zrot_AuJo"], :] = 3 * 3.14
+    x_bounds[3].min[fancy_names_index["Zrot_AuJo"], FIN] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[3].max[fancy_names_index["Zrot_AuJo"], FIN] = 3 * 3.14 + .1
+
+    x_bounds[3].min[fancy_names_index["Zrot_JeCh"], :] = 0
+    x_bounds[3].max[fancy_names_index["Zrot_JeCh"], :] = 3 * 3.14
+    x_bounds[3].min[fancy_names_index["Zrot_JeCh"], FIN] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[3].max[fancy_names_index["Zrot_JeCh"], FIN] = 3 * 3.14 + .1
+
+    # bras f4a la vrille
+
+    # le carpe
+    x_bounds[3].min[fancy_names_index["XrotC_AuJo"], :] = -.4
+
+    # le dehanchement f4a la vrille
+
+    # Contraintes de vitesse: PHASE 3 la vrille et demie
+
+    # en xy bassin
+    x_bounds[3].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = -10
+    x_bounds[3].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = 10
+
+    x_bounds[3].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = -10
+    x_bounds[3].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = 10
+
+    # z bassin
+    x_bounds[3].min[fancy_names_index["vZ_AuJo"], :] = -100
+    x_bounds[3].max[fancy_names_index["vZ_AuJo"], :] = 100
+
+    x_bounds[3].min[fancy_names_index["vZ_JeCh"], :] = -100
+    x_bounds[3].max[fancy_names_index["vZ_JeCh"], :] = 100
+
+    # autour de x
+    x_bounds[3].min[fancy_names_index["vXrot_AuJo"], :] = -100
+    x_bounds[3].max[fancy_names_index["vXrot_AuJo"], :] = 100
+
+    x_bounds[3].min[fancy_names_index["vXrot_JeCh"], :] = -100
+    x_bounds[3].max[fancy_names_index["vXrot_JeCh"], :] = 100
+
+    # autour de y
+    x_bounds[3].min[fancy_names_index["vYrot_AuJo"], :] = -100
+    x_bounds[3].max[fancy_names_index["vYrot_AuJo"], :] = 100
+
+    x_bounds[3].min[fancy_names_index["vYrot_JeCh"], :] = -100
+    x_bounds[3].max[fancy_names_index["vYrot_JeCh"], :] = 100
+
+    # autour de z
+    x_bounds[3].min[fancy_names_index["vZrot_AuJo"], :] = -100
+    x_bounds[3].max[fancy_names_index["vZrot_AuJo"], :] = 100
+
+    x_bounds[3].min[fancy_names_index["vZrot_JeCh"], :] = -100
+    x_bounds[3].max[fancy_names_index["vZrot_JeCh"], :] = 100
+
+    # bras droit
+    x_bounds[3].min[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = 100
+
+    x_bounds[3].min[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = 100
+
+    # bras droit
+    x_bounds[3].min[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = 100
+
+    x_bounds[3].min[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = 100
+
+    # coude droit
+    x_bounds[3].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = 100
+
+    x_bounds[3].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = 100
+
+    # coude gauche
+    x_bounds[3].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = 100
+
+    x_bounds[3].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = -100
+    x_bounds[3].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = 100
+
+    # du carpe
+    x_bounds[3].min[fancy_names_index["vXrotC_AuJo"], :] = -100
+    x_bounds[3].max[fancy_names_index["vXrotC_AuJo"], :] = 100
+
+    x_bounds[3].min[fancy_names_index["vXrotC_JeCh"], :] = -100
+    x_bounds[3].max[fancy_names_index["vXrotC_JeCh"], :] = 100
+
+    # du dehanchement
+    x_bounds[3].min[fancy_names_index["vYrotC_AuJo"], :] = -100
+    x_bounds[3].max[fancy_names_index["vYrotC_AuJo"], :] = 100
+
+    x_bounds[3].min[fancy_names_index["vYrotC_JeCh"], :] = -100
+    x_bounds[3].max[fancy_names_index["vYrotC_JeCh"], :] = 100
+
+    #
+    # Contraintes de position: PHASE 4 la reception
+    #
+
+    # deplacement
+    x_bounds[4].min[fancy_names_index["X_AuJo"], :] = -.1
+    x_bounds[4].max[fancy_names_index["X_AuJo"], :] = .1
+    x_bounds[4].min[fancy_names_index["Y_AuJo"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["Y_AuJo"], FIN] = .1
+    x_bounds[4].min[fancy_names_index["Z_AuJo"], :] = 0
+    x_bounds[4].max[fancy_names_index["Z_AuJo"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[4].min[fancy_names_index["Z_AuJo"], FIN] = 0
+    x_bounds[4].max[fancy_names_index["Z_AuJo"], FIN] = .1
+
+    x_bounds[4].min[fancy_names_index["X_JeCh"], :] = -.1
+    x_bounds[4].max[fancy_names_index["X_JeCh"], :] = .1
+    x_bounds[4].min[fancy_names_index["Y_JeCh"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["Y_JeCh"], FIN] = .1
+    x_bounds[4].min[fancy_names_index["Z_JeCh"], :] = 0
+    x_bounds[4].max[fancy_names_index["Z_JeCh"], :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
+    x_bounds[4].min[fancy_names_index["Z_JeCh"], FIN] = 0
+    x_bounds[4].max[fancy_names_index["Z_JeCh"], FIN] = .1
+
+    # le salto autour de x
+    x_bounds[4].min[fancy_names_index["Xrot_AuJo"], :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
+    x_bounds[4].max[fancy_names_index["Xrot_AuJo"], :] = -.50 + 4 * 3.14  # un peu carpe a la fin
+    x_bounds[4].min[fancy_names_index["Xrot_AuJo"], FIN] = -.50 + 4 * 3.14 - .1
+    x_bounds[4].max[fancy_names_index["Xrot_AuJo"], FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
+
+    x_bounds[4].min[fancy_names_index["Xrot_JeCh"], :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
+    x_bounds[4].max[fancy_names_index["Xrot_JeCh"], :] = -.50 + 4 * 3.14  # un peu carpe a la fin
+    x_bounds[4].min[fancy_names_index["Xrot_JeCh"], FIN] = -.50 + 4 * 3.14 - .1
+    x_bounds[4].max[fancy_names_index["Xrot_JeCh"], FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
+
+    # limitation du tilt autour de y
+    x_bounds[4].min[fancy_names_index["Yrot_AuJo"], :] = - 3.14 / 16
+    x_bounds[4].max[fancy_names_index["Yrot_AuJo"], :] = 3.14 / 16
+
+    x_bounds[4].min[fancy_names_index["Yrot_JeCh"], :] = - 3.14 / 16
+    x_bounds[4].max[fancy_names_index["Yrot_JeCh"], :] = 3.14 / 16
+
+    # la vrille autour de z
+    x_bounds[4].min[fancy_names_index["Zrot_AuJo"], :] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[4].max[fancy_names_index["Zrot_AuJo"], :] = 3 * 3.14 + .1
+
+    x_bounds[4].min[fancy_names_index["Zrot_JeCh"], :] = 3 * 3.14 - .1  # complete la vrille
+    x_bounds[4].max[fancy_names_index["Zrot_JeCh"], :] = 3 * 3.14 + .1
+
+    # bras droit
+    x_bounds[4].min[fancy_names_index["YrotBD_AuJo"], FIN] = 2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[fancy_names_index["YrotBD_AuJo"], FIN] = 2.9 + .1
+    x_bounds[4].min[fancy_names_index["ZrotBD_AuJo"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotBD_AuJo"], FIN] = .1
+
+    x_bounds[4].min[fancy_names_index["YrotBD_JeCh"], FIN] = 2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[fancy_names_index["YrotBD_JeCh"], FIN] = 2.9 + .1
+    x_bounds[4].min[fancy_names_index["ZrotBD_JeCh"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotBD_JeCh"], FIN] = .1
+
+    # bras gauche
+    x_bounds[4].min[fancy_names_index["YrotBG_AuJo"], FIN] = -2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[fancy_names_index["YrotBG_AuJo"], FIN] = -2.9 + .1
+    x_bounds[4].min[fancy_names_index["ZrotBG_AuJo"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotBG_AuJo"], FIN] = .1
+
+    x_bounds[4].min[fancy_names_index["YrotBG_JeCh"], FIN] = -2.9 - .1  # debut bras aux oreilles
+    x_bounds[4].max[fancy_names_index["YrotBG_JeCh"], FIN] = -2.9 + .1
+    x_bounds[4].min[fancy_names_index["ZrotBG_JeCh"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotBG_JeCh"], FIN] = .1
+
+    # coude droit
+    x_bounds[4].min[fancy_names_index["ZrotABD_AuJo"]:fancy_names_index["XrotABD_AuJo"] + 1, FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotABD_AuJo"]:fancy_names_index["XrotABD_AuJo"] + 1, FIN] = .1
+
+    x_bounds[4].min[fancy_names_index["ZrotABD_JeCh"]:fancy_names_index["XrotABD_JeCh"] + 1, FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotABD_JeCh"]:fancy_names_index["XrotABD_JeCh"] + 1, FIN] = .1
+    # coude gauche
+    x_bounds[4].min[fancy_names_index["ZrotABG_AuJo"]:fancy_names_index["XrotABG_AuJo"] + 1, FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotABG_AuJo"]:fancy_names_index["XrotABG_AuJo"] + 1, FIN] = .1
+
+    x_bounds[4].min[fancy_names_index["ZrotABG_JeCh"]:fancy_names_index["XrotABG_JeCh"] + 1, FIN] = -.1
+    x_bounds[4].max[fancy_names_index["ZrotABG_JeCh"]:fancy_names_index["XrotABG_JeCh"] + 1, FIN] = .1
+
+    # le carpe
+    x_bounds[4].min[fancy_names_index["XrotC_AuJo"], :] = -.4
+    x_bounds[4].min[fancy_names_index["XrotC_AuJo"], FIN] = -.60
+    x_bounds[4].max[fancy_names_index["XrotC_AuJo"], FIN] = -.40  # fin un peu carpe
+
+    x_bounds[4].min[fancy_names_index["XrotC_JeCh"], :] = -.4
+    x_bounds[4].min[fancy_names_index["XrotC_JeCh"], FIN] = -.60
+    x_bounds[4].max[fancy_names_index["XrotC_JeCh"], FIN] = -.40  # fin un peu carpe
+
+    # le dehanchement
+    x_bounds[4].min[fancy_names_index["YrotC_AuJo"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["YrotC_AuJo"], FIN] = .1
+
+    x_bounds[4].min[fancy_names_index["YrotC_JeCh"], FIN] = -.1
+    x_bounds[4].max[fancy_names_index["YrotC_JeCh"], FIN] = .1
+
+    # Contraintes de vitesse: PHASE 4 la reception
+
+    # en xy bassin
+    x_bounds[4].min[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = -10
+    x_bounds[4].max[fancy_names_index["vX_AuJo"]:fancy_names_index["vY_AuJo"] + 1, :] = 10
+
+    x_bounds[4].min[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = -10
+    x_bounds[4].max[fancy_names_index["vX_JeCh"]:fancy_names_index["vY_JeCh"] + 1, :] = 10
+
+    # z bassin
+    x_bounds[4].min[fancy_names_index["vZ_AuJo"], :] = -100
+    x_bounds[4].max[fancy_names_index["vZ_AuJo"], :] = 100
+
+    x_bounds[4].min[fancy_names_index["vZ_JeCh"], :] = -100
+    x_bounds[4].max[fancy_names_index["vZ_JeCh"], :] = 100
+
+    # autour de x
+    x_bounds[4].min[fancy_names_index["vXrot_AuJo"], :] = -100
+    x_bounds[4].max[fancy_names_index["vXrot_AuJo"], :] = 100
+
+    x_bounds[4].min[fancy_names_index["vXrot_JeCh"], :] = -100
+    x_bounds[4].max[fancy_names_index["vXrot_JeCh"], :] = 100
+
+    # autour de y
+    x_bounds[4].min[fancy_names_index["vYrot_AuJo"], :] = -100
+    x_bounds[4].max[fancy_names_index["vYrot_AuJo"], :] = 100
+
+    x_bounds[4].min[fancy_names_index["vYrot_JeCh"], :] = -100
+    x_bounds[4].max[fancy_names_index["vYrot_JeCh"], :] = 100
+
+    # autour de z
+    x_bounds[4].min[fancy_names_index["vZrot_AuJo"], :] = -100
+    x_bounds[4].max[fancy_names_index["vZrot_AuJo"], :] = 100
+
+    x_bounds[4].min[fancy_names_index["vZrot_JeCh"], :] = -100
+    x_bounds[4].max[fancy_names_index["vZrot_JeCh"], :] = 100
+
+    # bras droit
+    x_bounds[4].min[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotBD_AuJo"]:fancy_names_index["vYrotBD_AuJo"] + 1, :] = 100
+
+    x_bounds[4].min[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotBD_JeCh"]:fancy_names_index["vYrotBD_JeCh"] + 1, :] = 100
+
+    # bras droit
+    x_bounds[4].min[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotBG_AuJo"]:fancy_names_index["vYrotBG_AuJo"] + 1, :] = 100
+
+    x_bounds[4].min[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotBG_JeCh"]:fancy_names_index["vYrotBG_JeCh"] + 1, :] = 100
+
+    # coude droit
+    x_bounds[4].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABD_AuJo"] + 1, :] = 100
+
+    x_bounds[4].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABD_JeCh"] + 1, :] = 100
+
+    # coude gauche
+    x_bounds[4].min[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotABD_AuJo"]:fancy_names_index["vYrotABG_AuJo"] + 1, :] = 100
+
+    x_bounds[4].min[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = -100
+    x_bounds[4].max[fancy_names_index["vZrotABD_JeCh"]:fancy_names_index["vYrotABG_JeCh"] + 1, :] = 100
+
+    # du carpe
+    x_bounds[4].min[fancy_names_index["vXrotC_AuJo"], :] = -100
+    x_bounds[4].max[fancy_names_index["vXrotC_AuJo"], :] = 100
+
+    x_bounds[4].min[fancy_names_index["vXrotC_JeCh"], :] = -100
+    x_bounds[4].max[fancy_names_index["vXrotC_JeCh"], :] = 100
+
+    # du dehanchement
+    x_bounds[4].min[fancy_names_index["vYrotC_AuJo"], :] = -100
+    x_bounds[4].max[fancy_names_index["vYrotC_AuJo"], :] = 100
+
+    x_bounds[4].min[fancy_names_index["vYrotC_JeCh"], :] = -100
+    x_bounds[4].max[fancy_names_index["vYrotC_JeCh"], :] = 100
+
+    return x_bounds
+
+def set_x_init(biorbd_model, fancy_names_index):
+
+    nb_q = biorbd_model[0].nbQ()
+    nb_qdot = biorbd_model[0].nbQdot()
+    x0 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
+    x1 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
+    x2 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
+    x3 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
+    x4 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
+
+    x0[fancy_names_index["Xrot_AuJo"], 0] = .50
+    x0[fancy_names_index["ZrotBG_AuJo"]] = -.75
+    x0[fancy_names_index["ZrotBD_AuJo"]] = .75
+    x0[fancy_names_index["YrotBG_AuJo"], 0] = -2.9
+    x0[fancy_names_index["YrotBD_AuJo"], 0] = 2.9
+    x0[fancy_names_index["YrotBG_AuJo"], 1] = -1.35
+    x0[fancy_names_index["YrotBD_AuJo"], 1] = 1.35
+    x0[fancy_names_index["XrotC_AuJo"], 0] = -.5
+    x0[fancy_names_index["XrotC_AuJo"], 1] = -2.6
+
+    x0[fancy_names_index["Xrot_JeCh"], 0] = .50
+    x0[fancy_names_index["ZrotBG_JeCh"]] = -.75
+    x0[fancy_names_index["ZrotBD_JeCh"]] = .75
+    x0[fancy_names_index["YrotBG_JeCh"], 0] = -2.9
+    x0[fancy_names_index["YrotBD_JeCh"], 0] = 2.9
+    x0[fancy_names_index["YrotBG_JeCh"], 1] = -1.35
+    x0[fancy_names_index["YrotBD_JeCh"], 1] = 1.35
+    x0[fancy_names_index["XrotC_JeCh"], 0] = -.5
+    x0[fancy_names_index["XrotC_JeCh"], 1] = -2.6
+
+    x1[fancy_names_index["ZrotBG_AuJo"]] = -.75
+    x1[fancy_names_index["ZrotBD_AuJo"]] = .75
+    x1[fancy_names_index["Xrot_AuJo"], 1] = 2 * 3.14
+    x1[fancy_names_index["YrotBG_AuJo"]] = -1.35
+    x1[fancy_names_index["YrotBD_AuJo"]] = 1.35
+    x1[fancy_names_index["XrotC_AuJo"]] = -2.6
+
+    x1[fancy_names_index["ZrotBG_JeCh"]] = -.75
+    x1[fancy_names_index["ZrotBD_JeCh"]] = .75
+    x1[fancy_names_index["Xrot_JeCh"], 1] = 2 * 3.14
+    x1[fancy_names_index["YrotBG_JeCh"]] = -1.35
+    x1[fancy_names_index["YrotBD_JeCh"]] = 1.35
+    x1[fancy_names_index["XrotC_JeCh"]] = -2.6
+
+    x2[fancy_names_index["Xrot_AuJo"]] = 2 * 3.14
+    x2[fancy_names_index["Zrot_AuJo"], 1] = 3.14
+    x2[fancy_names_index["ZrotBG_AuJo"], 0] = -.75
+    x2[fancy_names_index["ZrotBD_AuJo"], 0] = .75
+    x2[fancy_names_index["YrotBG_AuJo"], 0] = -1.35
+    x2[fancy_names_index["YrotBD_AuJo"], 0] = 1.35
+    x2[fancy_names_index["XrotC_AuJo"], 0] = -2.6
+
+    x2[fancy_names_index["Xrot_JeCh"]] = 2 * 3.14
+    x2[fancy_names_index["Zrot_JeCh"], 1] = 3.14
+    x2[fancy_names_index["ZrotBG_JeCh"], 0] = -.75
+    x2[fancy_names_index["ZrotBD_JeCh"], 0] = .75
+    x2[fancy_names_index["YrotBG_JeCh"], 0] = -1.35
+    x2[fancy_names_index["YrotBD_JeCh"], 0] = 1.35
+    x2[fancy_names_index["XrotC_JeCh"], 0] = -2.6
+
+    x3[fancy_names_index["Xrot_AuJo"], 0] = 2 * 3.14
+    x3[fancy_names_index["Xrot_AuJo"], 1] = 2 * 3.14 + 3/2 * 3.14
+    x3[fancy_names_index["Zrot_AuJo"], 0] = 3.14
+    x3[fancy_names_index["Zrot_AuJo"], 1] = 3 * 3.14
+
+    x3[fancy_names_index["Xrot_JeCh"], 0] = 2 * 3.14
+    x3[fancy_names_index["Xrot_JeCh"], 1] = 2 * 3.14 + 3 / 2 * 3.14
+    x3[fancy_names_index["Zrot_JeCh"], 0] = 3.14
+    x3[fancy_names_index["Zrot_JeCh"], 1] = 3 * 3.14
+
+    x4[fancy_names_index["Xrot_AuJo"], 0] = 2 * 3.14 + 3/2 * 3.14
+    x4[fancy_names_index["Xrot_AuJo"], 1] = 4 * 3.14
+    x4[fancy_names_index["Zrot_AuJo"]] = 3 * 3.14
+    x4[fancy_names_index["XrotC_AuJo"], 1] = -.5
+
+    x4[fancy_names_index["Xrot_JeCh"], 0] = 2 * 3.14 + 3 / 2 * 3.14
+    x4[fancy_names_index["Xrot_JeCh"], 1] = 4 * 3.14
+    x4[fancy_names_index["Zrot_JeCh"]] = 3 * 3.14
+    x4[fancy_names_index["XrotC_JeCh"], 1] = -.5
+
+    x_init = InitialGuessList()
+    x_init.add(x0, interpolation=InterpolationType.LINEAR)
+    x_init.add(x1, interpolation=InterpolationType.LINEAR)
+    x_init.add(x2, interpolation=InterpolationType.LINEAR)
+    x_init.add(x3, interpolation=InterpolationType.LINEAR)
+    x_init.add(x4, interpolation=InterpolationType.LINEAR)
+
+    return x_init
+
 def prepare_ocp(
     biorbd_model_path: str, n_shooting: int, final_time: float, n_threads: int, ode_solver: OdeSolver = OdeSolver.RK4()
 ) -> OptimalControlProgram:
@@ -68,73 +1080,7 @@ def prepare_ocp(
 
     nb_q = biorbd_model[0].nbQ()
     nb_qdot = biorbd_model[0].nbQdot()
-    nb_qddot_joints = nb_q - biorbd_model[0].nbRoot()
-
-    # Pour la lisibilite
-    X_AuJo = 0
-    Y_AuJo = 1
-    Z_AuJo = 2
-    Xrot_AuJo = 3
-    Yrot_AuJo = 4
-    Zrot_AuJo = 5
-    ZrotBD_AuJo = 6
-    YrotBD_AuJo = 7
-    ZrotABD_AuJo = 8
-    XrotABD_AuJo = 9
-    ZrotBG_AuJo = 10
-    YrotBG_AuJo = 11
-    ZrotABG_AuJo = 12
-    XrotABG_AuJo = 13
-    XrotC_AuJo = 14
-    YrotC_AuJo = 15
-    X_JeCh = 16
-    Y_JeCh = 17
-    Z_JeCh = 18
-    Xrot_JeCh = 19
-    Yrot_JeCh = 20
-    Zrot_JeCh = 21
-    ZrotBD_JeCh = 22
-    YrotBD_JeCh = 23
-    ZrotABD_JeCh = 24
-    XrotABD_JeCh = 25
-    ZrotBG_JeCh = 26
-    YrotBG_JeCh = 27
-    ZrotABG_JeCh = 28
-    XrotABG_JeCh = 29
-    XrotC_JeCh = 30
-    YrotC_JeCh = 31
-    vX_AuJo = 0 + nb_q
-    vY_AuJo = 1 + nb_q
-    vZ_AuJo = 2 + nb_q
-    vXrot_AuJo = 3 + nb_q
-    vYrot_AuJo = 4 + nb_q
-    vZrot_AuJo = 5 + nb_q
-    vZrotBD_AuJo = 6 + nb_q
-    vYrotBD_AuJo = 7 + nb_q
-    vZrotABD_AuJo = 8 + nb_q
-    vYrotABD_AuJo = 9 + nb_q
-    vZrotBG_AuJo = 10 + nb_q
-    vYrotBG_AuJo = 11 + nb_q
-    vZrotABG_AuJo = 12 + nb_q
-    vYrotABG_AuJo = 13 + nb_q
-    vXrotC_AuJo = 14 + nb_q
-    vYrotC_AuJo = 15 + nb_q
-    vX_JeCh = 16 + nb_q
-    vY_JeCh = 17 + nb_q
-    vZ_JeCh = 18 + nb_q
-    vXrot_JeCh = 19 + nb_q
-    vYrot_JeCh = 20 + nb_q
-    vZrot_JeCh = 21 + nb_q
-    vZrotBD_JeCh = 22 + nb_q
-    vYrotBD_JeCh = 23 + nb_q
-    vZrotABD_JeCh = 24 + nb_q
-    vYrotABD_JeCh = 25 + nb_q
-    vZrotBG_JeCh = 26 + nb_q
-    vYrotBG_JeCh = 27 + nb_q
-    vZrotABG_JeCh = 28 + nb_q
-    vYrotABG_JeCh = 29 + nb_q
-    vXrotC_JeCh = 30 + nb_q
-    vYrotC_JeCh = 31 + nb_q
+    nb_qddot_joints = (nb_q / 2) - biorbd_model[0].nbRoot()
 
     # Add objective functions
     objective_functions = ObjectiveList()
@@ -147,11 +1093,12 @@ def prepare_ocp(
 
     objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000, phase=0)
 
-    # TODO: peut-etre changer le nom des cibles pour plus generique
+    # Les hanches sont fixes a +-0.2 en bounds, mais les mains doivent quand meme être proches des jambes
     objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainGAuJo', second_marker='CibleMainGAuJo', weight=1000, phase=0)
     objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainDAuJo', second_marker='CibleMainDAuJo', weight=1000, phase=0)
     objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainGJeCh', second_marker='CibleMainGJeCh', weight=1000, phase=0)
     objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainDJeCh', second_marker='CibleMainDJeCh', weight=1000, phase=0)
+
 
     # arrete de gigoter les bras
     les_bras = [ZrotBD_AuJo, YrotBD_AuJo, ZrotABD_AuJo, XrotABD_AuJo, ZrotBG_AuJo, YrotBG_AuJo, ZrotABG_AuJo, XrotABG_AuJo,
@@ -166,13 +1113,14 @@ def prepare_ocp(
 
     # Dynamics
     dynamics = DynamicsList()
-
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
 
+    fancy_names_index = set_fancy_names_index()
+    set_x_bounds(biorbd_model, fancy_names_index)
 
     qddot_joints_min, qddot_joints_max, qddot_joints_init = -500, 500, 0
     u_bounds = BoundsList()
@@ -189,940 +1137,13 @@ def prepare_ocp(
     u_init.add([qddot_joints_init] * nb_qddot_joints)
     u_init.add([qddot_joints_init] * nb_qddot_joints)
 
-    # Path constraint
-    x_bounds = BoundsList()
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-
-    # Pour la lisibilite
-    DEBUT, MILIEU, FIN = 0, 1, 2
-
-    #
-    # Contraintes de position: PHASE 0 la montee en carpe
-    #
-
-    zmax = 9.81 / 8 * final_time**2 + 1  # une petite marge
-
-    # deplacement
-    x_bounds[0].min[X_AuJo, :] = -.1
-    x_bounds[0].max[X_AuJo, :] = .1
-    x_bounds[0].min[Y_AuJo, :] = -1.
-    x_bounds[0].max[Y_AuJo, :] = 1.
-    x_bounds[0].min[:Z_AuJo+1, DEBUT] = 0
-    x_bounds[0].max[:Z_AuJo+1, DEBUT] = 0
-    x_bounds[0].min[Z_AuJo, MILIEU:] = 0
-    x_bounds[0].max[Z_AuJo, MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    x_bounds[0].min[X_JeCh, :] = -.1
-    x_bounds[0].max[X_JeCh, :] = .1
-    x_bounds[0].min[Y_JeCh, :] = -1.
-    x_bounds[0].max[Y_JeCh, :] = 1.
-    x_bounds[0].min[:Z_JeCh + 1, DEBUT] = 0
-    x_bounds[0].max[:Z_JeCh + 1, DEBUT] = 0
-    x_bounds[0].min[Z_JeCh, MILIEU:] = 0
-    x_bounds[0].max[Z_JeCh, MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    # le salto autour de x
-    x_bounds[0].min[Xrot_AuJo, DEBUT] = .50  # penche vers l'avant un peu carpe
-    x_bounds[0].max[Xrot_AuJo, DEBUT] = .50
-    x_bounds[0].min[Xrot_AuJo, MILIEU:] = 0
-    x_bounds[0].max[Xrot_AuJo, MILIEU:] = 4 * 3.14 + .1  # salto
-
-    x_bounds[0].min[Xrot_JeCh, DEBUT] = .50  # penche vers l'avant un peu carpe
-    x_bounds[0].max[Xrot_JeCh, DEBUT] = .50
-    x_bounds[0].min[Xrot_JeCh, MILIEU:] = 0
-    x_bounds[0].max[Xrot_JeCh, MILIEU:] = 4 * 3.14 + .1  # salto
-
-    # limitation du tilt autour de y
-    x_bounds[0].min[Yrot_AuJo, DEBUT] = 0
-    x_bounds[0].max[Yrot_AuJo, DEBUT] = 0
-    x_bounds[0].min[Yrot_AuJo, MILIEU:] = - 3.14 / 16  # vraiment pas suppose tilte
-    x_bounds[0].max[Yrot_AuJo, MILIEU:] = 3.14 / 16
-
-    x_bounds[0].min[Yrot_JeCh, DEBUT] = 0
-    x_bounds[0].max[Yrot_JeCh, DEBUT] = 0
-    x_bounds[0].min[Yrot_JeCh, MILIEU:] = - 3.14 / 16  # vraiment pas suppose tilte
-    x_bounds[0].max[Yrot_JeCh, MILIEU:] = 3.14 / 16
-
-    # la vrille autour de z
-    x_bounds[0].min[Zrot_AuJo, DEBUT] = 0
-    x_bounds[0].max[Zrot_AuJo, DEBUT] = 0
-    x_bounds[0].min[Zrot_AuJo, MILIEU:] = -.1  # pas de vrille dans cette phase
-    x_bounds[0].max[Zrot_AuJo, MILIEU:] = .1
-
-    x_bounds[0].min[Zrot_JeCh, DEBUT] = 0
-    x_bounds[0].max[Zrot_JeCh, DEBUT] = 0
-    x_bounds[0].min[Zrot_JeCh, MILIEU:] = -.1  # pas de vrille dans cette phase
-    x_bounds[0].max[Zrot_JeCh, MILIEU:] = .1
-
-    # bras droit
-    x_bounds[0].min[YrotBD_AuJo, DEBUT] = 2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBD_AuJo, DEBUT] = 2.9
-    x_bounds[0].min[ZrotBD_AuJo, DEBUT] = 0
-    x_bounds[0].max[ZrotBD_AuJo, DEBUT] = 0
-
-    x_bounds[0].min[YrotBD_JeCh, DEBUT] = 2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBD_JeCh, DEBUT] = 2.9
-    x_bounds[0].min[ZrotBD_JeCh, DEBUT] = 0
-    x_bounds[0].max[ZrotBD_JeCh, DEBUT] = 0
-
-    # bras gauche
-    x_bounds[0].min[YrotBG_AuJo, DEBUT] = -2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBG_AuJo, DEBUT] = -2.9
-    x_bounds[0].min[ZrotBG_AuJo, DEBUT] = 0
-    x_bounds[0].max[ZrotBG_AuJo, DEBUT] = 0
-
-    x_bounds[0].min[YrotBG_JeCh, DEBUT] = -2.9  # debut bras aux oreilles
-    x_bounds[0].max[YrotBG_JeCh, DEBUT] = -2.9
-    x_bounds[0].min[ZrotBG_JeCh, DEBUT] = 0
-    x_bounds[0].max[ZrotBG_JeCh, DEBUT] = 0
-
-    # coude droit
-    x_bounds[0].min[ZrotABD_AuJo:XrotABD_AuJo+1, DEBUT] = 0
-    x_bounds[0].max[ZrotABD_AuJo:XrotABD_AuJo+1, DEBUT] = 0
-
-    x_bounds[0].min[ZrotABD_JeCh:XrotABD_JeCh + 1, DEBUT] = 0
-    x_bounds[0].max[ZrotABD_JeCh:XrotABD_JeCh + 1, DEBUT] = 0
-
-    # coude gauche
-    x_bounds[0].min[ZrotABG_AuJo:XrotABG_AuJo+1, DEBUT] = 0
-    x_bounds[0].max[ZrotABG_AuJo:XrotABG_AuJo+1, DEBUT] = 0
-
-    x_bounds[0].min[ZrotABG_JeCh:XrotABG_JeCh + 1, DEBUT] = 0
-    x_bounds[0].max[ZrotABG_JeCh:XrotABG_JeCh + 1, DEBUT] = 0
-
-    # le carpe
-    x_bounds[0].min[XrotC_AuJo, DEBUT] = -.50  # depart un peu ferme aux hanches
-    x_bounds[0].max[XrotC_AuJo, DEBUT] = -.50
-    x_bounds[0].max[XrotC_AuJo, FIN] = -2.5
-
-    x_bounds[0].min[XrotC_JeCh, DEBUT] = -.50  # depart un peu ferme aux hanches
-    x_bounds[0].max[XrotC_JeCh, DEBUT] = -.50
-    x_bounds[0].max[XrotC_JeCh, FIN] = -2.5
-
-    # le dehanchement
-    x_bounds[0].min[YrotC_AuJo, DEBUT] = 0
-    x_bounds[0].max[YrotC_AuJo, DEBUT] = 0
-    x_bounds[0].min[YrotC_AuJo, MILIEU:] = -.1
-    x_bounds[0].max[YrotC_AuJo, MILIEU:] = .1
-
-    x_bounds[0].min[YrotC_JeCh, DEBUT] = 0
-    x_bounds[0].max[YrotC_JeCh, DEBUT] = 0
-    x_bounds[0].min[YrotC_JeCh, MILIEU:] = -.1
-    x_bounds[0].max[YrotC_JeCh, MILIEU:] = .1
-
-    # Contraintes de vitesse: PHASE 0 la montee en carpe
-
-    vzinit = 9.81 / 2 * final_time  # vitesse initiale en z du CoM pour revenir a terre au temps final
-
-    # decalage entre le bassin et le CoM
-    CoM_Q_sym = MX.sym('CoM', nb_q)
-    CoM_Q_init = x_bounds[0].min[:nb_q, DEBUT]  # min ou max ne change rien a priori, au DEBUT ils sont egaux normalement
-    CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].CoM(CoM_Q_sym).to_mx()])
-    bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym],
-                             [biorbd_model[0].globalJCS(0).to_mx()])  # retourne la RT du bassin
-
-    r = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation de la RT
-
-    # en xy bassin
-    x_bounds[0].min[vX_AuJo:vY_AuJo+1, :] = -10
-    x_bounds[0].max[vX_AuJo:vY_AuJo+1, :] = 10
-    x_bounds[0].min[vX_AuJo:vY_AuJo+1, DEBUT] = -.5
-    x_bounds[0].max[vX_AuJo:vY_AuJo+1, DEBUT] = .5
-
-    x_bounds[0].min[vX_JeCh:vY_JeCh + 1, :] = -10
-    x_bounds[0].max[vX_JeCh:vY_JeCh + 1, :] = 10
-    x_bounds[0].min[vX_JeCh:vY_JeCh + 1, DEBUT] = -.5
-    x_bounds[0].max[vX_JeCh:vY_JeCh + 1, DEBUT] = .5
-
-    # z bassin
-    x_bounds[0].min[vZ_AuJo, :] = -100
-    x_bounds[0].max[vZ_AuJo, :] = 100
-    x_bounds[0].min[vZ_AuJo, DEBUT] = vzinit - .5
-    x_bounds[0].max[vZ_AuJo, DEBUT] = vzinit + .5
-
-    x_bounds[0].min[vZ_JeCh, :] = -100
-    x_bounds[0].max[vZ_JeCh, :] = 100
-    x_bounds[0].min[vZ_JeCh, DEBUT] = vzinit - .5
-    x_bounds[0].max[vZ_JeCh, DEBUT] = vzinit + .5
-
-    # autour de x
-    x_bounds[0].min[vXrot_AuJo, :] = .5  # d'apres une observation video
-    x_bounds[0].max[vXrot_AuJo, :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
-
-    x_bounds[0].min[vXrot_JeCh, :] = .5  # d'apres une observation video
-    x_bounds[0].max[vXrot_JeCh, :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
-
-    # autour de y
-    x_bounds[0].min[vYrot_AuJo, :] = -100
-    x_bounds[0].max[vYrot_AuJo, :] = 100
-    x_bounds[0].min[vYrot_AuJo, DEBUT] = 0
-    x_bounds[0].max[vYrot_AuJo, DEBUT] = 0
-
-    x_bounds[0].min[vYrot_JeCh, :] = -100
-    x_bounds[0].max[vYrot_JeCh, :] = 100
-    x_bounds[0].min[vYrot_JeCh, DEBUT] = 0
-    x_bounds[0].max[vYrot_JeCh, DEBUT] = 0
-
-    # autour de z
-    x_bounds[0].min[vZrot_AuJo, :] = -100
-    x_bounds[0].max[vZrot_AuJo, :] = 100
-    x_bounds[0].min[vZrot_AuJo, DEBUT] = 0
-    x_bounds[0].max[vZrot_AuJo, DEBUT] = 0
-
-    x_bounds[0].min[vZrot_JeCh, :] = -100
-    x_bounds[0].max[vZrot_JeCh, :] = 100
-    x_bounds[0].min[vZrot_JeCh, DEBUT] = 0
-    x_bounds[0].max[vZrot_JeCh, DEBUT] = 0
-
-    # tenir compte du decalage entre bassin et CoM avec la rotation
-    # Qtransdot = Qtransdot + v cross Qrotdot
-    borne_inf = ( x_bounds[0].min[vX_AuJo:vZ_AuJo+1, DEBUT] + np.cross(r, x_bounds[0].min[vXrot_AuJo:vZrot_AuJo+1, DEBUT]) )[0]
-    borne_sup = ( x_bounds[0].max[vX_AuJo:vZ_AuJo+1, DEBUT] + np.cross(r, x_bounds[0].max[vXrot_AuJo:vZrot_AuJo+1, DEBUT]) )[0]
-    x_bounds[0].min[vX_AuJo:vZ_AuJo+1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
-    x_bounds[0].max[vX_AuJo:vZ_AuJo+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
-
-    borne_inf = (x_bounds[0].min[vX_JeCh:vZ_JeCh + 1, DEBUT] + np.cross(r, x_bounds[0].min[vXrot_JeCh:vZrot_JeCh + 1, DEBUT]))[0]
-    borne_sup = (x_bounds[0].max[vX_JeCh:vZ_JeCh + 1, DEBUT] + np.cross(r, x_bounds[0].max[vXrot_JeCh:vZrot_JeCh + 1, DEBUT]))[0]
-    x_bounds[0].min[vX_JeCh:vZ_JeCh + 1, DEBUT] = min(borne_sup[0], borne_inf[0]), min(borne_sup[1], borne_inf[1]), min(borne_sup[2], borne_inf[2])
-    x_bounds[0].max[vX_JeCh:vZ_JeCh + 1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
-
-    # bras droit
-    x_bounds[0].min[vZrotBD_AuJo:vYrotBD_AuJo+1, :] = -100
-    x_bounds[0].max[vZrotBD_AuJo:vYrotBD_AuJo+1, :] = 100
-    x_bounds[0].min[vZrotBD_AuJo:vYrotBD_AuJo+1, DEBUT] = 0
-    x_bounds[0].max[vZrotBD_AuJo:vYrotBD_AuJo+1, DEBUT] = 0
-
-    x_bounds[0].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
-    x_bounds[0].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
-    x_bounds[0].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, DEBUT] = 0
-    x_bounds[0].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, DEBUT] = 0
-
-    # bras droit
-    x_bounds[0].min[vZrotBG_AuJo:vYrotBG_AuJo+1, :] = -100
-    x_bounds[0].max[vZrotBG_AuJo:vYrotBG_AuJo+1, :] = 100
-    x_bounds[0].min[vZrotBG_AuJo:vYrotBG_AuJo+1, DEBUT] = 0
-    x_bounds[0].max[vZrotBG_AuJo:vYrotBG_AuJo+1, DEBUT] = 0
-
-    x_bounds[0].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
-    x_bounds[0].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
-    x_bounds[0].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, DEBUT] = 0
-    x_bounds[0].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, DEBUT] = 0
-
-    # coude droit
-    x_bounds[0].min[vZrotABD_AuJo:vYrotABD_AuJo+1, :] = -100
-    x_bounds[0].max[vZrotABD_AuJo:vYrotABD_AuJo+1, :] = 100
-    x_bounds[0].min[vZrotABD_AuJo:vYrotABD_AuJo+1, DEBUT] = 0
-    x_bounds[0].max[vZrotABD_AuJo:vYrotABD_AuJo+1, DEBUT] = 0
-
-    x_bounds[0].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
-    x_bounds[0].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
-    x_bounds[0].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, DEBUT] = 0
-    x_bounds[0].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, DEBUT] = 0
-    # coude gauche
-    x_bounds[0].min[vZrotABD_AuJo:vYrotABG_AuJo+1, :] = -100
-    x_bounds[0].max[vZrotABD_AuJo:vYrotABG_AuJo+1, :] = 100
-    x_bounds[0].min[vZrotABG_AuJo:vYrotABG_AuJo+1, DEBUT] = 0
-    x_bounds[0].max[vZrotABG_AuJo:vYrotABG_AuJo+1, DEBUT] = 0
-
-    x_bounds[0].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
-    x_bounds[0].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
-    x_bounds[0].min[vZrotABG_JeCh:vYrotABG_JeCh + 1, DEBUT] = 0
-    x_bounds[0].max[vZrotABG_JeCh:vYrotABG_JeCh + 1, DEBUT] = 0
-
-    # du carpe
-    x_bounds[0].min[vXrotC_AuJo, :] = -100
-    x_bounds[0].max[vXrotC_AuJo, :] = 100
-    x_bounds[0].min[vXrotC_AuJo, DEBUT] = 0
-    x_bounds[0].max[vXrotC_AuJo, DEBUT] = 0
-
-    x_bounds[0].min[vXrotC_JeCh, :] = -100
-    x_bounds[0].max[vXrotC_JeCh, :] = 100
-    x_bounds[0].min[vXrotC_JeCh, DEBUT] = 0
-    x_bounds[0].max[vXrotC_JeCh, DEBUT] = 0
-
-    # du dehanchement
-    x_bounds[0].min[vYrotC_AuJo, :] = -100
-    x_bounds[0].max[vYrotC_AuJo, :] = 100
-    x_bounds[0].min[vYrotC_AuJo, DEBUT] = 0
-    x_bounds[0].max[vYrotC_AuJo, DEBUT] = 0
-
-    x_bounds[0].min[vYrotC_JeCh, :] = -100
-    x_bounds[0].max[vYrotC_JeCh, :] = 100
-    x_bounds[0].min[vYrotC_JeCh, DEBUT] = 0
-    x_bounds[0].max[vYrotC_JeCh, DEBUT] = 0
-
-    #
-    # Contraintes de position: PHASE 1 le salto carpe
-    #
-
-    # deplacement
-    x_bounds[1].min[X_AuJo, :] = -.1
-    x_bounds[1].max[X_AuJo, :] = .1
-    x_bounds[1].min[Y_AuJo, :] = -1.
-    x_bounds[1].max[Y_AuJo, :] = 1.
-    x_bounds[1].min[Z_AuJo, :] = 0
-    x_bounds[1].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    x_bounds[1].min[X_JeCh, :] = -.1
-    x_bounds[1].max[X_JeCh, :] = .1
-    x_bounds[1].min[Y_JeCh, :] = -1.
-    x_bounds[1].max[Y_JeCh, :] = 1.
-    x_bounds[1].min[Z_JeCh, :] = 0
-    x_bounds[1].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    # le salto autour de x
-    x_bounds[1].min[Xrot_AuJo, :] = 0
-    x_bounds[1].max[Xrot_AuJo, :] = 4 * 3.14
-    x_bounds[1].min[Xrot_AuJo, FIN] = 2 * 3.14 - .1
-
-    x_bounds[1].min[Xrot_JeCh, :] = 0
-    x_bounds[1].max[Xrot_JeCh, :] = 4 * 3.14
-    x_bounds[1].min[Xrot_JeCh, FIN] = 2 * 3.14 - .1
-
-    # limitation du tilt autour de y
-    x_bounds[1].min[Yrot_AuJo, :] = - 3.14 / 16
-    x_bounds[1].max[Yrot_AuJo, :] = 3.14 / 16
-
-    x_bounds[1].min[Yrot_JeCh, :] = - 3.14 / 16
-    x_bounds[1].max[Yrot_JeCh, :] = 3.14 / 16
-    # la vrille autour de z
-    x_bounds[1].min[Zrot_AuJo, :] = -.1
-    x_bounds[1].max[Zrot_AuJo, :] = .1
-
-    x_bounds[1].min[Zrot_JeCh, :] = -.1
-    x_bounds[1].max[Zrot_JeCh, :] = .1
-
-    # bras f4a a l'ouverture
-
-    # le carpe
-    x_bounds[1].max[XrotC_AuJo, :] = -2.5
-    x_bounds[1].max[XrotC_JeCh, :] = -2.5
-
-    # le dehanchement
-    x_bounds[1].min[YrotC_AuJo, DEBUT] = -.1
-    x_bounds[1].max[YrotC_AuJo, DEBUT] = .1
-
-    x_bounds[1].min[YrotC_JeCh, DEBUT] = -.1
-    x_bounds[1].max[YrotC_JeCh, DEBUT] = .1
-
-
-    # Contraintes de vitesse: PHASE 1 le salto carpe
-
-    # en xy bassin
-    x_bounds[1].min[vX_AuJo:vY_AuJo + 1, :] = -10
-    x_bounds[1].max[vX_AuJo:vY_AuJo + 1, :] = 10
-
-    x_bounds[1].min[vX_JeCh:vY_JeCh + 1, :] = -10
-    x_bounds[1].max[vX_JeCh:vY_JeCh + 1, :] = 10
-
-    # z bassin
-    x_bounds[1].min[vZ_AuJo, :] = -100
-    x_bounds[1].max[vZ_AuJo, :] = 100
-
-    x_bounds[1].min[vZ_JeCh, :] = -100
-    x_bounds[1].max[vZ_JeCh, :] = 100
-
-    # autour de x
-    x_bounds[1].min[vXrot_AuJo, :] = -100
-    x_bounds[1].max[vXrot_AuJo, :] = 100
-
-    x_bounds[1].min[vXrot_JeCh, :] = -100
-    x_bounds[1].max[vXrot_JeCh, :] = 100
-
-    # autour de y
-    x_bounds[1].min[vYrot_AuJo, :] = -100
-    x_bounds[1].max[vYrot_AuJo, :] = 100
-
-    x_bounds[1].min[vYrot_JeCh, :] = -100
-    x_bounds[1].max[vYrot_JeCh, :] = 100
-
-    # autour de z
-    x_bounds[1].min[vZrot_AuJo, :] = -100
-    x_bounds[1].max[vZrot_AuJo, :] = 100
-
-    x_bounds[1].min[vZrot_JeCh, :] = -100
-    x_bounds[1].max[vZrot_JeCh, :] = 100
-
-    # bras droit
-    x_bounds[1].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
-    x_bounds[1].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
-
-    x_bounds[1].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
-    x_bounds[1].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
-
-    # bras droit
-    x_bounds[1].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
-    x_bounds[1].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
-
-    x_bounds[1].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
-    x_bounds[1].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
-
-    # coude droit
-    x_bounds[1].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
-    x_bounds[1].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
-
-    x_bounds[1].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
-    x_bounds[1].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
-
-    # coude gauche
-    x_bounds[1].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
-    x_bounds[1].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
-
-    x_bounds[1].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
-    x_bounds[1].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
-
-    # du carpe
-    x_bounds[1].min[vXrotC_AuJo, :] = -100
-    x_bounds[1].max[vXrotC_AuJo, :] = 100
-
-    x_bounds[1].min[vXrotC_JeCh, :] = -100
-    x_bounds[1].max[vXrotC_JeCh, :] = 100
-
-    # du dehanchement
-    x_bounds[1].min[vYrotC_AuJo, :] = -100
-    x_bounds[1].max[vYrotC_AuJo, :] = 100
-
-    x_bounds[1].min[vYrotC_JeCh, :] = -100
-    x_bounds[1].max[vYrotC_JeCh, :] = 100
-
-    #
-    # Contraintes de position: PHASE 2 l'ouverture
-    #
-
-    # deplacement
-    x_bounds[2].min[X_AuJo, :] = -.2
-    x_bounds[2].max[X_AuJo, :] = .2
-    x_bounds[2].min[Y_AuJo, :] = -1.
-    x_bounds[2].max[Y_AuJo, :] = 1.
-    x_bounds[2].min[Z_AuJo, :] = 0
-    x_bounds[2].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    x_bounds[2].min[X_JeCh, :] = -.2
-    x_bounds[2].max[X_JeCh, :] = .2
-    x_bounds[2].min[Y_JeCh, :] = -1.
-    x_bounds[2].max[Y_JeCh, :] = 1.
-    x_bounds[2].min[Z_JeCh, :] = 0
-    x_bounds[2].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    # le salto autour de x
-    x_bounds[2].min[Xrot_AuJo, :] = 2 * 3.14 + .1  # 1 salto 3/4
-    x_bounds[2].max[Xrot_AuJo, :] = 4 * 3.14
-
-    x_bounds[2].min[Xrot_JeCh, :] = 2 * 3.14 + .1  # 1 salto 3/4
-    x_bounds[2].max[Xrot_JeCh, :] = 4 * 3.14
-
-    # limitation du tilt autour de y
-    x_bounds[2].min[Yrot_AuJo, :] = - 3.14 / 4
-    x_bounds[2].max[Yrot_AuJo, :] = 3.14 / 4
-
-    x_bounds[2].min[Yrot_JeCh, :] = - 3.14 / 4
-    x_bounds[2].max[Yrot_JeCh, :] = 3.14 / 4
-
-    # la vrille autour de z
-    x_bounds[2].min[Zrot_AuJo, :] = 0
-    x_bounds[2].max[Zrot_AuJo, :] = 3 * 3.14
-
-    x_bounds[2].min[Zrot_JeCh, :] = 0
-    x_bounds[2].max[Zrot_JeCh, :] = 3 * 3.14
-
-    # bras f4a a l'ouverture
-
-    # le carpe
-    x_bounds[2].min[XrotC_AuJo, FIN] = -.4
-    x_bounds[2].min[XrotC_JeCh, FIN] = -.4
-
-    # le dehanchement f4a a l'ouverture
-
-    # Contraintes de vitesse: PHASE 2 l'ouverture
-
-    # en xy bassin
-    x_bounds[2].min[vX_AuJo:vY_AuJo + 1, :] = -10
-    x_bounds[2].max[vX_AuJo:vY_AuJo + 1, :] = 10
-
-    x_bounds[2].min[vX_JeCh:vY_JeCh + 1, :] = -10
-    x_bounds[2].max[vX_JeCh:vY_JeCh + 1, :] = 10
-
-    # z bassin
-    x_bounds[2].min[vZ_AuJo, :] = -100
-    x_bounds[2].max[vZ_AuJo, :] = 100
-
-    x_bounds[2].min[vZ_JeCh, :] = -100
-    x_bounds[2].max[vZ_JeCh, :] = 100
-
-    # autour de x
-    x_bounds[2].min[vXrot_AuJo, :] = -100
-    x_bounds[2].max[vXrot_AuJo, :] = 100
-
-    x_bounds[2].min[vXrot_JeCh, :] = -100
-    x_bounds[2].max[vXrot_JeCh, :] = 100
-
-    # autour de y
-    x_bounds[2].min[vYrot_AuJo, :] = -100
-    x_bounds[2].max[vYrot_AuJo, :] = 100
-
-    x_bounds[2].min[vYrot_JeCh, :] = -100
-    x_bounds[2].max[vYrot_JeCh, :] = 100
-
-    # autour de z
-    x_bounds[2].min[vZrot_AuJo, :] = -100
-    x_bounds[2].max[vZrot_AuJo, :] = 100
-
-    x_bounds[2].min[vZrot_JeCh, :] = -100
-    x_bounds[2].max[vZrot_JeCh, :] = 100
-
-    # bras droit
-    x_bounds[2].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
-    x_bounds[2].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
-
-    x_bounds[2].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
-    x_bounds[2].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
-
-    # bras droit
-    x_bounds[2].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
-    x_bounds[2].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
-
-    x_bounds[2].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
-    x_bounds[2].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
-
-    # coude droit
-    x_bounds[2].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
-    x_bounds[2].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
-
-    x_bounds[2].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
-    x_bounds[2].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
-
-    # coude gauche
-    x_bounds[2].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
-    x_bounds[2].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
-
-    x_bounds[2].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
-    x_bounds[2].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
-
-    # du carpe
-    x_bounds[2].min[vXrotC_AuJo, :] = -100
-    x_bounds[2].max[vXrotC_AuJo, :] = 100
-
-    x_bounds[2].min[vXrotC_JeCh, :] = -100
-    x_bounds[2].max[vXrotC_JeCh, :] = 100
-
-    # du dehanchement
-    x_bounds[2].min[vYrotC_AuJo, :] = -100
-    x_bounds[2].max[vYrotC_AuJo, :] = 100
-
-    x_bounds[2].min[vYrotC_JeCh, :] = -100
-    x_bounds[2].max[vYrotC_JeCh, :] = 100
-
-    #
-    # Contraintes de position: PHASE 3 la vrille et demie
-    #
-
-    # deplacement
-    x_bounds[3].min[X_AuJo, :] = -.2
-    x_bounds[3].max[X_AuJo, :] = .2
-    x_bounds[3].min[Y_AuJo, :] = -1.
-    x_bounds[3].max[Y_AuJo, :] = 1.
-    x_bounds[3].min[Z_AuJo, :] = 0
-    x_bounds[3].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    x_bounds[3].min[X_JeCh, :] = -.2
-    x_bounds[3].max[X_JeCh, :] = .2
-    x_bounds[3].min[Y_JeCh, :] = -1.
-    x_bounds[3].max[Y_JeCh, :] = 1.
-    x_bounds[3].min[Z_JeCh, :] = 0
-    x_bounds[3].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-
-    # le salto autour de x
-    x_bounds[3].min[Xrot_AuJo, :] = 2 * 3.14 - .1
-    x_bounds[3].max[Xrot_AuJo, :] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
-    x_bounds[3].min[Xrot_AuJo, FIN] = 2 * 3.14 + 3/2 * 3.14 - .1
-    x_bounds[3].max[Xrot_AuJo, FIN] = 2 * 3.14 + 3/2 * 3.14 + .1  # 1 salto 3/4
-
-    x_bounds[3].min[Xrot_JeCh, :] = 2 * 3.14 - .1
-    x_bounds[3].max[Xrot_JeCh, :] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
-    x_bounds[3].min[Xrot_JeCh, FIN] = 2 * 3.14 + 3 / 2 * 3.14 - .1
-    x_bounds[3].max[Xrot_JeCh, FIN] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
-
-    # limitation du tilt autour de y
-    x_bounds[3].min[Yrot_AuJo, :] = - 3.14 / 4
-    x_bounds[3].max[Yrot_AuJo, :] = 3.14 / 4
-    x_bounds[3].min[Yrot_AuJo, FIN] = - 3.14 / 8
-    x_bounds[3].max[Yrot_AuJo, FIN] = 3.14 / 8
-
-    x_bounds[3].min[Yrot_JeCh, :] = - 3.14 / 4
-    x_bounds[3].max[Yrot_JeCh, :] = 3.14 / 4
-    x_bounds[3].min[Yrot_JeCh, FIN] = - 3.14 / 8
-    x_bounds[3].max[Yrot_JeCh, FIN] = 3.14 / 8
-
-    # la vrille autour de z
-    x_bounds[3].min[Zrot_AuJo, :] = 0
-    x_bounds[3].max[Zrot_AuJo, :] = 3 * 3.14
-    x_bounds[3].min[Zrot_AuJo, FIN] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[3].max[Zrot_AuJo, FIN] = 3 * 3.14 + .1
-
-    x_bounds[3].min[Zrot_JeCh, :] = 0
-    x_bounds[3].max[Zrot_JeCh, :] = 3 * 3.14
-    x_bounds[3].min[Zrot_JeCh, FIN] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[3].max[Zrot_JeCh, FIN] = 3 * 3.14 + .1
-
-    # bras f4a la vrille
-
-    # le carpe
-    x_bounds[3].min[XrotC_AuJo, :] = -.4
-
-    # le dehanchement f4a la vrille
-
-    # Contraintes de vitesse: PHASE 3 la vrille et demie
-
-    # en xy bassin
-    x_bounds[3].min[vX_AuJo:vY_AuJo + 1, :] = -10
-    x_bounds[3].max[vX_AuJo:vY_AuJo + 1, :] = 10
-
-    x_bounds[3].min[vX_JeCh:vY_JeCh + 1, :] = -10
-    x_bounds[3].max[vX_JeCh:vY_JeCh + 1, :] = 10
-
-    # z bassin
-    x_bounds[3].min[vZ_AuJo, :] = -100
-    x_bounds[3].max[vZ_AuJo, :] = 100
-
-    x_bounds[3].min[vZ_JeCh, :] = -100
-    x_bounds[3].max[vZ_JeCh, :] = 100
-
-    # autour de x
-    x_bounds[3].min[vXrot_AuJo, :] = -100
-    x_bounds[3].max[vXrot_AuJo, :] = 100
-
-    x_bounds[3].min[vXrot_JeCh, :] = -100
-    x_bounds[3].max[vXrot_JeCh, :] = 100
-
-    # autour de y
-    x_bounds[3].min[vYrot_AuJo, :] = -100
-    x_bounds[3].max[vYrot_AuJo, :] = 100
-
-    x_bounds[3].min[vYrot_JeCh, :] = -100
-    x_bounds[3].max[vYrot_JeCh, :] = 100
-
-    # autour de z
-    x_bounds[3].min[vZrot_AuJo, :] = -100
-    x_bounds[3].max[vZrot_AuJo, :] = 100
-
-    x_bounds[3].min[vZrot_JeCh, :] = -100
-    x_bounds[3].max[vZrot_JeCh, :] = 100
-
-    # bras droit
-    x_bounds[3].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
-    x_bounds[3].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
-
-    x_bounds[3].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
-    x_bounds[3].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
-
-    # bras droit
-    x_bounds[3].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
-    x_bounds[3].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
-
-    x_bounds[3].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
-    x_bounds[3].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
-
-    # coude droit
-    x_bounds[3].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
-    x_bounds[3].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
-
-    x_bounds[3].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
-    x_bounds[3].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
-
-    # coude gauche
-    x_bounds[3].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
-    x_bounds[3].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
-
-    x_bounds[3].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
-    x_bounds[3].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
-
-    # du carpe
-    x_bounds[3].min[vXrotC_AuJo, :] = -100
-    x_bounds[3].max[vXrotC_AuJo, :] = 100
-
-    x_bounds[3].min[vXrotC_JeCh, :] = -100
-    x_bounds[3].max[vXrotC_JeCh, :] = 100
-
-    # du dehanchement
-    x_bounds[3].min[vYrotC_AuJo, :] = -100
-    x_bounds[3].max[vYrotC_AuJo, :] = 100
-
-    x_bounds[3].min[vYrotC_JeCh, :] = -100
-    x_bounds[3].max[vYrotC_JeCh, :] = 100
-
-    #
-    # Contraintes de position: PHASE 4 la reception
-    #
-
-    # deplacement
-    x_bounds[4].min[X_AuJo, :] = -.1
-    x_bounds[4].max[X_AuJo, :] = .1
-    x_bounds[4].min[Y_AuJo, FIN] = -.1
-    x_bounds[4].max[Y_AuJo, FIN] = .1
-    x_bounds[4].min[Z_AuJo, :] = 0
-    x_bounds[4].max[Z_AuJo, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-    x_bounds[4].min[Z_AuJo, FIN] = 0
-    x_bounds[4].max[Z_AuJo, FIN] = .1
-
-    x_bounds[4].min[X_JeCh, :] = -.1
-    x_bounds[4].max[X_JeCh, :] = .1
-    x_bounds[4].min[Y_JeCh, FIN] = -.1
-    x_bounds[4].max[Y_JeCh, FIN] = .1
-    x_bounds[4].min[Z_JeCh, :] = 0
-    x_bounds[4].max[Z_JeCh, :] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
-    x_bounds[4].min[Z_JeCh, FIN] = 0
-    x_bounds[4].max[Z_JeCh, FIN] = .1
-
-    # le salto autour de x
-    x_bounds[4].min[Xrot_AuJo, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
-    x_bounds[4].max[Xrot_AuJo, :] = -.50 + 4 * 3.14  # un peu carpe a la fin
-    x_bounds[4].min[Xrot_AuJo, FIN] = -.50 + 4 * 3.14 - .1
-    x_bounds[4].max[Xrot_AuJo, FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
-
-    x_bounds[4].min[Xrot_JeCh, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
-    x_bounds[4].max[Xrot_JeCh, :] = -.50 + 4 * 3.14  # un peu carpe a la fin
-    x_bounds[4].min[Xrot_JeCh, FIN] = -.50 + 4 * 3.14 - .1
-    x_bounds[4].max[Xrot_JeCh, FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
-
-    # limitation du tilt autour de y
-    x_bounds[4].min[Yrot_AuJo, :] = - 3.14 / 16
-    x_bounds[4].max[Yrot_AuJo, :] = 3.14 / 16
-
-    x_bounds[4].min[Yrot_JeCh, :] = - 3.14 / 16
-    x_bounds[4].max[Yrot_JeCh, :] = 3.14 / 16
-
-    # la vrille autour de z
-    x_bounds[4].min[Zrot_AuJo, :] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[4].max[Zrot_AuJo, :] = 3 * 3.14 + .1
-
-    x_bounds[4].min[Zrot_JeCh, :] = 3 * 3.14 - .1  # complete la vrille
-    x_bounds[4].max[Zrot_JeCh, :] = 3 * 3.14 + .1
-
-    # bras droit
-    x_bounds[4].min[YrotBD_AuJo, FIN] = 2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBD_AuJo, FIN] = 2.9 + .1
-    x_bounds[4].min[ZrotBD_AuJo, FIN] = -.1
-    x_bounds[4].max[ZrotBD_AuJo, FIN] = .1
-
-    x_bounds[4].min[YrotBD_JeCh, FIN] = 2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBD_JeCh, FIN] = 2.9 + .1
-    x_bounds[4].min[ZrotBD_JeCh, FIN] = -.1
-    x_bounds[4].max[ZrotBD_JeCh, FIN] = .1
-
-    # bras gauche
-    x_bounds[4].min[YrotBG_AuJo, FIN] = -2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBG_AuJo, FIN] = -2.9 + .1
-    x_bounds[4].min[ZrotBG_AuJo, FIN] = -.1
-    x_bounds[4].max[ZrotBG_AuJo, FIN] = .1
-
-    x_bounds[4].min[YrotBG_JeCh, FIN] = -2.9 - .1  # debut bras aux oreilles
-    x_bounds[4].max[YrotBG_JeCh, FIN] = -2.9 + .1
-    x_bounds[4].min[ZrotBG_JeCh, FIN] = -.1
-    x_bounds[4].max[ZrotBG_JeCh, FIN] = .1
-
-    # coude droit
-    x_bounds[4].min[ZrotABD_AuJo:XrotABD_AuJo + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABD_AuJo:XrotABD_AuJo + 1, FIN] = .1
-
-    x_bounds[4].min[ZrotABD_JeCh:XrotABD_JeCh + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABD_JeCh:XrotABD_JeCh + 1, FIN] = .1
-    # coude gauche
-    x_bounds[4].min[ZrotABG_AuJo:XrotABG_AuJo + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABG_AuJo:XrotABG_AuJo + 1, FIN] = .1
-
-    x_bounds[4].min[ZrotABG_JeCh:XrotABG_JeCh + 1, FIN] = -.1
-    x_bounds[4].max[ZrotABG_JeCh:XrotABG_JeCh + 1, FIN] = .1
-
-    # le carpe
-    x_bounds[4].min[XrotC_AuJo, :] = -.4
-    x_bounds[4].min[XrotC_AuJo, FIN] = -.60
-    x_bounds[4].max[XrotC_AuJo, FIN] = -.40  # fin un peu carpe
-
-    x_bounds[4].min[XrotC_JeCh, :] = -.4
-    x_bounds[4].min[XrotC_JeCh, FIN] = -.60
-    x_bounds[4].max[XrotC_JeCh, FIN] = -.40  # fin un peu carpe
-
-    # le dehanchement
-    x_bounds[4].min[YrotC_AuJo, FIN] = -.1
-    x_bounds[4].max[YrotC_AuJo, FIN] = .1
-
-    x_bounds[4].min[YrotC_JeCh, FIN] = -.1
-    x_bounds[4].max[YrotC_JeCh, FIN] = .1
-
-    # Contraintes de vitesse: PHASE 4 la reception
-
-    # en xy bassin
-    x_bounds[4].min[vX_AuJo:vY_AuJo + 1, :] = -10
-    x_bounds[4].max[vX_AuJo:vY_AuJo + 1, :] = 10
-
-    x_bounds[4].min[vX_JeCh:vY_JeCh + 1, :] = -10
-    x_bounds[4].max[vX_JeCh:vY_JeCh + 1, :] = 10
-
-    # z bassin
-    x_bounds[4].min[vZ_AuJo, :] = -100
-    x_bounds[4].max[vZ_AuJo, :] = 100
-
-    x_bounds[4].min[vZ_JeCh, :] = -100
-    x_bounds[4].max[vZ_JeCh, :] = 100
-
-    # autour de x
-    x_bounds[4].min[vXrot_AuJo, :] = -100
-    x_bounds[4].max[vXrot_AuJo, :] = 100
-
-    x_bounds[4].min[vXrot_JeCh, :] = -100
-    x_bounds[4].max[vXrot_JeCh, :] = 100
-
-    # autour de y
-    x_bounds[4].min[vYrot_AuJo, :] = -100
-    x_bounds[4].max[vYrot_AuJo, :] = 100
-
-    x_bounds[4].min[vYrot_JeCh, :] = -100
-    x_bounds[4].max[vYrot_JeCh, :] = 100
-
-    # autour de z
-    x_bounds[4].min[vZrot_AuJo, :] = -100
-    x_bounds[4].max[vZrot_AuJo, :] = 100
-
-    x_bounds[4].min[vZrot_JeCh, :] = -100
-    x_bounds[4].max[vZrot_JeCh, :] = 100
-
-    # bras droit
-    x_bounds[4].min[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = -100
-    x_bounds[4].max[vZrotBD_AuJo:vYrotBD_AuJo + 1, :] = 100
-
-    x_bounds[4].min[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = -100
-    x_bounds[4].max[vZrotBD_JeCh:vYrotBD_JeCh + 1, :] = 100
-
-    # bras droit
-    x_bounds[4].min[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = -100
-    x_bounds[4].max[vZrotBG_AuJo:vYrotBG_AuJo + 1, :] = 100
-
-    x_bounds[4].min[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = -100
-    x_bounds[4].max[vZrotBG_JeCh:vYrotBG_JeCh + 1, :] = 100
-
-    # coude droit
-    x_bounds[4].min[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = -100
-    x_bounds[4].max[vZrotABD_AuJo:vYrotABD_AuJo + 1, :] = 100
-
-    x_bounds[4].min[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = -100
-    x_bounds[4].max[vZrotABD_JeCh:vYrotABD_JeCh + 1, :] = 100
-
-    # coude gauche
-    x_bounds[4].min[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = -100
-    x_bounds[4].max[vZrotABD_AuJo:vYrotABG_AuJo + 1, :] = 100
-
-    x_bounds[4].min[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = -100
-    x_bounds[4].max[vZrotABD_JeCh:vYrotABG_JeCh + 1, :] = 100
-
-    # du carpe
-    x_bounds[4].min[vXrotC_AuJo, :] = -100
-    x_bounds[4].max[vXrotC_AuJo, :] = 100
-
-    x_bounds[4].min[vXrotC_JeCh, :] = -100
-    x_bounds[4].max[vXrotC_JeCh, :] = 100
-
-    # du dehanchement
-    x_bounds[4].min[vYrotC_AuJo, :] = -100
-    x_bounds[4].max[vYrotC_AuJo, :] = 100
-
-    x_bounds[4].min[vYrotC_JeCh, :] = -100
-    x_bounds[4].max[vYrotC_JeCh, :] = 100
-
-    #
-    # Initial guesses
-    #
-    x0 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
-    x1 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
-    x2 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
-    x3 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
-    x4 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
-
-    x0[Xrot_AuJo, 0] = .50
-    x0[ZrotBG_AuJo] = -.75
-    x0[ZrotBD_AuJo] = .75
-    x0[YrotBG_AuJo, 0] = -2.9
-    x0[YrotBD_AuJo, 0] = 2.9
-    x0[YrotBG_AuJo, 1] = -1.35
-    x0[YrotBD_AuJo, 1] = 1.35
-    x0[XrotC_AuJo, 0] = -.5
-    x0[XrotC_AuJo, 1] = -2.6
-
-    x0[Xrot_JeCh, 0] = .50
-    x0[ZrotBG_JeCh] = -.75
-    x0[ZrotBD_JeCh] = .75
-    x0[YrotBG_JeCh, 0] = -2.9
-    x0[YrotBD_JeCh, 0] = 2.9
-    x0[YrotBG_JeCh, 1] = -1.35
-    x0[YrotBD_JeCh, 1] = 1.35
-    x0[XrotC_JeCh, 0] = -.5
-    x0[XrotC_JeCh, 1] = -2.6
-
-    x1[ZrotBG_AuJo] = -.75
-    x1[ZrotBD_AuJo] = .75
-    x1[Xrot_AuJo, 1] = 2 * 3.14
-    x1[YrotBG_AuJo] = -1.35
-    x1[YrotBD_AuJo] = 1.35
-    x1[XrotC_AuJo] = -2.6
-
-    x1[ZrotBG_JeCh] = -.75
-    x1[ZrotBD_JeCh] = .75
-    x1[Xrot_JeCh, 1] = 2 * 3.14
-    x1[YrotBG_JeCh] = -1.35
-    x1[YrotBD_JeCh] = 1.35
-    x1[XrotC_JeCh] = -2.6
-
-    x2[Xrot_AuJo] = 2 * 3.14
-    x2[Zrot_AuJo, 1] = 3.14
-    x2[ZrotBG_AuJo, 0] = -.75
-    x2[ZrotBD_AuJo, 0] = .75
-    x2[YrotBG_AuJo, 0] = -1.35
-    x2[YrotBD_AuJo, 0] = 1.35
-    x2[XrotC_AuJo, 0] = -2.6
-
-    x2[Xrot_JeCh] = 2 * 3.14
-    x2[Zrot_JeCh, 1] = 3.14
-    x2[ZrotBG_JeCh, 0] = -.75
-    x2[ZrotBD_JeCh, 0] = .75
-    x2[YrotBG_JeCh, 0] = -1.35
-    x2[YrotBD_JeCh, 0] = 1.35
-    x2[XrotC_JeCh, 0] = -2.6
-
-    x3[Xrot_AuJo, 0] = 2 * 3.14
-    x3[Xrot_AuJo, 1] = 2 * 3.14 + 3/2 * 3.14
-    x3[Zrot_AuJo, 0] = 3.14
-    x3[Zrot_AuJo, 1] = 3 * 3.14
-
-    x3[Xrot_JeCh, 0] = 2 * 3.14
-    x3[Xrot_JeCh, 1] = 2 * 3.14 + 3 / 2 * 3.14
-    x3[Zrot_JeCh, 0] = 3.14
-    x3[Zrot_JeCh, 1] = 3 * 3.14
-
-    x4[Xrot_AuJo, 0] = 2 * 3.14 + 3/2 * 3.14
-    x4[Xrot_AuJo, 1] = 4 * 3.14
-    x4[Zrot_AuJo] = 3 * 3.14
-    x4[XrotC_AuJo, 1] = -.5
-
-    x4[Xrot_JeCh, 0] = 2 * 3.14 + 3 / 2 * 3.14
-    x4[Xrot_JeCh, 1] = 4 * 3.14
-    x4[Zrot_JeCh] = 3 * 3.14
-    x4[XrotC_JeCh, 1] = -.5
-
-    x_init = InitialGuessList()
-    x_init.add(x0, interpolation=InterpolationType.LINEAR)
-    x_init.add(x1, interpolation=InterpolationType.LINEAR)
-    x_init.add(x2, interpolation=InterpolationType.LINEAR)
-    x_init.add(x3, interpolation=InterpolationType.LINEAR)
-    x_init.add(x4, interpolation=InterpolationType.LINEAR)
+    set_x_init(biorbd_model, fancy_names_index)
 
     constraints = ConstraintList()
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainGAuJo', second_marker='CibleMainGAuJo', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainDAuJo', second_marker='CibleMainDAuJo', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainGJeCh', second_marker='CibleMainGJeCh', phase=1)
-    constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainDJeCh', second_marker='CibleMainDJeCh', phase=1)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainGAuJo', second_marker='CibleMainGAuJo', phase=1)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainDAuJo', second_marker='CibleMainDAuJo', phase=1)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainGJeCh', second_marker='CibleMainGJeCh', phase=1)
+    # constraints.add(ConstraintFcn.SUPERIMPOSE_MARKERS, node=Node.ALL_SHOOTING, min_bound=-.05, max_bound=.05, first_marker='MidMainDJeCh', second_marker='CibleMainDJeCh', phase=1)
 #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=1)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
@@ -1147,7 +1168,7 @@ def prepare_ocp(
 
 def main():
 
-    model_path = 
+    model_path = "Models/AuJo_JeCh.bioMod"
     n_threads = 4
     print_ocp_FLAG = True
     show_online_FLAG = True

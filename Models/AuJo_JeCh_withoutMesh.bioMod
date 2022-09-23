@@ -1,0 +1,360 @@
+version 4
+
+root_actuated 0
+external_forces 0
+
+gravity 0 0 -9.81
+
+
+// AuJo
+
+segment PelvisAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.0
+	translations xyz
+	rotations xyz
+	com 0.0 0.0 0.0
+	mass 9.842218695835946
+	inertia
+		0.07430771938045669 0.0 0.0
+		0.0 0.10226135309324605 0.0
+		0.0 0.0 0.07199359755988904
+endsegment
+
+segment ThoraxAuJo
+	parent PelvisAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.13873488625201624
+	com 0.0 0.0 0.13324519765515508
+	mass 10.805225423044323
+	inertia
+		0.08270213319238207 0.0 0.0
+		0.0 0.12207052864621462 0.0
+		0.0 0.0 0.08609230645268866
+endsegment
+
+segment HeadAuJo
+	parent ThoraxAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.275
+	com 0.0 0.0 0.12570258172841098
+	mass 4.0351077892906
+	inertia
+		0.022294816860753033 0.0 0.0
+		0.0 0.022294816860753033 0.0
+		0.0 0.0 0.010688223216888195
+endsegment
+
+segment RightUpperArmAuJo
+	parent ThoraxAuJo
+	rt 0 0.17 0.1 xyz -0.1545 0.0 0.21100000000000002
+	rotations zy
+	rangesQ
+		-0.65 2
+		-0.05 3
+	com 0.0 0.0 -0.13267409708507344
+	mass 1.517714154591481
+	inertia
+		0.010259683869487661 0.0 0.0
+		0.0 0.010259683869487661 0.0
+		0.0 0.0 0.0013139081354452031
+endsegment
+
+segment RightForearmAuJo
+	parent RightUpperArmAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.27949999999999997
+	rotations zx
+	rangesQ
+		-1.8 1.1
+		-2.65 0
+	com 0.0 0.0 -0.09936983344569192
+	mass 0.7059108417089944
+	inertia
+		0.0029092821447951724 0.0 0.0
+		0.0 0.002917286737171984 0.0
+		0.0 0.0 0.0003379337085966001
+endsegment
+
+segment RightHandAuJo
+	parent RightForearmAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.23000000000000004
+	com 0.0 0.0 -0.06960962612861851
+	mass 0.29842699002170603
+	inertia
+		0.0005690015669414241 0.0 0.0
+		0.0 0.0006292743535637929 0.0
+		0.0 0.0 0.00011010273298401827
+endsegment
+
+	marker MidMainDAuJo
+		parent RightHandAuJo
+		position 0 0 -0.1
+	endmarker
+
+segment LeftUpperArmAuJo
+	parent ThoraxAuJo
+	rt 0 -0.17 -0.1 xyz 0.1545 0.0 0.21100000000000002
+	rotations zy
+	rangesQ
+		-2 0.65
+		-3 0.05
+	com 0.0 0.0 -0.13267409708507344
+	mass 1.517714154591481
+	inertia
+		0.010259683869487661 0.0 0.0
+		0.0 0.010259683869487661 0.0
+		0.0 0.0 0.0013139081354452031
+endsegment
+
+segment LeftForearmAuJo
+	parent LeftUpperArmAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.27949999999999997
+	rotations zx
+	rangesQ
+		-1.1 1.8
+		-2.65 0
+	com 0.0 0.0 -0.09936983344569192
+	mass 0.7059108417089944
+	inertia
+		0.0029092821447951724 0.0 0.0
+		0.0 0.002917286737171984 0.0
+		0.0 0.0 0.0003379337085966001
+endsegment
+
+segment LeftHandAuJo
+	parent LeftForearmAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.23000000000000004
+	com 0.0 0.0 -0.06960962612861851
+	mass 0.29842699002170603
+	inertia
+		0.0005690015669414241 0.0 0.0
+		0.0 0.0006292743535637929 0.0
+		0.0 0.0 0.00011010273298401827
+endsegment
+
+	marker MidMainGAuJo
+		parent LeftHandAuJo
+		position 0 0 -0.1
+	endmarker
+
+segment ThighsAuJo
+	parent PelvisAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.11026511374798374
+	rotations xy
+	rangesQ
+		-2.7 0.3
+		-0.35 0.35
+	com 0.0 0.0 -0.1574341232686466
+	mass 13.46914653414573
+	inertia
+		0.17542597318717995 0.0 0.0
+		0.0 0.2496822198515837 0.0
+		0.0 0.0 0.11759248458512153
+endsegment
+
+segment ShanksAuJo
+	parent ThighsAuJo
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.374
+	com 2.7440080783259104e-18 0.0 -0.1942053015773545
+	mass 5.057487956187485
+	inertia
+		0.08052491351688545 0.0 0.0
+		0.0 0.1084071607123443 0.0
+		0.0 0.0 0.03294938801906687
+endsegment
+
+	marker CibleMainDAuJo
+		parent ShanksAuJo
+		position -0.1 0 -0.22
+	endmarker
+
+	marker CibleMainGAuJo
+		parent ShanksAuJo
+		position 0.1 0 -0.22
+	endmarker
+
+segment FeetAuJo
+	parent ShanksAuJo
+	rt -0.35 0 0 xyz 0.0 0.0 -0.40249999999999997
+	com 1.512783561182948e-18 0.0 -0.07228412618237678
+	mass 1.1467096288515386
+	inertia
+		0.0030553830813945604 1.2529041364832826e-20 0.0
+		1.2529041364832823e-20 0.009255842539700082 0.0
+		0.0 0.0 0.0069974348429488
+endsegment
+
+
+// JeCh
+
+segment PelvisJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.0
+	translations xyz
+	rotations xyz
+	com 0.0 0.0 0.0
+	mass 8.635490777027421
+	inertia
+		0.04057544805751573 0.0 0.0
+		0.0 0.06419492137801786 0.0
+		0.0 0.0 0.07856632696267374
+endsegment
+
+segment ThoraxJeCh
+	parent PelvisJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.07962856967679773
+	com 0.0 0.0 0.18586072825095679
+	mass 21.590137373499694
+	inertia
+		0.2951500069158354 0.0 0.0
+		0.0 0.37609333890068686 0.0
+		0.0 0.0 0.24124807818271302
+endsegment
+
+segment HeadJeCh
+	parent ThoraxJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.36600000000000005
+	com 0.0 0.0 0.13333598306698535
+	mass 5.972056654760603
+	inertia
+		0.041132365961008915 0.0 0.0
+		0.0 0.041132365961008915 0.0
+		0.0 0.0 0.020264738272943887
+endsegment
+
+segment RightUpperArmJeCh
+	parent ThoraxJeCh
+	rt 0 0.17 0.1 xyz -0.2005 0.0 0.341
+	rotations zy
+	rangesQ
+		-0.65 2
+		-0.05 3
+	com 0.0 0.0 -0.12140314197934511
+	mass 2.2470793772722777
+	inertia
+		0.013382582876278769 0.0 0.0
+		0.0 0.013382582876278769 0.0
+		0.0 0.0 0.0030667961185717714
+endsegment
+
+segment RightForearmJeCh
+	parent RightUpperArmJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.26
+	rotations zx
+	rangesQ
+		-1.8 1.1
+		-2.65 0
+	com 0.0 0.0 -0.10447939392923734
+	mass 1.292120820617971
+	inertia
+		0.00635327469383388 0.0 0.0
+		0.0 0.006412213658887347 0.0
+		0.0 0.0 0.0010267442291883237
+endsegment
+
+segment RightHandJeCh
+	parent RightForearmJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.248
+	com 0.0 0.0 -0.0760492496407589
+	mass 0.5274736616369877
+	inertia
+		0.0011196599137931955 0.0 0.0
+		0.0 0.001282276971762135 0.0
+		0.0 0.0 0.0002913545143405944
+endsegment
+
+	marker MidMainDJeCh
+		parent RightHandJeCh
+		position 0 0 -0.1
+	endmarker
+
+segment LeftUpperArmJeCh
+	parent ThoraxJeCh
+	rt 0 -0.17 -0.1 xyz 0.2005 0.0 0.341
+	rotations zy
+	rangesQ
+		-2 0.65
+		-3 0.05
+	com 0.0 0.0 -0.12140314197934511
+	mass 2.2470793772722777
+	inertia
+		0.013382582876278769 0.0 0.0
+		0.0 0.013382582876278769 0.0
+		0.0 0.0 0.0030667961185717714
+endsegment
+
+segment LeftForearmJeCh
+	parent LeftUpperArmJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.26
+	rotations zx
+	rangesQ
+		-1.1 1.8
+		-2.65 0
+	com 0.0 0.0 -0.10447939392923734
+	mass 1.292120820617971
+	inertia
+		0.00635327469383388 0.0 0.0
+		0.0 0.006412213658887347 0.0
+		0.0 0.0 0.0010267442291883237
+endsegment
+
+segment LeftHandJeCh
+	parent LeftForearmJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.248
+	com 0.0 0.0 -0.0760492496407589
+	mass 0.5274736616369877
+	inertia
+		0.0011196599137931955 0.0 0.0
+		0.0 0.001282276971762135 0.0
+		0.0 0.0 0.0002913545143405944
+endsegment
+
+	marker MidMainGJeCh
+		parent LeftHandJeCh
+		position 0 0 -0.1
+	endmarker
+
+segment ThighsJeCh
+	parent PelvisJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.07437143032320227
+	rotations xy
+	rangesQ
+		-2.7 0.3
+		-0.35 0.35
+	com 0.0 0.0 -0.18547667885481373
+	mass 19.74578731738488
+	inertia
+		0.3130753495073404 0.0 0.0
+		0.0 0.41974702904268285 0.0
+		0.0 0.0 0.183043225862275
+endsegment
+
+segment ShanksJeCh
+	parent ThighsJeCh
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.41350000000000003
+	com 3.709431468862376e-18 0.0 -0.18978508773835495
+	mass 7.48243385775263
+	inertia
+		0.1121619423458845 0.0 0.0
+		0.0 0.15258392065392865 0.0
+		0.0 0.0 0.05154993597533833
+endsegment
+
+	marker CibleMainDJeCh
+		parent ShanksJeCh
+		position -0.1 0 -0.22
+	endmarker
+
+	marker CibleMainGJeCh
+		parent ShanksJeCh
+		position 0.1 0 -0.22
+	endmarker
+
+segment FeetJeCh
+	parent ShanksJeCh
+	rt -0.35 0 0 xyz 0.0 0.0 -0.38400000000000006
+	com 2.5501310116811656e-18 0.0 -0.0839063232906051
+	mass 2.040746300520297
+	inertia
+		0.006769476943675188 3.3381779276229174e-20 2.168404344971009e-19
+		3.3381779276229174e-20 0.01746492629094843 0.0
+		2.168404344971009e-19 0.0 0.01284837823651119
+endsegment
+
+
