@@ -2,8 +2,8 @@ from typing import Annotated, Literal, TypeVar
 import numpy.typing as npt
 
 import numpy as np
-import yaml
 import yeadon
+import yaml
 
 
 # From [https://stackoverflow.com/questions/71109838/numpy-typing-with-specific-shape-and-datatype]
@@ -1333,11 +1333,26 @@ def parse_biomod_options(filename):
 
 
 if __name__ == '__main__':
-    import argparse
-    parser = argparse.ArgumentParser(description="Convert yeadon human model to bioMod.")
-    parser.add_argument("meas", help="measurement file of the human")
-    parser.add_argument("--bioModOptions", nargs=1, help="option file for the bioMod")
-    args = parser.parse_args()
+    # import argparse
+
+    DEBUG_FLAG = False
+
+    if DEBUG_FLAG:
+        class Arguments:
+            def __init__(self):
+                self.meas= '/home/lim/Documents/Stage_lisa/AnthropoImpactOnTech/Models'
+                self.bioModOptions = ['tech_opt.yml']
+
+
+        args = Arguments()
+
+    else:
+        import argparse
+
+        parser = argparse.ArgumentParser(description="Convert yeadon human model to bioMod.")
+        parser.add_argument("meas", help="measurement file of the human")
+        parser.add_argument("--bioModOptions", nargs=1, help="option file for the bioMod")
+        args = parser.parse_args()
 
     bioModOptions = args.bioModOptions[0] if args.bioModOptions else None
 
