@@ -944,7 +944,7 @@ def main():
         ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=show_online_FLAG, show_options=dict(show_bounds=True))
     if HSL_FLAG:
-        solver.set_linear_solver('ma57')
+         solver.set_linear_solver('ma57')
     else:
         print("Not using ma57")
     solver.set_maximum_iterations(10000)
@@ -952,9 +952,10 @@ def main():
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M")
-    nom = model_path.split('/')[-1].removesuffix('.bioMod')
+    nom = model_path_AuJo.split('/')[-1].removesuffix('.bioMod')
     qs = sol.states[0]['q']
     qdots = sol.states[0]['qdot']
+
     for i in range(1, len(sol.states)):
         qs = np.hstack((qs, sol.states[i]['q']))
         qdots = np.hstack((qdots, sol.states[i]['qdot']))
