@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate
 import bioviz
+import pickle
 
 """
 Ce code a été écrit pout faire les simulations pour Antoine, 
@@ -14,6 +15,7 @@ C'est surement overkill d'utiliser un KR4 à 100 noeuds pour des mouvements à v
 #
 # Physique
 #
+
 def Quintic(t, Ti, Tj, Qi, Qj):  # Quintic est bonne
     if t < Ti:
         t = Ti
@@ -116,6 +118,14 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     QddotbrasD = Qddot[:, DROITE]
     QddotbrasG = Qddot[:, GAUCHE]
 
+    titles = ['QbrasD', 'QbrasG', 'QdotbrasD', 'QdotbrasG', 'QddotbrasG','QddotbrasG']
+    values = [QbrasD, QbrasG, QdotbrasD, QdotbrasG, QddotbrasG, QddotbrasG]
+    n = len(values)
+    for i in range(n):
+        file = open(titre + "-" + titles[i] + ".pkl", 'wb')
+        pickle.dump(values[i], file)
+        file.close()
+
     fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2, sharex=True)
     axQD.plot(t, QbrasD)
     axQG.plot(t, QbrasG)
@@ -139,7 +149,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
 
     fig.tight_layout()
     fig.savefig(f'Videos/{suptitre}.pdf')
-    fig.show()
+    # fig.show()
 
 def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     nb_q = m.nbQ()
@@ -168,6 +178,16 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     QddotrotY = Qddot[:, 4]
     QddotrotZ = Qddot[:, 5]
 
+
+    titles = ['QX','QY','QZ', 'QrotX', 'QrotY','QrotZ','QdotX','QdotY','QdotZ','QdotrotX','QdotrotY','QdotrotZ','QddotX','QddotY','QddotZ','QddotrotX','QddotrotY','QddotrotZ']
+    values = [QX, QY, QZ, QrotX, QrotY, QrotZ, QdotX, QdotY, QdotZ, QdotrotX, QdotrotY, QdotrotZ,QddotX, QddotY, QddotZ, QddotrotX, QddotrotY, QddotrotZ]
+    n = len(values)
+    for i in  range(n):
+        file = open(titre + "-" + titles[i]+".pkl" , 'wb')
+        pickle.dump(values[i], file)
+        file.close()
+
+
     fig, (axp, axv, axa) = plt.subplots(3, 1, sharex=True)
     axp.plot(t, QX, label="X")
     axp.plot(t, QY, label="Y")
@@ -192,7 +212,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     fig.suptitle(suptitre)
     fig.tight_layout()
     fig.savefig(f'Videos/{suptitre}.pdf')
-    fig.show()
+    # fig.show()
 
     figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, sharex=True)
     axprot.plot(t, QrotX, label="Rot X")
@@ -218,7 +238,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     figrot.suptitle(suptitre)
     figrot.tight_layout()
     figrot.savefig(f'Videos/{suptitre}.pdf')
-    figrot.show()
+    # figrot.show()
 
 
 #
@@ -255,8 +275,11 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, viz=False):
 N = 100
 model_path_JeCh = "Models/JeCh_pr.bioMod"
 model_path_SaMi = "Models/SaMi_pr.bioMod"
+model_path_ElMe = "Models/ElMe_TechOpt83.bioMod"
 m_JeCh = biorbd.Model(model_path_JeCh)
 m_SaMi = biorbd.Model(model_path_SaMi)
+m_ElMe = biorbd.Model(model_path_ElMe)
+
 
 GAUCHE = 24  # 42 -> 24; 10 -> 9
 DROITE = 15  # 42 -> 15; 10 -> 7
@@ -372,3 +395,57 @@ X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
 X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])  # correction pour la translation
 
 simuler("SaMi bras droit bas, gauche descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+
+# El Me
+# debut bras en haut
+X0 = np.zeros(m_ElMe.nbQ() * 2)
+X0[DROITE] = -Q0
+X0[GAUCHE] = Q0
+
+CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+bassin = m_ElMe.globalJCS(0).to_array()
+QCoM = CoM_func.reshape(1, 3)
+Qbassin = bassin[-1, :3]
+r = QCoM - Qbassin
+
+X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+
+simuler("ELMe bras en haut", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+simuler("ElMe bras descendent", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+simuler("ElMe bras gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+simuler("ElMe bras droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+
+# debut bras droit en haut, gauche bas
+X0 = np.zeros(m_ElMe.nbQ() * 2)
+X0[DROITE] = -Q0
+X0[GAUCHE] = Qf
+
+CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+bassin = m_ElMe.globalJCS(0).to_array()
+QCoM = CoM_func.reshape(1, 3)
+Qbassin = bassin[-1, :3]
+r = QCoM - Qbassin
+
+X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+
+simuler("ElMe bras gauche bas, droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+
+# debut bras gauche en haut, droit bas
+X0 = np.zeros(m_ElMe.nbQ() * 2)
+X0[DROITE] = -Qf
+X0[GAUCHE] = Q0
+
+CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+bassin = m_ElMe.globalJCS(0).to_array()
+QCoM = CoM_func.reshape(1, 3)
+Qbassin = bassin[-1, :3]
+r = QCoM - Qbassin
+
+X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+
+simuler("ElMe bras droit bas, gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+
+
