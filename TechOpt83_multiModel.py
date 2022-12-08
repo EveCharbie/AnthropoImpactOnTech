@@ -1,11 +1,15 @@
 """
 The goal of this program is to optimize the movement to achieve a rudi out pike (803<).
-Simultaneously for two anthorpometric models.
+Simultaneously for two anthropometric models.
 """
 import numpy as np
 import biorbd_casadi as biorbd
 from typing import Union
 import casadi as cas
+import sys
+import argparse
+
+#sys.path.append('/home/lim/Documents/Stage_Lisa/bioptim/')
 from bioptim import (
     OptimalControlProgram,
     DynamicsList,
@@ -32,6 +36,7 @@ from bioptim import (
     PhaseTransitionFcn,
     NodeMappingList,
 )
+
 import time
 
 try:
@@ -780,12 +785,34 @@ def prepare_ocp(
     fancy_names_index = set_fancy_names_index(nb_q)
 
     # Phase mapping
+    # controls
     node_mappings = NodeMappingList()
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=0, phase_post=5)
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=1, phase_post=6)
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=2, phase_post=7)
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=3, phase_post=8)
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=4, phase_post=9)
+    # states
+
+    node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
+
+    #node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
+   # node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
+   #node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7)
+    #node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8)
+    #node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9)
+
+
+
 
     # Add objective functions
     objective_functions = ObjectiveList()
@@ -833,7 +860,15 @@ def prepare_ocp(
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=7)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=8)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=9)
-
+    #argparse
+    parser = argparse.ArgumentParser()
+    #parser.add_argument("model", type=str, help="the bioMod file")
+    parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
+    parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
+    parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
+    parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
+    parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
+    args = parser.parse_args()
     # ouvre les hanches rapidement apres la vrille
     ## AuJo
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[fancy_names_index["XrotC"]], targets=[0, 0], weight=10000, phase=3)
@@ -930,14 +965,14 @@ def main():
 
     model_path_AuJo = "Models/AuJo_TechOpt83.bioMod"
     model_path_JeCh = "Models/JeCh_TechOpt83.bioMod"
-    n_threads = 2
+    n_threads = 4
     print_ocp_FLAG = False  # True
     show_online_FLAG = False  # True
     HSL_FLAG = True
     save_sol_FLAG = True
-
     n_shooting = (40, 100, 100, 100, 40,
                   40, 100, 100, 100, 40)
+
     ocp = prepare_ocp(model_path_AuJo, model_path_JeCh, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     ocp.add_plot_penalty(CostType.ALL)
     if print_ocp_FLAG:
@@ -969,7 +1004,9 @@ def main():
 
     # Print the last solution
     #sol.animate(n_frames=-1, show_floor=False)
+
     # sol.graphs(show_bounds=True)
 
 if __name__ == "__main__":
     main()
+
