@@ -26,13 +26,66 @@ from bioptim import (
 )
 import time
 
+
+class Model :
+    """
+    Attributes
+    ----------
+    model: str
+        A reference to the name of the model
+    with_hsl  :
+        no hsl, don't use libhsl
+    n_threads : int
+        refers to the numbers of threads in the solver
+    savesol :
+        returns true if empty, else returns False
+    show_online : bool
+        returns true if empty, else returns False
+    print_ocp : bool
+        returns False if empty, else returns True """
+
+    def __init__(self, model , n_threads = 1, with_hsl = None, savesol = None, show_online = None, print_ocp = None):
+
+        self.model = model
+        self.with_hsl = with_hsl
+        self.n_threads = n_threads
+        self.savesol = savesol
+        self.show_online = show_online
+        self.print_ocp = print_ocp
+
+        if with_hsl :
+            return False
+
+        if savesol :
+            return False
+
+        if show_online :
+            return False
+
+        if print_ocp :
+            return True
+
+
+
+
+#   parser = argparse.ArgumentParser()
+    #parser.add_argument("model", type=str, help="the bioMod file")
+   # parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
+   # parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
+   # parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
+   # parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
+   # parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
+   # args = parser.parse_args()
+#
+
+
+
 try:
     import IPython
     IPYTHON = True
 except ImportError:
     print("No IPython.")
     IPYTHON = False
-
 
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     diff = 0
@@ -740,23 +793,17 @@ def main():
     """
     Prepares and solves an ocp for a 803<. Animates the results
     """
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument("model", type=str, help="the bioMod file")
-    parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
-    parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
-    parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
-    parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
-    parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
-    args = parser.parse_args()
 
+    biorbd_model_path = 'Documents/Stage_Lisa/AnthropoImpactOnTech/Models/ElMe.bioMod'
+    Mod = Model(model = biorbd_model_path)
     n_shooting = (40, 100, 100, 100, 40)
-    ocp = prepare_ocp(args.model, n_shooting=n_shooting, n_threads=args.n_threads, final_time=1.87)
+
+    ocp = prepare_ocp(Mod.model, n_shooting=n_shooting, n_threads = Mod.n_threads, final_time=1.87)
     ocp.add_plot_penalty(CostType.ALL)
-    if args.print_ocp:
+    if Mod.print_ocp:
         ocp.print(to_graph=True)
-    solver = Solver.IPOPT(show_online_optim=args.show_online, show_options=dict(show_bounds=True))
-    if args.with_hsl:
+    solver = Solver.IPOPT(show_online_optim=Mod.show_online, show_options=dict(show_bounds=True))
+    if Mod.with_hsl:
         solver.set_linear_solver('ma57')
     else:
         print("Not using ma57")
@@ -765,13 +812,13 @@ def main():
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M")
-    nom = args.model.split('/')[-1].removesuffix('.bioMod')
+    nom = Mod.model.split('/')[-1].removesuffix('.bioMod')
     qs = sol.states[0]['q']
     qdots = sol.states[0]['qdot']
     for i in range(1, len(sol.states)):
         qs = np.hstack((qs, sol.states[i]['q']))
         qdots = np.hstack((qdots, sol.states[i]['qdot']))
-    if args.savesol:  # switch manuelle
+    if Mod.savesol:  # switch manuelle
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-q.npy", qs)
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-qdot.npy", qdots)
         np.save(f"Solutions/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-t.npy", sol.phase_time)
