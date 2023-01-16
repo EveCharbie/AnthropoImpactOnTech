@@ -4,6 +4,7 @@ import numpy.typing as npt
 import numpy as np
 import yeadon
 import yaml
+from math import pi
 
 
 # From [https://stackoverflow.com/questions/71109838/numpy-typing-with-specific-shape-and-datatype]
@@ -173,7 +174,7 @@ class Pelvis(BioModSegment):
         com = O
         mass = human.P.mass
         inertia = human.P.rel_inertia
-
+        meshscale = Pelvis.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -199,9 +200,17 @@ class Pelvis(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('Ls2L')) / 0.154
+        m_y = (human.meas.get('Ls1w')) / 0.288
+        m_z = (human.meas.get('Ls4d')) / 0.158
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
         """Get the origin of the Pelvis in the global frame centered at Pelvis' COM."""
         return O
+
 
 
 class Thorax(BioModSegment):
@@ -230,7 +239,7 @@ class Thorax(BioModSegment):
 
         mass, com_global, inertia_global = human.combine_inertia(('T', 's3', 's4'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Thorax.get_origin(human)
-
+        meshscale = Thorax.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -256,9 +265,18 @@ class Thorax(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human):
+        m_x = (human.meas.get('Ls5L') - human.meas.get('Ls2L')) / 0.366
+        m_y = (human.meas.get('Ls2w')) / 0.287
+        m_z = (human.meas.get('Ls4d')) / 0.158
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
         """Get the origin of the Thorax in the global frame centered at Pelvis' COM."""
         return np.asarray(human.T.pos - human.P.center_of_mass).reshape(3)
+
+
 
 
 class Head(BioModSegment):
@@ -287,7 +305,7 @@ class Head(BioModSegment):
 
         mass, com_global, inertia_global = human.combine_inertia(('s5', 's6', 's7'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Head.get_origin(human)
-
+        meshscale = Head.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -313,6 +331,13 @@ class Head(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('Ls8L')) / 0.277
+        m_y = ((human.meas.get('Ls7p')) / pi) / 0.185
+        m_z = ((human.meas.get('Ls7p')) / pi) / 0.185
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
         """Get the origin of the Head in the global frame centered at Pelvis' COM."""
         length = human.C.solids[0].height + human.C.solids[1].height
@@ -320,6 +345,7 @@ class Head(BioModSegment):
         dir = dir / np.linalg.norm(dir)
         pos = human.C.pos + length * dir
         return np.asarray(pos - human.P.center_of_mass).reshape(3)
+
 
 
 class LeftUpperArm(BioModSegment):
@@ -349,7 +375,7 @@ class LeftUpperArm(BioModSegment):
         com = np.asarray(human.A1.rel_center_of_mass).reshape(3)
         mass = human.A1.mass
         inertia = human.A1.rel_inertia
-
+        meshscale = LeftUpperArm.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -375,9 +401,18 @@ class LeftUpperArm(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('La2L')) / 0.26
+        m_y = ((human.meas.get('La1p')) / pi) / 0.097
+        m_z = ((human.meas.get('La1p')) / pi) / 0.097
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
         """Get the origin of the LeftUpperArm in the global frame centered at Pelvis' COM."""
         return np.asarray(human.A1.pos - human.P.center_of_mass).reshape(3)
+
+
 
 
 class LeftForearm(BioModSegment):
@@ -409,7 +444,7 @@ class LeftForearm(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = LeftForearm.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -433,6 +468,13 @@ class LeftForearm(BioModSegment):
             patch=patch,
             markers=markers
         )
+
+    @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('La4L') - human.meas.get('La2L')) / 0.248
+        m_y = ((human.meas.get('La3p')) / pi) / 0.09
+        m_z = ((human.meas.get('La3p')) / pi) / 0.09
+        return [m_x, m_y, m_z]
 
     @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
@@ -469,7 +511,7 @@ class LeftHand(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = LeftHand.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -495,6 +537,13 @@ class LeftHand(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = human.meas.get('La7L') / 0.177
+        m_y = (human.meas.get('La5w')) / 0.098
+        m_z = (human.meas.get('La5w')) / 0.098
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human):
         """Get the origin of the LeftHand in the global frame centered at Pelvis' COM."""
         length = human.A2.solids[0].height + human.A2.solids[1].height
@@ -502,6 +551,8 @@ class LeftHand(BioModSegment):
         dir = dir / np.linalg.norm(dir)
         pos = human.A2.pos + length * dir
         return np.asarray(pos - human.P.center_of_mass).reshape(3)
+
+
 
 
 class RightUpperArm(BioModSegment):
@@ -530,7 +581,7 @@ class RightUpperArm(BioModSegment):
         com = np.asarray(human.B1.rel_center_of_mass).reshape(3)
         mass = human.B1.mass
         inertia = human.B1.rel_inertia
-
+        meshscale = RightUpperArm.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -554,6 +605,13 @@ class RightUpperArm(BioModSegment):
             patch=patch,
             markers=markers
         )
+
+    @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = human.meas.get('Lb2L') / 0.26
+        m_y = ((human.meas.get('Lb1p')) / pi) / 0.097
+        m_z = ((human.meas.get('Lb1p')) / pi) / 0.097
+        return [m_x, m_y, m_z]
 
     @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
@@ -590,7 +648,7 @@ class RightForearm(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = RightForearm.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -614,6 +672,13 @@ class RightForearm(BioModSegment):
             patch=patch,
             markers=markers
         )
+
+    @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('Lb4L') - human.meas.get('La2L')) / 0.248
+        m_y = ((human.meas.get('Lb3p')) / pi) / 0.09
+        m_z = ((human.meas.get('Lb3p')) / pi) / 0.09
+        return [m_x, m_y, m_z]
 
     @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
@@ -650,7 +715,7 @@ class RightHand(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = RightHand.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -676,6 +741,13 @@ class RightHand(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = human.meas.get('Lb7L') / 0.177
+        m_y = human.meas.get('Lb5w') / 0.098
+        m_z = human.meas.get('Lb5w') / 0.098
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human):
         """Get the origin of the RightHand in the global frame centered at Pelvis' COM."""
         length = human.B2.solids[0].height + human.B2.solids[1].height
@@ -683,6 +755,7 @@ class RightHand(BioModSegment):
         dir = dir / np.linalg.norm(dir)
         pos = human.B2.pos + length * dir
         return np.asarray(pos - human.P.center_of_mass).reshape(3)
+
 
 
 class LeftThigh(BioModSegment):
@@ -711,7 +784,7 @@ class LeftThigh(BioModSegment):
         com = np.asarray(human.J1.rel_center_of_mass).reshape(3)
         mass = human.J1.mass
         inertia = human.J1.rel_inertia
-
+        meshscale = LeftThigh.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -737,9 +810,16 @@ class LeftThigh(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = human.meas.get('Lj3L') / 0.4135
+        m_y = ((human.meas.get('Lj2p')) / pi) / 0.174
+        m_z = ((human.meas.get('Lj2p')) / pi) / 0.174
+        return [m_x, m_y, m_z]
+    @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
         """Get the origin of the LeftTigh in the global frame centered at Pelvis' COM."""
         return np.asarray(human.J1.pos - human.P.center_of_mass).reshape(3)
+
 
 
 class LeftShank(BioModSegment):
@@ -771,7 +851,7 @@ class LeftShank(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = LeftShank.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -797,9 +877,17 @@ class LeftShank(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('Lj5L') - human.meas.get('Lj3L')) / 0.3815
+        m_y = ((human.meas.get('Lj4p')) / pi) / 0.121
+        m_z = ((human.meas.get('Lj4p')) / pi) / 0.121
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
         """Get the origin of the LeftShank in the global frame centered at Pelvis' COM."""
         return np.asarray(human.J2.pos - human.P.center_of_mass).reshape(3)
+
 
 
 class LeftFoot(BioModSegment):
@@ -831,7 +919,7 @@ class LeftFoot(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = LeftFoot.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -857,6 +945,13 @@ class LeftFoot(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('Lj9L') - human.meas.get('Lj6L')) / 0.188
+        m_y = ((human.meas.get('Lj8w')) / pi) / 0.056
+        m_z = ((human.meas.get('Lj8w')) / pi) / 0.056
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human):
         """Get the origin of the LeftFoot in the global frame centered at Pelvis' COM."""
         length = human.J2.solids[0].height + human.J2.solids[1].height
@@ -864,6 +959,7 @@ class LeftFoot(BioModSegment):
         dir = dir / np.linalg.norm(dir)
         pos = human.J2.pos + length * dir
         return np.asarray(pos - human.P.center_of_mass).reshape(3)
+
 
 
 class RightThigh(BioModSegment):
@@ -893,7 +989,7 @@ class RightThigh(BioModSegment):
         com = np.asarray(human.K1.rel_center_of_mass).reshape(3)
         mass = human.K1.mass
         inertia = human.K1.rel_inertia
-
+        meshscale = RightThigh.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -917,6 +1013,13 @@ class RightThigh(BioModSegment):
             patch=patch,
             markers=markers
         )
+
+    @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = human.meas.get('Lk3L') / 0.4135
+        m_y = ((human.meas.get('Lk2p')) / pi) / 0.174
+        m_z = ((human.meas.get('Lk2p')) / pi) / 0.174
+        return [m_x, m_y, m_z]
 
     @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
@@ -953,7 +1056,7 @@ class RightShank(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = RightShank.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -979,9 +1082,17 @@ class RightShank(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('Lk5L') - human.meas.get('Lj3L')) / 0.3815
+        m_y = ((human.meas.get('Lk4p')) / pi) / 0.121
+        m_z = ((human.meas.get('Lk4p')) / pi) / 0.121
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
         """Get the origin of the RightShank in the global frame centered at Pelvis' COM."""
         return np.asarray(human.K2.pos - human.P.center_of_mass).reshape(3)
+
 
 
 class RightFoot(BioModSegment):
@@ -1013,7 +1124,7 @@ class RightFoot(BioModSegment):
         mass = segment.mass
         com = np.asarray(segment.rel_center_of_mass).reshape(3)
         inertia = segment.rel_inertia
-
+        meshscale = RightFoot.adapted_meshscale(human)
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -1039,6 +1150,13 @@ class RightFoot(BioModSegment):
         )
 
     @staticmethod
+    def adapted_meshscale(human: yeadon.Human):
+        m_x = (human.meas.get('Lk9L') - human.meas.get('Lk6L')) / 0.188
+        m_y = ((human.meas.get('Lk8w')) / pi) / 0.056
+        m_z = ((human.meas.get('Lk8w')) / pi) / 0.056
+        return [m_x, m_y, m_z]
+
+    @staticmethod
     def get_origin(human: yeadon.Human):
         """Get the origin of the RightFoot in the global frame centered at Pelvis' COM."""
         length = human.K2.solids[0].height + human.K2.solids[1].height
@@ -1046,6 +1164,8 @@ class RightFoot(BioModSegment):
         dir = dir / np.linalg.norm(dir)
         pos = human.K2.pos + length * dir
         return np.asarray(pos - human.P.center_of_mass).reshape(3)
+
+
 
 
 class Thighs(BioModSegment):
@@ -1335,12 +1455,12 @@ def parse_biomod_options(filename):
 if __name__ == '__main__':
     # import argparse
 
-    DEBUG_FLAG = False
+    DEBUG_FLAG = True
 
     if DEBUG_FLAG:
         class Arguments:
             def __init__(self):
-                self.meas= '/home/lim/Documents/Stage_lisa/AnthropoImpactOnTech/Models'
+                self.meas= '/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/AuJo.txt'
                 self.bioModOptions = ['tech_opt.yml']
 
 
@@ -1357,6 +1477,7 @@ if __name__ == '__main__':
     bioModOptions = args.bioModOptions[0] if args.bioModOptions else None
 
     human = yeadon.Human(args.meas)
+
     BioHuman, human_options, segments_options = parse_biomod_options(bioModOptions)
 
     biohuman = BioHuman(human, **human_options, **segments_options)
