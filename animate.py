@@ -8,19 +8,18 @@ import os
 from IPython import embed
 
 model_path = "Models/JeCh_TechOpt83.bioMod"
-Folder_per_twist_nb = ["Solutions_vrille_et_demi/", "Solutions_double_vrille_et_demi/", "Solutions_triple_vrille_et_demi/"]
+Folder_per_twist_nb = {"1": "Solutions_vrille_et_demi/", "2": "Solutions_double_vrille_et_demi/", "3": "Solutions_triple_vrille_et_demi/"}
 results_path = 'solutions_techOPT83/'
 cmap = cm.get_cmap('viridis')
 
 num_athlete = 0
 
-fig, axs = plt.subplots(4, 4)
+fig, axs = plt.subplots(4, 4, figsize=(18, 9))
 axs = axs.ravel()
 
-# problematic_althetes = ["EvZl", "ZoTs", "MaJa", "ElMe_TechOpt83"]
-# done_athletes = ["AdCh", "AlAd", "AuJo_TechOpt83", "KaFu", "LaDe", "MaCu", "MaJa", "OlGa", "SoMe", "Benjamin", "KaMi", "FeBl"]
-for nb_twists in [1, 2, 3]:
-    results_path_this_time = results_path + Folder_per_twist_nb[nb_twists - 1]
+for key in Folder_per_twist_nb:
+    nb_twists = int(key)
+    results_path_this_time = results_path + Folder_per_twist_nb[key]
     for foldername in os.listdir(results_path_this_time):
         for filename in os.listdir(results_path_this_time + foldername + '/'):
             f = os.path.join(results_path_this_time + foldername + '/', filename)
@@ -58,7 +57,6 @@ for nb_twists in [1, 2, 3]:
 
                         if num_athlete == 1:
                             axs[i].set_title(f"{model.nameDof()[i].to_string()}")
-axs[0].legend(bbox_to_anchor=(5, 1), loc='upper left', borderaxespad=0.)
-plt.subplots_adjust(right=0.7)
-# plt.tight_layout()
+axs[0].legend(bbox_to_anchor=(4.8, 1), loc='upper left', borderaxespad=0., ncols=2, fontsize=12)
+plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
 plt.show()
