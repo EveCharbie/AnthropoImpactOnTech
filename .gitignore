@@ -138,3 +138,7 @@ Videos/
 Images/
 
 .idea/
+
+*.npy
+
+*.png
