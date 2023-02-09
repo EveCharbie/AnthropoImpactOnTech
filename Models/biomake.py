@@ -201,9 +201,9 @@ class Pelvis(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('Ls2L')) / 0.154
-        m_y = (human.meas.get('Ls1w')) / 0.288
-        m_z = (human.meas.get('Ls4d')) / 0.158
+        m_x = (human.meas.get('Ls1w')) / 0.288
+        m_y = (human.meas.get('Ls4d')) / 0.158
+        m_z = (human.meas.get('Ls2L')) / 0.154
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -266,9 +266,9 @@ class Thorax(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human):
-        m_x = (human.meas.get('Ls5L') - human.meas.get('Ls2L')) / 0.366
-        m_y = (human.meas.get('Ls2w')) / 0.287
-        m_z = (human.meas.get('Ls4d')) / 0.158
+        m_x = (human.meas.get('Ls3w')) / 0.316
+        m_y = (human.meas.get('Ls4d')) / 0.158
+        m_z = (human.meas.get('Ls5L') - human.meas.get('Ls2L')) / 0.366
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -332,9 +332,9 @@ class Head(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('Ls8L')) / 0.277
+        m_x = ((human.meas.get('Ls7p')) / pi) / 0.185
         m_y = ((human.meas.get('Ls7p')) / pi) / 0.185
-        m_z = ((human.meas.get('Ls7p')) / pi) / 0.185
+        m_z = (human.meas.get('Ls8L')) / 0.277
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -402,9 +402,9 @@ class LeftUpperArm(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('La2L')) / 0.26
+        m_x = ((human.meas.get('La1p')) / pi) / 0.097
         m_y = ((human.meas.get('La1p')) / pi) / 0.097
-        m_z = ((human.meas.get('La1p')) / pi) / 0.097
+        m_z = (human.meas.get('La2L')) / 0.26
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -471,9 +471,9 @@ class LeftForearm(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('La4L') - human.meas.get('La2L')) / 0.248
+        m_x = ((human.meas.get('La3p')) / pi) / 0.09
         m_y = ((human.meas.get('La3p')) / pi) / 0.09
-        m_z = ((human.meas.get('La3p')) / pi) / 0.09
+        m_z = (human.meas.get('La4L') - human.meas.get('La2L')) / 0.248
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -501,7 +501,7 @@ class LeftHand(BioModSegment):
             patch: list[Vec3] = None,
             markers: dict[dict] = {}
     ):
-        label = label or LeftHand
+        label = label or LeftHand.__name__
 
         xyz = LeftHand.get_origin(human) - LeftForearm.get_origin(human)
         translations = ''
@@ -538,9 +538,9 @@ class LeftHand(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = human.meas.get('La7L') / 0.177
+        m_x = (human.meas.get('La5w')) / 0.098
         m_y = (human.meas.get('La5w')) / 0.098
-        m_z = (human.meas.get('La5w')) / 0.098
+        m_z = human.meas.get('La7L') / 0.177
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -608,9 +608,9 @@ class RightUpperArm(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = human.meas.get('Lb2L') / 0.26
+        m_x = ((human.meas.get('Lb1p')) / pi) / 0.097
         m_y = ((human.meas.get('Lb1p')) / pi) / 0.097
-        m_z = ((human.meas.get('Lb1p')) / pi) / 0.097
+        m_z = human.meas.get('Lb2L') / 0.26
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -675,9 +675,9 @@ class RightForearm(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('Lb4L') - human.meas.get('La2L')) / 0.248
+        m_x = ((human.meas.get('Lb3p')) / pi) / 0.09
         m_y = ((human.meas.get('Lb3p')) / pi) / 0.09
-        m_z = ((human.meas.get('Lb3p')) / pi) / 0.09
+        m_z = (human.meas.get('Lb4L') - human.meas.get('La2L')) / 0.248
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -742,9 +742,9 @@ class RightHand(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = human.meas.get('Lb7L') / 0.177
+        m_x = human.meas.get('Lb5w') / 0.098
         m_y = human.meas.get('Lb5w') / 0.098
-        m_z = human.meas.get('Lb5w') / 0.098
+        m_z = human.meas.get('Lb7L') / 0.177
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -811,9 +811,9 @@ class LeftThigh(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = human.meas.get('Lj3L') / 0.4135
+        m_x = ((human.meas.get('Lj2p')) / pi) / 0.174
         m_y = ((human.meas.get('Lj2p')) / pi) / 0.174
-        m_z = ((human.meas.get('Lj2p')) / pi) / 0.174
+        m_z = human.meas.get('Lj3L') / 0.4135
         return [m_x, m_y, m_z]
     @staticmethod
     def get_origin(human: yeadon.Human) -> Vec3:
@@ -878,9 +878,9 @@ class LeftShank(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('Lj5L') - human.meas.get('Lj3L')) / 0.3815
+        m_x = ((human.meas.get('Lj4p')) / pi) / 0.121
         m_y = ((human.meas.get('Lj4p')) / pi) / 0.121
-        m_z = ((human.meas.get('Lj4p')) / pi) / 0.121
+        m_z = (human.meas.get('Lj5L') - human.meas.get('Lj3L')) / 0.3815
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -946,9 +946,11 @@ class LeftFoot(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('Lj9L') - human.meas.get('Lj6L')) / 0.188
-        m_y = ((human.meas.get('Lj8w')) / pi) / 0.056
-        m_z = ((human.meas.get('Lj8w')) / pi) / 0.056
+        m_x = ((human.meas.get('Lj6p')) / (2 * pi)) / 0.04806479281375239
+        # m_x = (human.meas.get('Lj9L') - human.meas.get('Lj6L')) / 0.188
+        m_y = human.meas.get('Lj6d') / 0.121
+        # m_y = ((human.meas.get('Lj8w')) / pi) / 0.06
+        m_z = (human.meas.get('Lj9L')) / 0.208
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -1016,9 +1018,9 @@ class RightThigh(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = human.meas.get('Lk3L') / 0.4135
+        m_x = ((human.meas.get('Lk2p')) / pi) / 0.174
         m_y = ((human.meas.get('Lk2p')) / pi) / 0.174
-        m_z = ((human.meas.get('Lk2p')) / pi) / 0.174
+        m_z = human.meas.get('Lk3L') / 0.4135
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -1083,9 +1085,9 @@ class RightShank(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('Lk5L') - human.meas.get('Lj3L')) / 0.3815
+        m_x = ((human.meas.get('Lk4p')) / pi) / 0.121
         m_y = ((human.meas.get('Lk4p')) / pi) / 0.121
-        m_z = ((human.meas.get('Lk4p')) / pi) / 0.121
+        m_z = (human.meas.get('Lk5L') - human.meas.get('Lj3L')) / 0.3815
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -1151,9 +1153,11 @@ class RightFoot(BioModSegment):
 
     @staticmethod
     def adapted_meshscale(human: yeadon.Human):
-        m_x = (human.meas.get('Lk9L') - human.meas.get('Lk6L')) / 0.188
-        m_y = ((human.meas.get('Lk8w')) / pi) / 0.056
-        m_z = ((human.meas.get('Lk8w')) / pi) / 0.056
+        m_x = ((human.meas.get('Lk6p')) / (2 * pi)) / 0.04933803235848756
+        # m_x = (human.meas.get('Lj9L') - human.meas.get('Lj6L')) / 0.188
+        m_y = (human.meas.get('Lk6d')) / 0.122
+        # m_y = ((human.meas.get('Lj8w')) / pi) / 0.06
+        m_z = (human.meas.get('Lk9L')) / 0.2
         return [m_x, m_y, m_z]
 
     @staticmethod
@@ -1194,7 +1198,8 @@ class Thighs(BioModSegment):
 
         mass, com_global, inertia = human.combine_inertia(('J1', 'K1'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Thighs.get_origin(human)
-
+        m_x, m_y, m_z  = np.array(RightThigh.adapted_meshscale(human))+np.array(LeftThigh.adapted_meshscale(human))
+        meshscale = [np.array(m_x /2), m_y/2, m_z/2]
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -1251,7 +1256,8 @@ class Shanks(BioModSegment):
 
         mass, com_global, inertia = human.combine_inertia(('j3', 'j4', 'k3', 'k4'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Shanks.get_origin(human)
-
+        m_x, m_y, m_z = np.array(RightShank.adapted_meshscale(human)) + np.array(LeftShank.adapted_meshscale(human))
+        meshscale = [m_x / 2, m_y / 2, m_z / 2]
         markers = parse_markers(label, markers)
 
         BioModSegment.__init__(
@@ -1309,8 +1315,9 @@ class Feet(BioModSegment):
 
         mass, com_global, inertia = human.combine_inertia(('j5', 'j6', 'j7', 'j8', 'k5', 'k6', 'k7', 'k8'))
         com = np.asarray(com_global - human.P.center_of_mass).reshape(3) - Feet.get_origin(human)
-
-        markers = parse_markers(label, markers)
+        m_x, m_y, m_z  = np.array(RightFoot.adapted_meshscale(human))+np.array(LeftFoot.adapted_meshscale(human))
+        meshscale = [m_x/2, m_y/2, m_z/2 ]
+        parse_markers(label, markers)
 
         BioModSegment.__init__(
             self,
@@ -1455,12 +1462,12 @@ def parse_biomod_options(filename):
 if __name__ == '__main__':
     # import argparse
 
-    DEBUG_FLAG = True
+    DEBUG_FLAG = False
 
     if DEBUG_FLAG:
         class Arguments:
             def __init__(self):
-                self.meas= '/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/AuJo.txt'
+                self.meas= '/home/lim/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/JeCh.txt'
                 self.bioModOptions = ['tech_opt.yml']
 
 
