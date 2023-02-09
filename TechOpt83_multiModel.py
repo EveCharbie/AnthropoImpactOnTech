@@ -9,7 +9,7 @@ import casadi as cas
 import sys
 import argparse
 
-#sys.path.append('/home/lim/Documents/Stage_Lisa/bioptim/')
+sys.path.append('/home/lim/Documents/Stage_Lisa/bioptim/')
 from bioptim import (
     OptimalControlProgram,
     DynamicsList,
@@ -35,6 +35,7 @@ from bioptim import (
     PhaseTransitionList,
     PhaseTransitionFcn,
     NodeMappingList,
+
 )
 
 import time
@@ -186,6 +187,7 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     vzinit = 9.81 / 2 * final_time  # vitesse initiale en z du CoM pour revenir a terre au temps final
 
     # decalage entre le bassin et le CoM
+    # AUJO
     CoM_Q_sym = cas.MX.sym('CoM', nb_q)
     CoM_Q_init = x_bounds[0].min[:nb_q, DEBUT]  # min ou max ne change rien a priori, au DEBUT ils sont egaux normalement
     CoM_Q_func = cas.Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].CoM(CoM_Q_sym).to_mx()])
@@ -194,6 +196,8 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
 
     r = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation de la RT
 
+    #JECH
+
     # en xy bassin
     x_bounds[0].min[fancy_names_index["vX"]:fancy_names_index["vY"]+1, :] = -10
     x_bounds[0].max[fancy_names_index["vX"]:fancy_names_index["vY"]+1, :] = 10
@@ -201,8 +205,8 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[0].max[fancy_names_index["vX"]:fancy_names_index["vY"]+1, DEBUT] = .5
 
     # z bassin
-    x_bounds[0].min[fancy_names_index["vZ"], :] = -100
-    x_bounds[0].max[fancy_names_index["vZ"], :] = 100
+    x_bounds[0].min[fancy_names_index["vZ"], :] = -50
+    x_bounds[0].max[fancy_names_index["vZ"], :] = 50
     x_bounds[0].min[fancy_names_index["vZ"], DEBUT] = vzinit - .5
     x_bounds[0].max[fancy_names_index["vZ"], DEBUT] = vzinit + .5
 
@@ -211,14 +215,14 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[0].max[fancy_names_index["vXrot"], :] = 20  # aussi vite que nécessaire, mais ne devrait pas atteindre cette vitesse
 
     # autour de y
-    x_bounds[0].min[fancy_names_index["vYrot"], :] = -100
-    x_bounds[0].max[fancy_names_index["vYrot"], :] = 100
+    x_bounds[0].min[fancy_names_index["vYrot"], :] = -50
+    x_bounds[0].max[fancy_names_index["vYrot"], :] = 50
     x_bounds[0].min[fancy_names_index["vYrot"], DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vYrot"], DEBUT] = 0
 
     # autour de z
-    x_bounds[0].min[fancy_names_index["vZrot"], :] = -100
-    x_bounds[0].max[fancy_names_index["vZrot"], :] = 100
+    x_bounds[0].min[fancy_names_index["vZrot"], :] = -50
+    x_bounds[0].max[fancy_names_index["vZrot"], :] = 50
     x_bounds[0].min[fancy_names_index["vZrot"], DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vZrot"], DEBUT] = 0
 
@@ -231,38 +235,38 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[0].max[fancy_names_index["vX"]:fancy_names_index["vZ"]+1, DEBUT] = max(borne_sup[0], borne_inf[0]), max(borne_sup[1], borne_inf[1]), max(borne_sup[2], borne_inf[2])
 
     # bras droit
-    x_bounds[0].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"]+1, :] = -100
-    x_bounds[0].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"]+1, :] = -50
+    x_bounds[0].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"]+1, :] = 50
     x_bounds[0].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"]+1, DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"]+1, DEBUT] = 0
 
     # bras droit
-    x_bounds[0].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"]+1, :] = -100
-    x_bounds[0].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"]+1, :] = -50
+    x_bounds[0].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"]+1, :] = 50
     x_bounds[0].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"]+1, DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"]+1, DEBUT] = 0
 
     # coude droit
-    x_bounds[0].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"]+1, :] = -100
-    x_bounds[0].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"]+1, :] = -50
+    x_bounds[0].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"]+1, :] = 50
     x_bounds[0].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"]+1, DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"]+1, DEBUT] = 0
 
     # coude gauche
-    x_bounds[0].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"]+1, :] = -100
-    x_bounds[0].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"]+1, :] = 100
+    x_bounds[0].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"]+1, :] = -50
+    x_bounds[0].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"]+1, :] = 50
     x_bounds[0].min[fancy_names_index["vZrotABG"]:fancy_names_index["vYrotABG"]+1, DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vZrotABG"]:fancy_names_index["vYrotABG"]+1, DEBUT] = 0
 
     # du carpe
-    x_bounds[0].min[fancy_names_index["vXrotC"], :] = -100
-    x_bounds[0].max[fancy_names_index["vXrotC"], :] = 100
+    x_bounds[0].min[fancy_names_index["vXrotC"], :] = -50
+    x_bounds[0].max[fancy_names_index["vXrotC"], :] = 50
     x_bounds[0].min[fancy_names_index["vXrotC"], DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vXrotC"], DEBUT] = 0
 
     # du dehanchement
-    x_bounds[0].min[fancy_names_index["vYrotC"], :] = -100
-    x_bounds[0].max[fancy_names_index["vYrotC"], :] = 100
+    x_bounds[0].min[fancy_names_index["vYrotC"], :] = -50
+    x_bounds[0].max[fancy_names_index["vYrotC"], :] = 50
     x_bounds[0].min[fancy_names_index["vYrotC"], DEBUT] = 0
     x_bounds[0].max[fancy_names_index["vYrotC"], DEBUT] = 0
 
@@ -310,43 +314,43 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[1].max[fancy_names_index["vX"]:fancy_names_index["vY"] + 1, :] = 10
 
     # z bassin
-    x_bounds[1].min[fancy_names_index["vZ"], :] = -100
-    x_bounds[1].max[fancy_names_index["vZ"], :] = 100
+    x_bounds[1].min[fancy_names_index["vZ"], :] = -50
+    x_bounds[1].max[fancy_names_index["vZ"], :] = 50
 
     # autour de x
-    x_bounds[1].min[fancy_names_index["vXrot"], :] = -100
-    x_bounds[1].max[fancy_names_index["vXrot"], :] = 100
+    x_bounds[1].min[fancy_names_index["vXrot"], :] = -50
+    x_bounds[1].max[fancy_names_index["vXrot"], :] = 50
 
     # autour de y
-    x_bounds[1].min[fancy_names_index["vYrot"], :] = -100
-    x_bounds[1].max[fancy_names_index["vYrot"], :] = 100
+    x_bounds[1].min[fancy_names_index["vYrot"], :] = -50
+    x_bounds[1].max[fancy_names_index["vYrot"], :] = 50
 
     # autour de z
-    x_bounds[1].min[fancy_names_index["vZrot"], :] = -100
-    x_bounds[1].max[fancy_names_index["vZrot"], :] = 100
+    x_bounds[1].min[fancy_names_index["vZrot"], :] = -50
+    x_bounds[1].max[fancy_names_index["vZrot"], :] = 50
 
     # bras droit
-    x_bounds[1].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = -100
-    x_bounds[1].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = 100
+    x_bounds[1].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = -50
+    x_bounds[1].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = 50
 
     # bras droit
-    x_bounds[1].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = -100
-    x_bounds[1].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = 100
+    x_bounds[1].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = -50
+    x_bounds[1].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = 50
 
     # coude droit
-    x_bounds[1].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = -100
-    x_bounds[1].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = 100
+    x_bounds[1].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = -50
+    x_bounds[1].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = 50
     # coude gauche
-    x_bounds[1].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = -100
-    x_bounds[1].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = 100
+    x_bounds[1].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = -50
+    x_bounds[1].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = 50
 
     # du carpe
-    x_bounds[1].min[fancy_names_index["vXrotC"], :] = -100
-    x_bounds[1].max[fancy_names_index["vXrotC"], :] = 100
+    x_bounds[1].min[fancy_names_index["vXrotC"], :] = -50
+    x_bounds[1].max[fancy_names_index["vXrotC"], :] = 50
 
     # du dehanchement
-    x_bounds[1].min[fancy_names_index["vYrotC"], :] = -100
-    x_bounds[1].max[fancy_names_index["vYrotC"], :] = 100
+    x_bounds[1].min[fancy_names_index["vYrotC"], :] = -50
+    x_bounds[1].max[fancy_names_index["vYrotC"], :] = 50
 
     #
     # Contraintes de position: PHASE 2 l'ouverture
@@ -386,44 +390,44 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[2].max[fancy_names_index["vX"]:fancy_names_index["vY"] + 1, :] = 10
 
     # z bassin
-    x_bounds[2].min[fancy_names_index["vZ"], :] = -100
-    x_bounds[2].max[fancy_names_index["vZ"], :] = 100
+    x_bounds[2].min[fancy_names_index["vZ"], :] = -50
+    x_bounds[2].max[fancy_names_index["vZ"], :] = 50
 
     # autour de x
-    x_bounds[2].min[fancy_names_index["vXrot"], :] = -100
-    x_bounds[2].max[fancy_names_index["vXrot"], :] = 100
+    x_bounds[2].min[fancy_names_index["vXrot"], :] = -50
+    x_bounds[2].max[fancy_names_index["vXrot"], :] = 50
 
     # autour de y
-    x_bounds[2].min[fancy_names_index["vYrot"], :] = -100
-    x_bounds[2].max[fancy_names_index["vYrot"], :] = 100
+    x_bounds[2].min[fancy_names_index["vYrot"], :] = -50
+    x_bounds[2].max[fancy_names_index["vYrot"], :] = 50
 
     # autour de z
-    x_bounds[2].min[fancy_names_index["vZrot"], :] = -100
-    x_bounds[2].max[fancy_names_index["vZrot"], :] = 100
+    x_bounds[2].min[fancy_names_index["vZrot"], :] = -50
+    x_bounds[2].max[fancy_names_index["vZrot"], :] = 50
 
     # bras droit
-    x_bounds[2].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = -100
-    x_bounds[2].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = 100
+    x_bounds[2].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = -50
+    x_bounds[2].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = 50
 
     # bras droit
-    x_bounds[2].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = -100
-    x_bounds[2].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = 100
+    x_bounds[2].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = -50
+    x_bounds[2].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = 50
 
     # coude droit
-    x_bounds[2].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = -100
-    x_bounds[2].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = 100
+    x_bounds[2].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = -50
+    x_bounds[2].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = 50
 
     # coude gauche
-    x_bounds[2].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = -100
-    x_bounds[2].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = 100
+    x_bounds[2].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = -50
+    x_bounds[2].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = 50
 
     # du carpe
-    x_bounds[2].min[fancy_names_index["vXrotC"], :] = -100
-    x_bounds[2].max[fancy_names_index["vXrotC"], :] = 100
+    x_bounds[2].min[fancy_names_index["vXrotC"], :] = -50
+    x_bounds[2].max[fancy_names_index["vXrotC"], :] = 50
 
     # du dehanchement
-    x_bounds[2].min[fancy_names_index["vYrotC"], :] = -100
-    x_bounds[2].max[fancy_names_index["vYrotC"], :] = 100
+    x_bounds[2].min[fancy_names_index["vYrotC"], :] = -50
+    x_bounds[2].max[fancy_names_index["vYrotC"], :] = 50
 
     #
     # Contraintes de position: PHASE 3 la vrille et demie
@@ -469,44 +473,44 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[3].max[fancy_names_index["vX"]:fancy_names_index["vY"] + 1, :] = 10
 
     # z bassin
-    x_bounds[3].min[fancy_names_index["vZ"], :] = -100
-    x_bounds[3].max[fancy_names_index["vZ"], :] = 100
+    x_bounds[3].min[fancy_names_index["vZ"], :] = -50
+    x_bounds[3].max[fancy_names_index["vZ"], :] = 50
 
     # autour de x
-    x_bounds[3].min[fancy_names_index["vXrot"], :] = -100
-    x_bounds[3].max[fancy_names_index["vXrot"], :] = 100
+    x_bounds[3].min[fancy_names_index["vXrot"], :] = -50
+    x_bounds[3].max[fancy_names_index["vXrot"], :] = 50
 
     # autour de y
-    x_bounds[3].min[fancy_names_index["vYrot"], :] = -100
-    x_bounds[3].max[fancy_names_index["vYrot"], :] = 100
+    x_bounds[3].min[fancy_names_index["vYrot"], :] = -50
+    x_bounds[3].max[fancy_names_index["vYrot"], :] = 50
 
     # autour de z
-    x_bounds[3].min[fancy_names_index["vZrot"], :] = -100
-    x_bounds[3].max[fancy_names_index["vZrot"], :] = 100
+    x_bounds[3].min[fancy_names_index["vZrot"], :] = -50
+    x_bounds[3].max[fancy_names_index["vZrot"], :] = 50
 
     # bras droit
-    x_bounds[3].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = -100
-    x_bounds[3].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = 100
+    x_bounds[3].min[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = -50
+    x_bounds[3].max[fancy_names_index["vZrotBD"]:fancy_names_index["vYrotBD"] + 1, :] = 50
 
     # bras droit
-    x_bounds[3].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = -100
-    x_bounds[3].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = 100
+    x_bounds[3].min[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = -50
+    x_bounds[3].max[fancy_names_index["vZrotBG"]:fancy_names_index["vYrotBG"] + 1, :] = 50
 
     # coude droit
-    x_bounds[3].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = -100
-    x_bounds[3].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = 100
+    x_bounds[3].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = -50
+    x_bounds[3].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABD"] + 1, :] = 50
 
     # coude gauche
-    x_bounds[3].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = -100
-    x_bounds[3].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = 100
+    x_bounds[3].min[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = -50
+    x_bounds[3].max[fancy_names_index["vZrotABD"]:fancy_names_index["vYrotABG"] + 1, :] = 50
 
     # du carpe
-    x_bounds[3].min[fancy_names_index["vXrotC"], :] = -100
-    x_bounds[3].max[fancy_names_index["vXrotC"], :] = 100
+    x_bounds[3].min[fancy_names_index["vXrotC"], :] = -50
+    x_bounds[3].max[fancy_names_index["vXrotC"], :] = 50
 
     # du dehanchement
-    x_bounds[3].min[fancy_names_index["vYrotC"], :] = -100
-    x_bounds[3].max[fancy_names_index["vYrotC"], :] = 100
+    x_bounds[3].min[fancy_names_index["vYrotC"], :] = -50
+    x_bounds[3].max[fancy_names_index["vYrotC"], :] = 50
 
     #
     # Contraintes de position: PHASE 4 la reception
@@ -611,6 +615,11 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[4].min[fancy_names_index["vYrotC"], :] = -100
     x_bounds[4].max[fancy_names_index["vYrotC"], :] = 100
 
+    # x_bounds[5] = x_bounds[0]
+    # x_bounds[6] = x_bounds[1]
+    # x_bounds[7] = x_bounds[2]
+    # x_bounds[8] = x_bounds[0]
+    # x_bounds[9] = x_bounds[4]
     x_bounds[5].min[:] = x_bounds[0].min[:]
     x_bounds[5].max[:] = x_bounds[0].max[:]
     x_bounds[6].min[:] = x_bounds[1].min[:]
@@ -793,17 +802,26 @@ def prepare_ocp(
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=3, phase_post=8)
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=4, phase_post=9)
     # states
-
-    node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
-    node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
-    node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
-    node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
-    node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
-    node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
-    node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
-    node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
-    node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
-    node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5)
+    node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
+    node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6)
+    node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
+    node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7)
+    node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7)
+    node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8)
+    node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8)
+    node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9)
+    # node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index=[i for i in range(6, 16)])
+    # node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
+    # node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
+    # node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
+    # node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
+    # node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
+    # node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
+    # node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
+    # node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
+    # node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
+    # node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
 
     #node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
    # node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
@@ -861,14 +879,14 @@ def prepare_ocp(
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10000, phase=8)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING, dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=10000, phase=9)
     #argparse
-    parser = argparse.ArgumentParser()
+    #parser = argparse.ArgumentParser()
     #parser.add_argument("model", type=str, help="the bioMod file")
-    parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
-    parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
-    parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
-    parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
-    parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
-    args = parser.parse_args()
+   # parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
+    #parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
+   # parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
+   # parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
+   # parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
+    #args = parser.parse_args()
     # ouvre les hanches rapidement apres la vrille
     ## AuJo
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[fancy_names_index["XrotC"]], targets=[0, 0], weight=10000, phase=3)
@@ -923,11 +941,13 @@ def prepare_ocp(
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=3)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=4)
-       # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=5)
+   # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=5)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=6)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=7)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=8)
     constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=9)
+
+
 
     phase_transitions = PhaseTransitionList()
     phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=0)  # 0-1
@@ -966,15 +986,18 @@ def main():
     model_path_AuJo = "Models/AuJo_TechOpt83.bioMod"
     model_path_JeCh = "Models/JeCh_TechOpt83.bioMod"
     n_threads = 4
-    print_ocp_FLAG = False  # True
+    print_ocp_FLAG = False  # True.
+
     show_online_FLAG = False  # True
     HSL_FLAG = True
     save_sol_FLAG = True
-    n_shooting = (40, 100, 100, 100, 40,
-                  40, 100, 100, 100, 40)
+    # n_shooting = (40, 100, 100, 100, 40,
+    #               40, 100, 100, 100, 40)
+    n_shooting = (4, 10, 10, 10, 4,
+                  4, 10, 10, 10, 4)
 
-    ocp = prepare_ocp(model_path_AuJo, model_path_JeCh, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
-    ocp.add_plot_penalty(CostType.ALL)
+    ocp = prepare_ocp(model_path_AuJo,model_path_JeCh, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87*2)
+    #ocp.add_plot_penalty(CostType.ALL)
     if print_ocp_FLAG:
         ocp.print(to_graph=True)
     solver = Solver.IPOPT(show_online_optim=show_online_FLAG, show_options=dict(show_bounds=True))
@@ -982,7 +1005,7 @@ def main():
          solver.set_linear_solver('ma57')
     else:
         print("Not using ma57")
-    solver.set_maximum_iterations(10000)
+    solver.set_maximum_iterations(10)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
@@ -1009,4 +1032,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #main()
 
