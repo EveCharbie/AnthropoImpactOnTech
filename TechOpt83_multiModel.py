@@ -795,23 +795,23 @@ def prepare_ocp(
 
     # Phase mapping
     #controls
-    # node_mappings = NodeMappingList()
-    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=0, phase_post=5)
-    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=1, phase_post=6)
-    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=2, phase_post=7)
-    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=3, phase_post=8)
-    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=4, phase_post=9)
+    node_mappings = NodeMappingList()
+    node_mappings.add("qddot_joints", map_controls=True, phase_pre=0, phase_post=5)
+    node_mappings.add("qddot_joints", map_controls=True, phase_pre=1, phase_post=6)
+    node_mappings.add("qddot_joints", map_controls=True, phase_pre=2, phase_post=7)
+    node_mappings.add("qddot_joints", map_controls=True, phase_pre=3, phase_post=8)
+    node_mappings.add("qddot_joints", map_controls=True, phase_pre=4, phase_post=9)
     # states
-    # node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5)
-    # node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
-    # node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6)
-    # node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
-    # node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7)
-    # node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7)
-    # node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8)
-    # node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8)
-    # node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9)
-    # node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index=[i for i in range(6, 16)])
+    node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5)
+    node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
+    node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6)
+    node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
+    node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7)
+    node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7)
+    node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8)
+    node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8)
+    node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9)
+    #node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index=[i for i in range(6, 16)])
     # node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
     # node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
     # node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
@@ -976,7 +976,7 @@ def prepare_ocp(
         constraints,
         ode_solver=ode_solver,
         n_threads=n_threads,
-        #node_mappings=node_mappings,
+        node_mappings=node_mappings,
         phase_transitions=phase_transitions,
     )
 
