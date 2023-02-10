@@ -17,7 +17,7 @@ Pelvis:
 Thorax:
   meshfile: Model_mesh/thorax.stl
   meshrt: [-0.15, 0, 0]
-  meshxyz: [0, -0.025, 0]
+  meshxyz: [0, -0.025, 0.05]
 
 Head:
   meshfile: Model_mesh/tete.stl
