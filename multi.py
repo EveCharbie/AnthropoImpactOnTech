@@ -10,7 +10,7 @@ import casadi as cas
 import sys
 import argparse
 
-sys.path.append('/home/lim/Documents/Stage_Lisa/bioptim/')
+#sys.path.append('/home/lim/Documents/Stage_Lisa/bioptim/')
 from bioptim import (
     OptimalControlProgram,
     DynamicsList,
@@ -137,8 +137,8 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[0].max[fancy_names_index["Z"], MILIEU:] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
 
     # le salto autour de x
-    x_bounds[0].min[Xrot, :] = 0
-    x_bounds[0].max[Xrot, :] = 0.50 + 3.14
+    x_bounds[0].min[fancy_names_index["Xrot"], :] = 0
+    x_bounds[0].max[fancy_names_index["Xrot"], :] = 0.50 + 3.14
     x_bounds[0].min[fancy_names_index["Xrot"], DEBUT] = .50  # penche vers l'avant un peu carpe
     x_bounds[0].max[fancy_names_index["Xrot"], DEBUT] = .50
     x_bounds[0].min[fancy_names_index["Xrot"], MILIEU:] = 0
@@ -190,7 +190,8 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
 
     # Contraintes de vitesse: PHASE 0 la montee en carpe
 
-    vzinit = 9.81 / (4*final_time)  # vitesse initiale en z du CoM pour revenir a terre au temps final
+    vzinit = 9.81 / 2 * final_time  # vitesse initiale en z du CoM pour revenir a terre au temps final
+    print(f'vzinit = {vzinit}')
 
     # 4 aller retour
 
@@ -217,6 +218,7 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[0].max[fancy_names_index["vZ"], :] = 50
     x_bounds[0].min[fancy_names_index["vZ"], DEBUT] = vzinit - .5
     x_bounds[0].max[fancy_names_index["vZ"], DEBUT] = vzinit + .5
+
 
     # autour de x
     x_bounds[0].min[fancy_names_index["vXrot"], :] = .5  # d'apres une observation video
@@ -650,6 +652,10 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     x_bounds[9].min[:] = x_bounds[4].min[:]
     x_bounds[9].max[:] = x_bounds[4].max[:]
 
+    print(f" x bounds phase 0 vZ : {x_bounds[0].min[fancy_names_index['vZ'], DEBUT]}")
+    print(f" x bounds phase 5 vZ : {x_bounds[5].min[fancy_names_index['vZ'], DEBUT]}")
+    print( x_bounds[0].min[fancy_names_index['vZ'], DEBUT] == x_bounds[5].min[fancy_names_index['vZ'], DEBUT])
+
     return x_bounds
 
 
@@ -799,11 +805,11 @@ def prepare_ocp(
                     BiorbdModel(biorbd_model_path_AuJo),
                     BiorbdModel(biorbd_model_path_AuJo),
                     BiorbdModel(biorbd_model_path_AuJo),
-                    BiorbdModel(biorbd_model_path_JeCh),
-                    BiorbdModel(biorbd_model_path_JeCh),
-                    BiorbdModel(biorbd_model_path_JeCh),
-                    BiorbdModel(biorbd_model_path_JeCh),
-                    BiorbdModel(biorbd_model_path_JeCh),
+                    BiorbdModel(biorbd_model_path_AuJo),
+                    BiorbdModel(biorbd_model_path_AuJo),
+                    BiorbdModel(biorbd_model_path_AuJo),
+                    BiorbdModel(biorbd_model_path_AuJo),
+                    BiorbdModel(biorbd_model_path_AuJo),
                     )
 
     nb_q = biorbd_model[0].nb_q
@@ -814,12 +820,12 @@ def prepare_ocp(
 
     # Phase mapping
     # controls
-    node_mappings = NodeMappingList()
-    node_mappings.add("qddot_joints", map_controls=True, phase_pre=0, phase_post=5)
-    node_mappings.add("qddot_joints", map_controls=True, phase_pre=1, phase_post=6)
-    node_mappings.add("qddot_joints", map_controls=True, phase_pre=2, phase_post=7)
-    node_mappings.add("qddot_joints", map_controls=True, phase_pre=3, phase_post=8)
-    node_mappings.add("qddot_joints", map_controls=True, phase_pre=4, phase_post=9)
+    # node_mappings = NodeMappingList()
+    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=0, phase_post=5)
+    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=1, phase_post=6)
+    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=2, phase_post=7)
+    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=3, phase_post=8)
+    # node_mappings.add("qddot_joints", map_controls=True, phase_pre=4, phase_post=9)
     # states
 
     # node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
@@ -869,7 +875,7 @@ def prepare_ocp(
     objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000,
                             phase=0)
     ## JeCh
-    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=100000,
+    objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0, max_bound=final_time, weight=100000,
                             phase=5)
 
     # Les hanches sont fixes a +-0.2 en bounds, mais les mains doivent quand meme être proches des jambes
@@ -1018,7 +1024,7 @@ def prepare_ocp(
         biorbd_model,
         dynamics,
         n_shooting,
-        [final_time / len(biorbd_model)] * len(biorbd_model),
+        [final_time*2 / len(biorbd_model)] * len(biorbd_model),
         x_init,
         u_init,
         x_bounds,
@@ -1044,10 +1050,10 @@ def main():
     save_sol_FLAG = True
     # n_shooting = (40, 100, 100, 100, 40,
     #               40, 100, 100, 100, 40)
-    n_shooting = (40, 100, 100, 100, 40,
-                  40, 100, 100, 100, 40)
+    n_shooting = (3, 5, 5, 5, 5,
+                  3, 5, 5, 5, 3)
 
-    ocp = prepare_ocp(model_path_AuJo, model_path_JeCh, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87 * 2)
+    ocp = prepare_ocp(model_path_AuJo, model_path_JeCh, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     # ocp.add_plot_penalty(CostType.ALL)
     if print_ocp_FLAG:
         ocp.print(to_graph=True)
@@ -1056,7 +1062,7 @@ def main():
         solver.set_linear_solver('ma57')
     else:
         print("Not using ma57")
-    solver.set_maximum_iterations(1000)
+    solver.set_maximum_iterations(100000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
