@@ -28,7 +28,7 @@ from bioptim import (
     ConstraintList,
     ConstraintFcn,
     PenaltyNodeList,
-    BiorbdInterface,
+    BiorbdModel,
     NonLinearProgram,
     ConfigureProblem,
     DynamicsFunctions,
@@ -52,7 +52,7 @@ def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> cas.MX:
     diff = 0
     for i, dof in enumerate(dofs):
         diff += (all_pn.nlp.states['q'].mx[dof] - targets[i])**2
-    return BiorbdInterface.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
+    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
 
 
 def set_fancy_names_index(nb_q):
@@ -97,8 +97,8 @@ def set_fancy_names_index(nb_q):
 
 def set_x_bounds(biorbd_model, fancy_names_index, final_time):
 
-    nb_q = biorbd_model[0].nbQ()
-    nb_qdot = biorbd_model[0].nbQ()
+    nb_q = biorbd_model[0].nb_q
+    nb_qdot = biorbd_model[0].nb_qdot
 
     # Path constraint
     x_bounds = BoundsList()
@@ -120,7 +120,7 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     # Contraintes de position: PHASE 0 la montee en carpe
     #
 
-    zmax = 9.81 / 8 * final_time**2 + 1  # une petite marge
+    zmax = 8 #9.81 / 8 * final_time**2 + 1  # une petite marge
 
     # deplacement
     x_bounds[0].min[fancy_names_index["X"], :] = -.1
@@ -190,9 +190,9 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
     # AUJO
     CoM_Q_sym = cas.MX.sym('CoM', nb_q)
     CoM_Q_init = x_bounds[0].min[:nb_q, DEBUT]  # min ou max ne change rien a priori, au DEBUT ils sont egaux normalement
-    CoM_Q_func = cas.Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].CoM(CoM_Q_sym).to_mx()])
+    CoM_Q_func = cas.Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].center_of_mass(CoM_Q_sym)])
     bassin_Q_func = cas.Function('bassin_Q_func', [CoM_Q_sym],
-                             [biorbd_model[0].globalJCS(0).to_mx()])  # retourne la RT du bassin
+                             [biorbd_model[0].homogeneous_matrices_in_global(CoM_Q_sym,0).to_mx()])  # retourne la RT du bassin
 
     r = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation de la RT
 
@@ -635,8 +635,8 @@ def set_x_bounds(biorbd_model, fancy_names_index, final_time):
 
 def set_x_init(biorbd_model, fancy_names_index):
 
-    nb_q = biorbd_model[0].nbQ()
-    nb_qdot = biorbd_model[0].nbQdot()
+    nb_q = biorbd_model[0].nb_q
+    nb_qdot = biorbd_model[0].nb_qdot
     x0 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x1 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
     x2 = np.vstack((np.zeros((nb_q, 2)), np.zeros((nb_qdot, 2))))
@@ -775,26 +775,26 @@ def prepare_ocp(
     The OptimalControlProgram ready to be solved
     """
 
-    biorbd_model = ( biorbd.Model(biorbd_model_path_AuJo),
-                     biorbd.Model(biorbd_model_path_AuJo),
-                     biorbd.Model(biorbd_model_path_AuJo),
-                     biorbd.Model(biorbd_model_path_AuJo),
-                     biorbd.Model(biorbd_model_path_AuJo),
-                     biorbd.Model(biorbd_model_path_JeCh),
-                     biorbd.Model(biorbd_model_path_JeCh),
-                     biorbd.Model(biorbd_model_path_JeCh),
-                     biorbd.Model(biorbd_model_path_JeCh),
-                     biorbd.Model(biorbd_model_path_JeCh),
+    biorbd_model = ( BiorbdModel(biorbd_model_path_AuJo),
+                     BiorbdModel(biorbd_model_path_AuJo),
+                     BiorbdModel(biorbd_model_path_AuJo),
+                     BiorbdModel(biorbd_model_path_AuJo),
+                     BiorbdModel(biorbd_model_path_AuJo),
+                     BiorbdModel(biorbd_model_path_JeCh),
+                     BiorbdModel(biorbd_model_path_JeCh),
+                     BiorbdModel(biorbd_model_path_JeCh),
+                     BiorbdModel(biorbd_model_path_JeCh),
+                     BiorbdModel(biorbd_model_path_JeCh),
                      )
 
-    nb_q = biorbd_model[0].nbQ()
-    nb_qdot = biorbd_model[0].nbQdot()
-    nb_qddot_joints = nb_q - biorbd_model[0].nbRoot()
+    nb_q = biorbd_model[0].nb_q
+    nb_qdot = biorbd_model[0].nb_qdot
+    nb_qddot_joints = nb_q - biorbd_model[0].nb_root
 
     fancy_names_index = set_fancy_names_index(nb_q)
 
     # Phase mapping
-    # controls
+    #controls
     node_mappings = NodeMappingList()
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=0, phase_post=5)
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=1, phase_post=6)
@@ -802,26 +802,26 @@ def prepare_ocp(
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=3, phase_post=8)
     node_mappings.add("qddot_joints", map_controls=True, phase_pre=4, phase_post=9)
     # states
-    node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5)
-    node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
-    node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6)
-    node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
-    node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7)
-    node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7)
-    node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8)
-    node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8)
-    node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9)
-    # node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index=[i for i in range(6, 16)])
-    # node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
-    # node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
-    # node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
-    # node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
-    # node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
-    # node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
-    # node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
-    # node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
-    # node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
-    # node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
+    # node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5)
+    # node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
+    # node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6)
+    # node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
+    # node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7)
+    # node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7)
+    # node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8)
+    # node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8)
+    # node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9)
+    node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index=[i for i in range(6, 16)])
+    node_mappings.add("q", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5, index= [i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6, index= [i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=2, phase_post=7, index = [i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=3, phase_post=8, index =[i for i in range(6,16)])
+    node_mappings.add("q", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
+    node_mappings.add("qdot", map_states=True, phase_pre=4, phase_post=9, index =[i for i in range(6,16)])
 
     #node_mappings.add("qdot", map_states=True, phase_pre=0, phase_post=5)
    # node_mappings.add("qdot", map_states=True, phase_pre=1, phase_post=6)
@@ -967,7 +967,7 @@ def prepare_ocp(
         biorbd_model,
         dynamics,
         n_shooting,
-        [final_time/len(biorbd_model)] * len(biorbd_model),
+        [final_time*2/len(biorbd_model)] * len(biorbd_model),
         x_init,
         u_init,
         x_bounds,
@@ -976,7 +976,7 @@ def prepare_ocp(
         constraints,
         ode_solver=ode_solver,
         n_threads=n_threads,
-        node_mappings=node_mappings,
+        #node_mappings=node_mappings,
         phase_transitions=phase_transitions,
     )
 
@@ -984,7 +984,7 @@ def prepare_ocp(
 def main():
 
     model_path_AuJo = "Models/AuJo_TechOpt83.bioMod"
-    model_path_JeCh = "Models/JeCh_TechOpt83.bioMod"
+    model_path_JeCh = "Models/AuJo_TechOpt83.bioMod"
     n_threads = 4
     print_ocp_FLAG = False  # True.
 
@@ -996,7 +996,7 @@ def main():
     n_shooting = (4, 10, 10, 10, 4,
                   4, 10, 10, 10, 4)
 
-    ocp = prepare_ocp(model_path_AuJo,model_path_JeCh, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87*2)
+    ocp = prepare_ocp(model_path_AuJo,model_path_JeCh, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     #ocp.add_plot_penalty(CostType.ALL)
     if print_ocp_FLAG:
         ocp.print(to_graph=True)
@@ -1005,7 +1005,7 @@ def main():
          solver.set_linear_solver('ma57')
     else:
         print("Not using ma57")
-    solver.set_maximum_iterations(10)
+    solver.set_maximum_iterations(1000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
