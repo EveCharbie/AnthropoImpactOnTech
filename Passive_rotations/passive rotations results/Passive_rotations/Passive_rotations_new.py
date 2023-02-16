@@ -77,8 +77,8 @@ def bras_descendent(m, x0, t, T0, Tf, Q0, Qf):
     Kv = 3.
     p, v, a = Quintic(t, T0, Tf, Q0, Qf)
     Qddot_J = np.zeros(m.nbQ() - m.nbRoot())
-    Qddot_J[GAUCHE - m.nbRoot()] = a + Kp * (p - x0[GAUCHE]) + Kv * (v - x0[m.nbQ() + GAUCHE])
-    Qddot_J[DROITE - m.nbRoot()] = -a + Kp * (-p - x0[DROITE]) + Kv * (-v - x0[m.nbQ() + DROITE])
+    Qddot_J[GAUCHE - m.nbRoot()] = -a + Kp * (-p - x0[GAUCHE]) + Kv * (-v - x0[m.nbQ() + GAUCHE])
+    Qddot_J[DROITE - m.nbRoot()] = a + Kp * (p - x0[DROITE]) + Kv * (v - x0[m.nbQ() + DROITE])
 
     x = dynamics_root(m, x0, Qddot_J)
     return x
@@ -89,7 +89,7 @@ def bras_gauche_descend(m, x0, t, T0, Tf, Q0, Qf):
     Kv = 3.
     p, v, a = Quintic(t, T0, Tf, Q0, Qf)
     Qddot_J = np.zeros(m.nbQ() - m.nbRoot())
-    Qddot_J[GAUCHE - m.nbRoot()] = a + Kp * (p - x0[GAUCHE]) + Kv * (v - x0[m.nbQ() + GAUCHE])
+    Qddot_J[GAUCHE - m.nbRoot()] = -a + Kp * (-p - x0[GAUCHE]) + Kv * (-v - x0[m.nbQ() + GAUCHE])
 
     x = dynamics_root(m, x0, Qddot_J)
     return x
@@ -100,7 +100,7 @@ def bras_droit_descend(m, x0, t, T0, Tf, Q0, Qf):
     Kv = 3.
     p, v, a = Quintic(t, T0, Tf, Q0, Qf)
     Qddot_J = np.zeros(m.nbQ() - m.nbRoot())
-    Qddot_J[DROITE - m.nbRoot()] = -a + Kp * (-p - x0[DROITE]) + Kv * (-v - x0[m.nbQ() + DROITE])
+    Qddot_J[DROITE - m.nbRoot()] = a + Kp * (p - x0[DROITE]) + Kv * (v - x0[m.nbQ() + DROITE])
 
     x = dynamics_root(m, x0, Qddot_J)
     return x
@@ -124,10 +124,10 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre =""):
     values = [QbrasD, QbrasG, QdotbrasD, QdotbrasG, QddotbrasG, QddotbrasG]
     athlete = titre.partition('debut')[0]
     n = len(values)
-   # for i in range(n):
-#        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
-       # pickle.dump(values[i], file)
-       # file.close()
+    for i in range(n):
+        file = open(f"Q_passive_rotations/{titre}-{titles[i]}.pkl", 'wb')
+        pickle.dump(values[i], file)
+        file.close()
 
     fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2, sharex=True)
     axQD.plot(t, QbrasD)
@@ -151,7 +151,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre =""):
     fig.suptitle(suptitre)
 
     fig.tight_layout()
-#    fig.savefig(f'Videos/{suptitre}.pdf')
+    fig.savefig(f'Videos/{suptitre}.pdf')
     # fig.show()
 
 def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
@@ -186,10 +186,10 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
     values = [QX, QY, QZ, QrotX, QrotY, QrotZ, QdotX, QdotY, QdotZ, QdotrotX, QdotrotY, QdotrotZ,QddotX, QddotY, QddotZ, QddotrotX, QddotrotY, QddotrotZ]
     n = len(values)
     athlete = titre.partition('debut')[0]
-  #  for i in  range(n):
-#        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
-     #   pickle.dump(values[i], file)
-    #    file.close()
+    for i in  range(n):
+        file = open(f"Q_passive_rotations/{titre}-{titles[i]}.pkl", 'wb')
+        pickle.dump(values[i], file)
+        file.close()
 
 
     fig, (axp, axv, axa) = plt.subplots(3, 1, sharex=True)
@@ -216,7 +216,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
     fig.suptitle(suptitre)
     fig.tight_layout()
     fig.savefig(f'Videos/{suptitre}.pdf')
-    fig.show()
+    # fig.show()
 
     figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, sharex=True)
     axprot.plot(t, QrotX, label="Rot X")
@@ -244,20 +244,6 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
     figrot.savefig(f'Videos/{suptitre}.pdf')
     # figrot.show()
 
-
-workbook = xlsxwriter.Workbook('/home/lim/Documents/Stage_Lisa/AnthropoImpactOnTech/degrees_of_liberty.xlsx')
-
-# The workbook object is then used to add new
-    # worksheet via the add_worksheet() method.
-worksheet = workbook.add_worksheet()
-
-# Use the worksheet object to write
-# data via the write() method.
-worksheet.write('A1', 'Athlete')
-worksheet.write('B1', 'Starting')
-worksheet.write('C1', 'Salto')
-worksheet.write('D1', 'Tilt')
-worksheet.write('E1', 'Twist')
 
 # Simulation
 #
@@ -303,99 +289,126 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row , column, si
         b.exec()
 
 N = 100
-JeCh = "Models/JeCh_pr.bioMod"
-JeCh_2 = "Models/JeCh_2.bioMod"
-SaMi = "Models/SaMi_pr.bioMod"
-ElMe = "Models/ElMe.bioMod"
-ZoTs = "Models/ZoTs.bioMod"
+JeCh = "Models/JeCh.bioMod"
+WeEm = "Models/WeEm.bioMod"
+SoMe = "Models/SoMe.bioMod"
+Sarah = "Models/Sarah.bioMod"
+OlGa = "Models/OlGa.bioMod"
+MaJa = "Models/MaJa.bioMod"
+MaCu = "Models/MaCu.bioMod"
+LaDe = "Models/LaDe.bioMod"
+FeBl = "Models/FeBl.bioMod"
+EvZl = "Models/EvZl.bioMod"
+Benjamin = "Models/Benjamin.bioMod"
+AuJo = "Models/AuJo.bioMod"
+AlAd = "Models/AlAd.bioMod"
+AdCh = "Models/AdCh.bioMod"
 
-# m_JeCh = biorbd.Model(model_path_JeCh)
-# m_SaMi = biorbd.Model(model_path_SaMi)
-# m_ElMe = biorbd.Model(model_path_ElMe)
-# m_ZoTs = biorbd.Model(model_path_ZoTs)
 
 
+# JeCh_2 = "Models/JeCh_2.bioMod"
+# SaMi = "Models/SaMi_pr.bioMod"
+# ElMe = "Models/ElMe.bioMod"
+# ZoTs = "Models/ZoTs.bioMod"
+# KaMi = "Models/KaMi.bioMod"
+# KaFu = "Models/KaFu.bioMod"
+# B
 
 
-
-GAUCHE = 24  # 42 -> 24; 10 -> 9
-DROITE = 15  # 42 -> 15; 10 -> 7
+GAUCHE = 11  # 42 -> 24; 10 -> 9
+DROITE = 7  # 42 -> 15; 10 -> 7
 
 t0 = 0.
 tf = 1.
 T0 = 0.
 Tf = .2
 Q0 = 2.9
-Qf = .18
+Qf = 0.0
 
-models = [JeCh]
-for i in range(len(models)):
-    model = biorbd.Model(models[i])
-    name = models[i]
-    column = 0
-    row = i*6  +1
+models = [JeCh, WeEm, SoMe, Sarah, OlGa, MaJa, MaCu, LaDe, FeBl, EvZl, Benjamin, AuJo, AlAd, AdCh]
+#for i in range(len(models)):
+i = 13
+model = biorbd.Model(models[i])
+name = models[i]
+athlete = models[i].removeprefix('Models/').removesuffix('.bioMod')
+workbook = xlsxwriter.Workbook(f'/home/mickaelbegon/Documents/antoine/Optimisation/sandbox/Passive_rotations/Degrees/degrees_of_liberty-{athlete}.xlsx')
 
-    # JeCh
-    # debut bras en haut
-    X0 = np.zeros(model.nbQ() * 2)
-    X0[DROITE] = -Q0
-    X0[GAUCHE] = Q0
+# The workbook object is then used to add new
+    # worksheet via the add_worksheet() method.
+worksheet = workbook.add_worksheet()
 
-    CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
-    bassin = model.globalJCS(0).to_array()
-    QCoM = CoM_func.reshape(1, 3)
-    Qbassin = bassin[-1, :3]
-    r = QCoM - Qbassin
+# Use the worksheet object to write
+# data via the write() method.
+worksheet.write('A1', 'Athlete')
+worksheet.write('B1', 'Position')
+worksheet.write('C1', 'Salto')
+worksheet.write('D1', 'Tilt')
+worksheet.write('E1', 'Twist')
 
-    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
-    X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
+column = 0
+row = 1
 
-    # row = i +1
-    situation = 'debut bras en haut'
-    simuler(f"{name} bras en haut", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True, row= row, column=column, situation= situation)
-    row+=1
-    simuler(f"{name} bras descendent", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=False, row=row, column=column, situation = situation)
+# JeCh
+# debut bras en haut
+X0 = np.zeros(model.nbQ() * 2)
+X0[DROITE] = Q0
+X0[GAUCHE] = -Q0
 
+CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
+bassin = model.globalJCS(0).to_array()
+QCoM = CoM_func.reshape(1, 3)
+Qbassin = bassin[-1, :3]
+r = QCoM - Qbassin
 
-    row+=1
-    simuler(f"{name} bras gauche descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=False, row=row, column=column, situation = situation)
-    row+=1
-    simuler(f"{name} bras droit descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=False, row=row, column=column, situation = situation )
+X0[model.nbQ() + 3] = - 2 * np.pi  # Salto rot
+X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
 
-    # debut bras droit en haut, gauche bas
-    situation = 'debut bras droit en haut, gauche bas'
-    X0 = np.zeros(model.nbQ() * 2)
-    X0[DROITE] = -Q0
-    X0[GAUCHE] = Qf
-
-    CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
-    bassin = model.globalJCS(0).to_array()
-    QCoM = CoM_func.reshape(1, 3)
-    Qbassin = bassin[-1, :3]
-    r = QCoM - Qbassin
-
-    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
-    X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
-    row+=1
-    simuler(f"{name} bras gauche bas, droit descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=False, row=row, column=column, situation=situation)
-
-    situation = 'debut bras gauche en haut, droit bas'
-    X0 = np.zeros(model.nbQ() * 2)
-    X0[DROITE] = -Qf
-    X0[GAUCHE] = Q0
-
-    CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
-    bassin = model.globalJCS(0).to_array()
-    QCoM = CoM_func.reshape(1, 3)
-    Qbassin = bassin[-1, :3]
-    r = QCoM - Qbassin
-
-    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
-    X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
-    row+=1
-    simuler(f"{name} bras droit bas, gauche descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=False, row=row, column=column, situation = situation)
+# row = i +1
+situation = 'starts with arms up'
+simuler(f"{name} arms stay up", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True, row= row, column=column, situation= situation)
+row+=1
+simuler(f"{name} arms go down", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True, row=row, column=column, situation = situation)
 
 
+row+=1
+simuler(f"{name} left arm goes down", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True, row=row, column=column, situation = situation)
+row+=1
+simuler(f"{name} right arm goes down", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True , row=row, column=column, situation = situation )
+
+# debut bras droit en haut, gauche bas
+situation = 'starts with right arm up and left arm down'
+X0 = np.zeros(model.nbQ() * 2)
+X0[DROITE] = Q0
+X0[GAUCHE] = -Qf
+
+CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
+bassin = model.globalJCS(0).to_array()
+QCoM = CoM_func.reshape(1, 3)
+Qbassin = bassin[-1, :3]
+r = QCoM - Qbassin
+
+X0[model.nbQ() + 3] = -2 * np.pi  # Salto rot
+X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
+row += 1
+simuler(f"{name} right goes down", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True, row=row, column=column, situation=situation)
+
+situation = 'starts with left arm up, right arm down'
+X0 = np.zeros(model.nbQ() * 2)
+X0[DROITE] = Qf
+X0[GAUCHE] = -Q0
+
+CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
+bassin = model.globalJCS(0).to_array()
+QCoM = CoM_func.reshape(1, 3)
+Qbassin = bassin[-1, :3]
+r = QCoM - Qbassin
+
+X0[model.nbQ() + 3] = - 2 * np.pi  # Salto rot
+X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
+row+=1
+simuler(f"{name} left arm goes down", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True , row=row, column=column, situation = situation)
+
+print('fin')
 workbook.close()
 
 

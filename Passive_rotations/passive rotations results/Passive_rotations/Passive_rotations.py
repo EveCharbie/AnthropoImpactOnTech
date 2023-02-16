@@ -124,10 +124,10 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre =""):
     values = [QbrasD, QbrasG, QdotbrasD, QdotbrasG, QddotbrasG, QddotbrasG]
     athlete = titre.partition('debut')[0]
     n = len(values)
-   # for i in range(n):
-#        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
-       # pickle.dump(values[i], file)
-       # file.close()
+    for i in range(n):
+        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
+        pickle.dump(values[i], file)
+        file.close()
 
     fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2, sharex=True)
     axQD.plot(t, QbrasD)
@@ -151,7 +151,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre =""):
     fig.suptitle(suptitre)
 
     fig.tight_layout()
-#    fig.savefig(f'Videos/{suptitre}.pdf')
+    fig.savefig(f'Videos/{suptitre}.pdf')
     # fig.show()
 
 def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
@@ -186,10 +186,10 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
     values = [QX, QY, QZ, QrotX, QrotY, QrotZ, QdotX, QdotY, QdotZ, QdotrotX, QdotrotY, QdotrotZ,QddotX, QddotY, QddotZ, QddotrotX, QddotrotY, QddotrotZ]
     n = len(values)
     athlete = titre.partition('debut')[0]
-  #  for i in  range(n):
-#        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
-     #   pickle.dump(values[i], file)
-    #    file.close()
+    for i in  range(n):
+        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
+        pickle.dump(values[i], file)
+        file.close()
 
 
     fig, (axp, axv, axa) = plt.subplots(3, 1, sharex=True)
@@ -216,7 +216,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
     fig.suptitle(suptitre)
     fig.tight_layout()
     fig.savefig(f'Videos/{suptitre}.pdf')
-    fig.show()
+    # fig.show()
 
     figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, sharex=True)
     axprot.plot(t, QrotX, label="Rot X")
@@ -303,11 +303,13 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row , column, si
         b.exec()
 
 N = 100
-JeCh = "Models/JeCh_pr.bioMod"
+JeCh = "Models/JeCh.bioMod"
 JeCh_2 = "Models/JeCh_2.bioMod"
 SaMi = "Models/SaMi_pr.bioMod"
 ElMe = "Models/ElMe.bioMod"
 ZoTs = "Models/ZoTs.bioMod"
+
+
 
 # m_JeCh = biorbd.Model(model_path_JeCh)
 # m_SaMi = biorbd.Model(model_path_SaMi)
@@ -318,8 +320,8 @@ ZoTs = "Models/ZoTs.bioMod"
 
 
 
-GAUCHE = 24  # 42 -> 24; 10 -> 9
-DROITE = 15  # 42 -> 15; 10 -> 7
+GAUCHE = 19  # 42 -> 24; 10 -> 9
+DROITE = 14  # 42 -> 15; 10 -> 7
 
 t0 = 0.
 tf = 1.
@@ -328,7 +330,7 @@ Tf = .2
 Q0 = 2.9
 Qf = .18
 
-models = [JeCh]
+models = [ ZoTs ]
 for i in range(len(models)):
     model = biorbd.Model(models[i])
     name = models[i]
