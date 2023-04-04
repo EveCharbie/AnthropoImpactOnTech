@@ -931,12 +931,12 @@ results_path = "/home/lim/Documents/Stage_Lisa/Solutions_Tech_opt_83/Sol_with_no
 
 # cmap = cm.colors.Colormap
 # pour  un athlete on veut toutes les ol avec les bruits et le gradient de couleurs sur la valeur de la fonction objc
-folder_graphs = "/home/lim/Documents/Stage_Lisa/kinematics_graphs"
+folder_graphs = "kinematics_graphs"
 
 
 FLAG_SAME_FIG = True
 
-model_path = "AnthropoImpactOnTech/Models"
+model_path = "models"
 # choix de l'athlete ou boucle for :
 # athlete = 'Kafu'
 key = "3"
