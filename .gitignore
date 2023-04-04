@@ -143,9 +143,6 @@ Images/
 
 *.ogv
 
-*.bioMod
-
-*.stl
 
 *.pdf
 
@@ -163,7 +160,7 @@ Models_all_dofs/
 
 Passive_rotations/Models/
 
-Models/
+Passive_rotations/passive rotation results/Passive_rotations/Models
 
 *.ods#
 

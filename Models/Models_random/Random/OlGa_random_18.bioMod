@@ -1,0 +1,209 @@
+version 4
+
+root_actuated 0
+external_forces 0
+
+gravity 0 0 -9.81
+
+segment Pelvis
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.0
+	translations xyz
+	rotations xyz
+	com 0.0 0.0 0.0
+	mass 13.47963378430496
+	inertia
+		0.1121444504993876 0.0 0.0
+		0.0 0.1660373391303952 0.0
+		0.0 0.0 0.12301978745620512
+	meshfile Model_mesh/pelvis.stl
+	meshscale 1.0121527777777777 1.1139240506329116 1.720779220779221
+	meshrt -0.175 0 0 xyz 0 0 0
+endsegment
+
+segment Thorax
+	parent Pelvis
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.1391037579205341
+	com 0.0 0.0 0.15025886556716384
+	mass 15.604823996670643
+	inertia
+		0.14824247038094224 0.0 0.0
+		0.0 0.2185704859544226 0.0
+		0.0 0.0 0.15875803552193793
+	meshfile Model_mesh/thorax.stl
+	meshscale 0.9477848101265822 1.1139240506329116 0.8278688524590162
+	meshrt -0.15 0 0 xyz 0 -0.025 0.05
+endsegment
+
+segment Head
+	parent Thorax
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 0.30299999999999994
+	com 0.0 0.0 0.12540911034391472
+	mass 4.578246308901814
+	inertia
+		0.02526940489183204 0.0 0.0
+		0.0 0.026066247641523557 0.0
+		0.0 0.0 0.013921692242950246
+	meshfile Model_mesh/tete.stl
+	meshscale 0.987620944159437 0.987620944159437 0.9061371841155234
+	meshrt 0 0 pi xyz 0 0 0
+endsegment
+
+segment RightUpperArm
+	parent Thorax
+	rt 0 0.17 0.1 xyz -0.18375 0.0 0.24
+	rotations zy
+	rangesQ
+		-0.65 2
+		-0.05 3
+	com 0.0 0.0 -0.12811300318156882
+	mass 1.928706587336206
+	inertia
+		0.012210863737276987 0.0 0.0
+		0.0 0.012434664056333975 0.0
+		0.0 0.0 0.0021900416853873643
+	meshfile Model_mesh/bras.stl
+	meshscale 0.8942210720111644 0.8942210720111644 1.0576923076923077
+endsegment
+
+segment RightForearm
+	parent RightUpperArm
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.275
+	rotations zx
+	rangesQ
+		-1.8 1.1
+		-2.65 0
+	com 0.0 0.0 -0.10530716017339406
+	mass 1.0241524859001436
+	inertia
+		0.004796010552116309 0.0 0.0
+		0.0 0.00484167359007019 0.0
+		0.0 0.0 0.0006492141198631017
+	meshfile Model_mesh/avantbras.stl
+	meshscale 0.8435211983870453 0.8435211983870453 0.9717741935483871
+endsegment
+
+segment RightHand
+	parent RightForearm
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.241
+	com 0.0 0.0 -0.07834901924890611
+	mass 0.5172321511766922
+	inertia
+		0.0011488734346975797 0.0 0.0
+		0.0 0.0013229783113564147 0.0
+		0.0 0.0 0.0003077284313645161
+	meshfile Model_mesh/main.stl
+	meshscale 1.0612244897959184 1.0612244897959184 1.0225988700564972
+endsegment
+
+	marker MidMainD
+		parent RightHand
+		position 0 0 -0.1
+	endmarker
+
+segment LeftUpperArm
+	parent Thorax
+	rt 0 -0.17 -0.1 xyz 0.18375 0.0 0.24
+	rotations zy
+	rangesQ
+		-2 0.65
+		-3 0.05
+	com 0.0 0.0 -0.1297870449381886
+	mass 1.9345632575221685
+	inertia
+		0.012259413763943391 0.0 0.0
+		0.0 0.012228709236171462 0.0
+		0.0 0.0 0.0021873159489013715
+	meshfile Model_mesh/bras.stl
+	meshscale 0.8942210720111644 0.8942210720111644 1.0576923076923077
+endsegment
+
+segment LeftForearm
+	parent LeftUpperArm
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.275
+	rotations zx
+	rangesQ
+		-1.1 1.8
+		-2.65 0
+	com 0.0 0.0 -0.10598458661128299
+	mass 1.0122287528448322
+	inertia
+		0.004787682223138659 0.0 0.0
+		0.0 0.004786651730475393 0.0
+		0.0 0.0 0.0006499505587900295
+	meshfile Model_mesh/avantbras.stl
+	meshscale 0.8435211983870453 0.8435211983870453 0.9717741935483871
+endsegment
+
+segment LeftHand
+	parent LeftForearm
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.241
+	com 0.0 0.0 -0.07835652464000382
+	mass 0.5185416193744173
+	inertia
+		0.0011495906947216893 0.0 0.0
+		0.0 0.0013204550259097636 0.0
+		0.0 0.0 0.0003037687692753979
+	meshfile Model_mesh/main.stl
+	meshscale 1.0612244897959184 1.0612244897959184 1.0225988700564972
+endsegment
+
+	marker MidMainG
+		parent LeftHand
+		position 0 0 -0.1
+	endmarker
+
+segment Thighs
+	parent Pelvis
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.12589624207946593
+	rotations xy
+	rangesQ
+		-2.7 0.3
+		-0.35 0.35
+	com 0.0 0.0 -0.17002348254203295
+	mass 16.090266247325165
+	inertia
+		0.2344877742414299 0.0 0.0
+		0.0 0.3296560018897577 0.0
+		0.0 0.0 0.1566519877781642
+	meshfile Model_mesh/cuisse.stl
+	meshscale 0.879925604910364 0.879925604910364 0.9480048367593713
+endsegment
+
+segment Shanks
+	parent Thighs
+	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.392
+	com 0.0 0.0 -0.1924901688149256
+	mass 7.196976745293528
+	inertia
+		0.1153771966893185 0.0 0.0
+		0.0 0.16024487330810128 0.0
+		0.0 0.0 0.05677473288081641
+	meshfile Model_mesh/jambe.stl
+	meshscale 0.9430916875775947 0.9430916875775947 1.0576671035386631
+	meshrt pi 0 0 xyz 0 0 0
+endsegment
+
+	marker CibleMainD
+		parent Shanks
+		position -0.1 0 -0.22
+	endmarker
+
+	marker CibleMainG
+		parent Shanks
+		position 0.1 0 -0.22
+	endmarker
+
+segment Feet
+	parent Shanks
+	rt -0.35 0 0 xyz 0.0 0.0 -0.40349999999999997
+	com 0.0 0.0 -0.08132588709798236
+	mass 1.7309861365911896
+	inertia
+		0.005914402542870214 2.1397438886594698e-20 -1.0734950998880107e-19
+		2.1290842374320372e-20 0.016165933190889985 0.0
+		-1.0912612054620517e-19 0.0 0.012327148842243585
+	meshfile Model_mesh/pied.stl
+	meshscale 0.9919995727408673 0.946518086980084 0.9366346153846155
+	meshrt 0 0 pi xyz 0 0 0
+endsegment
+
