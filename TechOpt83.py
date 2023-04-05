@@ -828,7 +828,7 @@ def main():
 
     # Print the last solution
     #sol.animate(n_frames=-1, show_floor=False)
-    # sol.graphs(show_bounds=True)
+     sol.graphs(show_bounds=True)
 
 if __name__ == "__main__":
     main()

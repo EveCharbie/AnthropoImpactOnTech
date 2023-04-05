@@ -138,3 +138,30 @@ Videos/
 Images/
 
 .idea/
+
+*.pkl
+
+*.ogv
+
+
+*.pdf
+
+*.yml
+
+*.xlsx
+
+*.npy
+
+*.png
+
+*.txt
+
+Models_all_dofs/
+
+Passive_rotations/Models/
+
+Passive_rotations/passive rotation results/Passive_rotations/Models
+
+*.ods#
+
+*.zip

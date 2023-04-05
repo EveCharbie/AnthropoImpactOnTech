@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import scipy.integrate
 import bioviz
 import pickle
+import xlsxwriter
 
 """
 Ce code a été écrit pout faire les simulations pour Antoine, 
@@ -107,9 +108,10 @@ def bras_droit_descend(m, x0, t, T0, Tf, Q0, Qf):
 #
 # Visualisation
 #
-def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
+def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre =""):
     global GAUCHE
     global DROITE
+
     nb_q = m.nbQ()
     QbrasD = X_tous[:, DROITE]
     QbrasG = X_tous[:, GAUCHE]
@@ -120,11 +122,12 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
 
     titles = ['QbrasD', 'QbrasG', 'QdotbrasD', 'QdotbrasG', 'QddotbrasG','QddotbrasG']
     values = [QbrasD, QbrasG, QdotbrasD, QdotbrasG, QddotbrasG, QddotbrasG]
+    athlete = titre.partition('debut')[0]
     n = len(values)
-    for i in range(n):
-        file = open(titre + "-" + titles[i] + ".pkl", 'wb')
-        pickle.dump(values[i], file)
-        file.close()
+   # for i in range(n):
+#        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
+       # pickle.dump(values[i], file)
+       # file.close()
 
     fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2, sharex=True)
     axQD.plot(t, QbrasD)
@@ -144,14 +147,14 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
 
     axQD.set_title("Droit")
     axQG.set_title("Gauche")
-    suptitre = "Mouvement des bras" + f" - {titre}" if titre != "" else ""
+    suptitre = f"Mouvement des bras - {titre}" if titre != "" else ""
     fig.suptitle(suptitre)
 
     fig.tight_layout()
-    fig.savefig(f'Videos/{suptitre}.pdf')
+#    fig.savefig(f'Videos/{suptitre}.pdf')
     # fig.show()
 
-def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
+def plot_Q_Qdot_bassin(m, t, X_tous, Qddot,titre=""):
     nb_q = m.nbQ()
 
     # position
@@ -182,10 +185,11 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     titles = ['QX','QY','QZ', 'QrotX', 'QrotY','QrotZ','QdotX','QdotY','QdotZ','QdotrotX','QdotrotY','QdotrotZ','QddotX','QddotY','QddotZ','QddotrotX','QddotrotY','QddotrotZ']
     values = [QX, QY, QZ, QrotX, QrotY, QrotZ, QdotX, QdotY, QdotZ, QdotrotX, QdotrotY, QdotrotZ,QddotX, QddotY, QddotZ, QddotrotX, QddotrotY, QddotrotZ]
     n = len(values)
-    for i in  range(n):
-        file = open(titre + "-" + titles[i]+".pkl" , 'wb')
-        pickle.dump(values[i], file)
-        file.close()
+    athlete = titre.partition('debut')[0]
+  #  for i in  range(n):
+#        file = open(f"Q_passive_rotations/{titre} + - + {titles[i]} + .pkl", 'wb')
+     #   pickle.dump(values[i], file)
+    #    file.close()
 
 
     fig, (axp, axv, axa) = plt.subplots(3, 1, sharex=True)
@@ -212,7 +216,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     fig.suptitle(suptitre)
     fig.tight_layout()
     fig.savefig(f'Videos/{suptitre}.pdf')
-    # fig.show()
+    fig.show()
 
     figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, sharex=True)
     axprot.plot(t, QrotX, label="Rot X")
@@ -241,13 +245,27 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     # figrot.show()
 
 
-#
+workbook = xlsxwriter.Workbook('/home/lim/Documents/Stage_Lisa/AnthropoImpactOnTech/degrees_of_liberty.xlsx')
+
+# The workbook object is then used to add new
+    # worksheet via the add_worksheet() method.
+worksheet = workbook.add_worksheet()
+
+# Use the worksheet object to write
+# data via the write() method.
+worksheet.write('A1', 'Athlete')
+worksheet.write('B1', 'Starting')
+worksheet.write('C1', 'Salto')
+worksheet.write('D1', 'Tilt')
+worksheet.write('E1', 'Twist')
+
 # Simulation
 #
-def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, viz=False):
+def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row , column, situation, viz=True):
     m.setGravity(np.array((0, 0, 0)))
     t, dt = np.linspace(t0, tf, num=N+1, retstep=True)
-
+    situation+= ',' + nom.partition('bioMod')[2]
+    nom = nom.partition('.bioMod')[0].removeprefix('Models/')
     func = lambda t, y: action_bras(m, y, t, T0, Tf, Q0, Qf)
 
     r = scipy.integrate.ode(func).set_integrator('dop853').set_initial_value(X0, t0)
@@ -256,8 +274,18 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, viz=False):
         r.integrate(r.t + dt)
         X_tous = np.vstack((X_tous, r.y))
 
-    print(f"{nom}")
-    print(f"Salto : {X_tous[-1, 3] / 2 / np.pi}\nTilt : {X_tous[-1, 4] / 2 / np.pi}\nTwist : {X_tous[-1, 5] / 2 / np.pi}\n")
+
+    worksheet.write(row, column, f'{nom}')
+    column+=1
+    worksheet.write(row, column, f'{situation}')
+    column +=1
+    worksheet.write(row, column, X_tous[-1, 3] / 2 / np.pi)
+    column +=1
+    worksheet.write(row, column, X_tous[-1, 4] / 2 / np.pi)
+    column+=1
+    worksheet.write(row, column, X_tous[-1, 5] / 2 / np.pi)
+
+   # print(f"Salto : {X_tous[-1, 3] / 2 / np.pi}\nTilt : {X_tous[-1, 4] / 2 / np.pi}\nTwist : {X_tous[-1, 5] / 2 / np.pi}\n")
 
     if viz:
         Qddot = np.zeros(X_tous.shape)
@@ -265,22 +293,29 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, viz=False):
         Qddot[np.logical_and(Qddot < 1e-14, Qddot > -1e-14)] = 0
         Qddot = Qddot[:, m.nbQ():]
 
-        plot_Q_Qdot_bras(m_JeCh, t, X_tous, Qddot, titre=nom)
-        plot_Q_Qdot_bassin(m_JeCh, t, X_tous, Qddot, titre=nom)
+        nom = nom.partition('.bioMod')[0].removeprefix('Models/')
+        suptitre = nom.removeprefix('Models/') + ' ' + situation
+        plot_Q_Qdot_bras(model, t, X_tous, Qddot, titre=suptitre)
+        plot_Q_Qdot_bassin(model, t, X_tous, Qddot, titre=suptitre)
 
-        b = bioviz.Viz(model_path_JeCh, show_floor=False)
-        b.load_movement(X_tous[:, :m_JeCh.nbQ()].T)
+        b = bioviz.Viz(models[i], show_floor=False)
+        b.load_movement(X_tous[:, :model.nbQ()].T)
         b.exec()
 
 N = 100
-model_path_JeCh = "Models/JeCh_pr.bioMod"
-model_path_SaMi = "Models/SaMi_pr.bioMod"
-model_path_ElMe = "Models/ElMe_TechOpt83.bioMod"
-model_path_ZoTs = "Models/ZoTs.bioMod"
-m_JeCh = biorbd.Model(model_path_JeCh)
-m_SaMi = biorbd.Model(model_path_SaMi)
-m_ElMe = biorbd.Model(model_path_ElMe)
-m_ZoTs = biorbd.Model(model_path_ZoTs)
+JeCh = "Models/JeCh_pr.bioMod"
+JeCh_2 = "Models/JeCh_2.bioMod"
+SaMi = "Models/SaMi_pr.bioMod"
+ElMe = "Models/ElMe.bioMod"
+ZoTs = "Models/ZoTs.bioMod"
+
+# m_JeCh = biorbd.Model(model_path_JeCh)
+# m_SaMi = biorbd.Model(model_path_SaMi)
+# m_ElMe = biorbd.Model(model_path_ElMe)
+# m_ZoTs = biorbd.Model(model_path_ZoTs)
+
+
+
 
 
 GAUCHE = 24  # 42 -> 24; 10 -> 9
@@ -293,1003 +328,1025 @@ Tf = .2
 Q0 = 2.9
 Qf = .18
 
-# JeCh
-# debut bras en haut
-X0 = np.zeros(m_JeCh.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_JeCh.CoM(X0[:m_JeCh.nbQ()]).to_array()
-bassin = m_JeCh.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_JeCh.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_JeCh.nbQ():m_JeCh.nbQ()+3] = X0[m_JeCh.nbQ():m_JeCh.nbQ() + 3] + np.cross(r, X0[m_JeCh.nbQ()+3:m_JeCh.nbQ()+6])  # correction pour la translation
-
-#simuler("JeCh bras en haut", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-#simuler("JeCh bras descendent", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("JeCh bras gauche descend", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("JeCh bras droit descend", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_JeCh.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_JeCh.CoM(X0[:m_JeCh.nbQ()]).to_array()
-bassin = m_JeCh.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_JeCh.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_JeCh.nbQ():m_JeCh.nbQ()+3] = X0[m_JeCh.nbQ():m_JeCh.nbQ() + 3] + np.cross(r, X0[m_JeCh.nbQ()+3:m_JeCh.nbQ()+6])  # correction pour la translation
-
-simuler("JeCh bras gauche bas, droit descend", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_JeCh.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_JeCh.CoM(X0[:m_JeCh.nbQ()]).to_array()
-bassin = m_JeCh.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_JeCh.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_JeCh.nbQ():m_JeCh.nbQ()+3] = X0[m_JeCh.nbQ():m_JeCh.nbQ() + 3] + np.cross(r, X0[m_JeCh.nbQ()+3:m_JeCh.nbQ()+6])  # correction pour la translation
-
-simuler("JeCh bras droit bas, gauche descend", m_JeCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# SaMi
-# debut bras en haut
-X0 = np.zeros(m_SaMi.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_SaMi.CoM(X0[:m_SaMi.nbQ()]).to_array()
-bassin = m_SaMi.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])  # correction pour la translation
-
-simuler("SaMi bras en haut", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("SaMi bras descendent", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("SaMi bras gauche descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("SaMi bras droit descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_SaMi.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_SaMi.CoM(X0[:m_SaMi.nbQ()]).to_array()
-bassin = m_SaMi.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])  # correction pour la translation
-
-simuler("SaMi bras gauche bas, droit descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_SaMi.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_SaMi.CoM(X0[:m_SaMi.nbQ()]).to_array()
-bassin = m_SaMi.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])  # correction pour la translation
-
-simuler("SaMi bras droit bas, gauche descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# El Me
-# debut bras en haut
-X0 = np.zeros(m_ElMe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
-bassin = m_ElMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
-
-simuler("ELMe bras en haut", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("ElMe bras descendent", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("ElMe bras gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("ElMe bras droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_ElMe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
-bassin = m_ElMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
-
-simuler("ElMe bras gauche bas, droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_ElMe.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
-bassin = m_ElMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
-
-simuler("ElMe bras droit bas, gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# ZoTs
-# debut bras en haut
-X0 = np.zeros(m_ZoTs.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_ZoTs.CoM(X0[:m_ZoTs.nbQ()]).to_array()
-bassin = m_ZoTs.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ZoTs.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ZoTS.nbQ():m_ZoTs.nbQ()+3] = X0[m_ZoTs.nbQ():m_ZoTs.nbQ() + 3] + np.cross(r, X0[m_ZoTs.nbQ()+3:m_ZoTs.nbQ()+6])  # correction pour la translation
-
-simuler("ZoTs bras en haut", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("ZoTs bras descendent", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("ZoTs bras gauche descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("ZoTs bras droit descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_ZoTs.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_ZoTs.CoM(X0[:m_ZoTs.nbQ()]).to_array()
-bassin = m_ZoTs.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ZoTs.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ZoTs.nbQ():m_ZoTs.nbQ()+3] = X0[m_ZoTs.nbQ():m_ZoTs.nbQ() + 3] + np.cross(r, X0[m_ZoTs.nbQ()+3:m_ZoTs.nbQ()+6])  # correction pour la translation
-
-simuler("ZoTs bras gauche bas, droit descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_ZoTs.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_ZoTs.CoM(X0[:m_ZoTs.nbQ()]).to_array()
-bassin = m_ZoTs.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ZoTs.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ZoTs.nbQ():m_ZoTs.nbQ()+3] = X0[m_ZoTs.nbQ():m_ZoTs.nbQ() + 3] + np.cross(r, X0[m_ZoTs.nbQ()+3:m_ZoTs.nbQ()+6])  # correction pour la translation
-
-simuler("ZoTs bras droit bas, gauche descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# WeEm
-# debut bras en haut
-X0 = np.zeros(m_WeEm.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_WeEm.CoM(X0[:m_WeEm.nbQ()]).to_array()
-bassin = m_WeEm.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_WeEm.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_WeEm.nbQ():m_WeEm.nbQ()+3] = X0[m_WeEm.nbQ():m_WeEm.nbQ() + 3] + np.cross(r, X0[m_WeEm.nbQ()+3:m_WeEm.nbQ()+6])  # correction pour la translation
-
-simuler("WeEm bras en haut", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("WeEm bras descendent", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("WeEm bras gauche descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("WeEm bras droit descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_WeEm.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_WeEm.CoM(X0[:m_WeEm.nbQ()]).to_array()
-bassin = m_WeEm.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_WeEm.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_WeEm.nbQ():m_WeEm.nbQ()+3] = X0[m_WeEm.nbQ():m_WeEm.nbQ() + 3] + np.cross(r, X0[m_WeEm.nbQ()+3:m_WeEm.nbQ()+6])  # correction pour la translation
-
-simuler("WeEm bras gauche bas, droit descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_WeEm.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_WeEm.CoM(X0[:m_WeEm.nbQ()]).to_array()
-bassin = m_WeEm.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_WeEm.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_WeEm.nbQ():m_WeEm.nbQ()+3] = X0[m_WeEm.nbQ():m_WeEm.nbQ() + 3] + np.cross(r, X0[m_WeEm.nbQ()+3:m_WeEm.nbQ()+6])  # correction pour la translation
-
-simuler("WeEm bras droit bas, gauche descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# SoMe
-# debut bras en haut
-X0 = np.zeros(m_SoMe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_SoMe.CoM(X0[:m_SoMe.nbQ()]).to_array()
-bassin = m_SoMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_SoMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_SoMe.nbQ():m_SoMe.nbQ()+3] = X0[m_SoMe.nbQ():m_SoMe.nbQ() + 3] + np.cross(r, X0[m_SoMe.nbQ()+3:m_SoMe.nbQ()+6])  # correction pour la translation
-
-simuler("SoMe bras en haut", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("SoMe bras descendent", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("SoMe bras gauche descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("SoMe bras droit descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_SoMe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_SoMe.CoM(X0[:m_SoMe.nbQ()]).to_array()
-bassin = m_SoMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_SoMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_SoMe.nbQ():m_SoMe.nbQ()+3] = X0[m_SoMe.nbQ():m_SoMe.nbQ() + 3] + np.cross(r, X0[m_SoMe.nbQ()+3:m_SoMe.nbQ()+6])  # correction pour la translation
-
-simuler("SoMe bras gauche bas, droit descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_SoMe.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_SoMe.CoM(X0[:m_SoMe.nbQ()]).to_array()
-bassin = m_SoMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_SoMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_SoMe.nbQ():m_SoMe.nbQ()+3] = X0[m_SoMe.nbQ():m_SoMe.nbQ() + 3] + np.cross(r, X0[m_SoMe.nbQ()+3:m_SoMe.nbQ()+6])  # correction pour la translation
-
-simuler("SoMe bras droit bas, gauche descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# Sarah
-# debut bras en haut
-X0 = np.zeros(m_Sarah.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_Sarah.CoM(X0[:m_Sarah.nbQ()]).to_array()
-bassin = m_Sarah.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_Sarah.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_Sarah.nbQ():m_Sarah.nbQ()+3] = X0[m_Sarah.nbQ():m_Sarah.nbQ() + 3] + np.cross(r, X0[m_Sarah.nbQ()+3:m_Sarah.nbQ()+6])  # correction pour la translation
-
-simuler("Sarah bras en haut", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("Sarah bras descendent", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("Sarah bras gauche descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("Sarah bras droit descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_Sarah.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_Sarah.CoM(X0[:m_Sarah.nbQ()]).to_array()
-bassin = m_Sarah.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_Sarah.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_Sarah.nbQ():m_Sarah.nbQ()+3] = X0[m_Sarah.nbQ():m_Sarah.nbQ() + 3] + np.cross(r, X0[m_Sarah.nbQ()+3:m_Sarah.nbQ()+6])  # correction pour la translation
-
-simuler("Sarah bras gauche bas, droit descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_Sarah.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_Sarah.CoM(X0[:m_Sarah.nbQ()]).to_array()
-bassin = m_Sarah.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_Sarah.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_Sarah.nbQ():m_Sarah.nbQ()+3] = X0[m_Sarah.nbQ():m_Sarah.nbQ() + 3] + np.cross(r, X0[m_Sarah.nbQ()+3:m_Sarah.nbQ()+6])  # correction pour la translation
-
-simuler("Sarah bras droit bas, gauche descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# OlGa
-# debut bras en haut
-X0 = np.zeros(m_OlGa.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_OlGa.CoM(X0[:m_OlGa.nbQ()]).to_array()
-bassin = m_OlGa.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_OlGa.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_OlGa.nbQ():m_OlGa.nbQ()+3] = X0[m_OlGa.nbQ():m_OlGa.nbQ() + 3] + np.cross(r, X0[m_OlGa.nbQ()+3:m_OlGa.nbQ()+6])  # correction pour la translation
-
-simuler("OlGa bras en haut", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("OlGa bras descendent", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("OlGa bras gauche descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("OlGa bras droit descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_OlGa.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_OlGa.CoM(X0[:m_OlGa.nbQ()]).to_array()
-bassin = m_OlGa.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_OlGa.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_OlGa.nbQ():m_OlGa.nbQ()+3] = X0[m_OlGa.nbQ():m_OlGa.nbQ() + 3] + np.cross(r, X0[m_OlGa.nbQ()+3:m_OlGa.nbQ()+6])  # correction pour la translation
-
-simuler("OlGa bras gauche bas, droit descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_OlGa.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_OlGa.CoM(X0[:m_OlGa.nbQ()]).to_array()
-bassin = m_OlGa.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_OlGa.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_OlGa.nbQ():m_OlGa.nbQ()+3] = X0[m_OlGa.nbQ():m_OlGa.nbQ() + 3] + np.cross(r, X0[m_OlGa.nbQ()+3:m_OlGa.nbQ()+6])  # correction pour la translation
-
-simuler("OlGa bras droit bas, gauche descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# MaJa
-# debut bras en haut
-X0 = np.zeros(m_MaJa.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_MaJa.CoM(X0[:m_MaJa.nbQ()]).to_array()
-bassin = m_MaJa.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_MaJa.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_MaJa.nbQ():m_MaJa.nbQ()+3] = X0[m_MaJa.nbQ():m_MaJa.nbQ() + 3] + np.cross(r, X0[m_MaJa.nbQ()+3:m_MaJa.nbQ()+6])  # correction pour la translation
-
-simuler("MaJa bras en haut", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("MaJa bras descendent", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("MaJa bras gauche descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("MaJa bras droit descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_MaJa.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_MaJa.CoM(X0[:m_MaJa.nbQ()]).to_array()
-bassin = m_MaJa.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_MaJa.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_MaJa.nbQ():m_MaJa.nbQ()+3] = X0[m_MaJa.nbQ():m_MaJa.nbQ() + 3] + np.cross(r, X0[m_MaJa.nbQ()+3:m_MaJa.nbQ()+6])  # correction pour la translation
-
-simuler("MaJa bras gauche bas, droit descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_MaJa.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_MaJa.CoM(X0[:m_MaJa.nbQ()]).to_array()
-bassin = m_MaJa.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_MaJa.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_MaJa.nbQ():m_MaJa.nbQ()+3] = X0[m_MaJa.nbQ():m_MaJa.nbQ() + 3] + np.cross(r, X0[m_MaJa.nbQ()+3:m_MaJa.nbQ()+6])  # correction pour la translation
-
-simuler("MaJa bras droit bas, gauche descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# MaCu
-# debut bras en haut
-X0 = np.zeros(m_MaCu.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_MaCu.CoM(X0[:m_MaCu.nbQ()]).to_array()
-bassin = m_MaCu.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_MaCu.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_MaCu.nbQ():m_MaCu.nbQ()+3] = X0[m_MaCu.nbQ():m_MaCu.nbQ() + 3] + np.cross(r, X0[m_MaCu.nbQ()+3:m_MaCu.nbQ()+6])  # correction pour la translation
-
-simuler("MaCu bras en haut", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("MaCu bras descendent", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("MaCu bras gauche descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("MaCu bras droit descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_MaCu.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_MaCu.CoM(X0[:m_MaCu.nbQ()]).to_array()
-bassin = m_MaCu.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_MaCu.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_MaCu.nbQ():m_MaCu.nbQ()+3] = X0[m_MaCu.nbQ():m_MaCu.nbQ() + 3] + np.cross(r, X0[m_MaCu.nbQ()+3:m_MaCu.nbQ()+6])  # correction pour la translation
-
-simuler("MaCu bras gauche bas, droit descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_MaCu.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_MaCu.CoM(X0[:m_MaCu.nbQ()]).to_array()
-bassin = m_MaCu.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_MaCu.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_MaCu.nbQ():m_MaCu.nbQ()+3] = X0[m_MaCu.nbQ():m_MaCu.nbQ() + 3] + np.cross(r, X0[m_MaCu.nbQ()+3:m_MaCu.nbQ()+6])  # correction pour la translation
-
-simuler("MaCu bras droit bas, gauche descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-
-# LaDe
-# debut bras en haut
-X0 = np.zeros(m_LaDe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_LaDe.CoM(X0[:m_LaDe.nbQ()]).to_array()
-bassin = m_LaDe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_LaDe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_LaDe.nbQ():m_LaDe.nbQ()+3] = X0[m_LaDe.nbQ():m_LaDe.nbQ() + 3] + np.cross(r, X0[m_LaDe.nbQ()+3:m_LaDe.nbQ()+6])  # correction pour la translation
-
-simuler("LaDe bras en haut", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("LaDe bras descendent", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("LaDe bras gauche descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("LaDe bras droit descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_LaDe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_LaDe.CoM(X0[:m_LaDe.nbQ()]).to_array()
-bassin = m_LaDe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_LaDe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_LaDe.nbQ():m_LaDe.nbQ()+3] = X0[m_LaDe.nbQ():m_LaDe.nbQ() + 3] + np.cross(r, X0[m_LaDe.nbQ()+3:m_LaDe.nbQ()+6])  # correction pour la translation
-
-simuler("LaDe bras gauche bas, droit descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_LaDe.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_LaDe.CoM(X0[:m_LaDe.nbQ()]).to_array()
-bassin = m_LaDe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_LaDe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_LaDe.nbQ():m_LaDe.nbQ()+3] = X0[m_LaDe.nbQ():m_LaDe.nbQ() + 3] + np.cross(r, X0[m_LaDe.nbQ()+3:m_LaDe.nbQ()+6])  # correction pour la translation
-
-simuler("LaDe bras droit bas, gauche descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-
-# KaMi
-# debut bras en haut
-X0 = np.zeros(m_KaMi.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_KaMi.CoM(X0[:m_KaMi.nbQ()]).to_array()
-bassin = m_KaMi.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_KaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_KaMi.nbQ():m_KaMi.nbQ()+3] = X0[m_KaMi.nbQ():m_KaMi.nbQ() + 3] + np.cross(r, X0[m_KaMi.nbQ()+3:m_KaMi.nbQ()+6])  # correction pour la translation
-
-simuler("KaMi bras en haut", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("KaMi bras descendent", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("KaMi bras gauche descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("KaMi bras droit descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_KaMi.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_KaMi.CoM(X0[:m_KaMi.nbQ()]).to_array()
-bassin = m_KaMi.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_KaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_KaMi.nbQ():m_KaMi.nbQ()+3] = X0[m_KaMi.nbQ():m_KaMi.nbQ() + 3] + np.cross(r, X0[m_KaMi.nbQ()+3:m_KaMi.nbQ()+6])  # correction pour la translation
-
-simuler("KaMi bras gauche bas, droit descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_KaMi.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_KaMi.CoM(X0[:m_KaMi.nbQ()]).to_array()
-bassin = m_KaMi.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_KaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_KaMi.nbQ():m_KaMi.nbQ()+3] = X0[m_KaMi.nbQ():m_KaMi.nbQ() + 3] + np.cross(r, X0[m_KaMi.nbQ()+3:m_KaMi.nbQ()+6])  # correction pour la translation
-
-simuler("KaMi bras droit bas, gauche descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# KaFu
-# debut bras en haut
-X0 = np.zeros(m_KaFu.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_KaFu.CoM(X0[:m_KaFu.nbQ()]).to_array()
-bassin = m_KaFu.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_KaFu.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_KaFu.nbQ():m_KaFu.nbQ()+3] = X0[m_KaFu.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_KaFu.nbQ()+3:m_KaFu.nbQ()+6])  # correction pour la translation
-
-simuler("KaFu bras en haut", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("KaFu bras descendent", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("KaFu bras gauche descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("KaFu bras droit descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_KaFu.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_KaFu.CoM(X0[:m_KaFu.nbQ()]).to_array()
-bassin = m_KaFu.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_KaFu.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_KaFu.nbQ():m_KaFu.nbQ()+3] = X0[m_KaFu.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_KaFu.nbQ()+3:m_KaFu.nbQ()+6])  # correction pour la translation
-
-simuler("KaFu bras gauche bas, droit descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_KaFu.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_KaFu.CoM(X0[:m_KaFu.nbQ()]).to_array()
-bassin = m_KaFu.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_KaFu.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_KaFu.nbQ():m_KaFu.nbQ()+3] = X0[m_KaFu.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_KaFu.nbQ()+3:m_KaFu.nbQ()+6])  # correction pour la translation
-
-simuler("KaFu bras droit bas, gauche descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# FeBl
-# debut bras en haut
-X0 = np.zeros(m_FeBl.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_FeBl.CoM(X0[:m_FeBl.nbQ()]).to_array()
-bassin = m_FeBl.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_FeBl.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_FeBl.nbQ():m_FeBl.nbQ()+3] = X0[m_FeBl.nbQ():m_FeBl.nbQ() + 3] + np.cross(r, X0[m_FeBl.nbQ()+3:m_FeBl.nbQ()+6])  # correction pour la translation
-
-simuler("FeBl bras en haut", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("FeBl bras descendent", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("FeBl bras gauche descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("FeBl bras droit descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_FeBl.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_FeBl.CoM(X0[:m_FeBl.nbQ()]).to_array()
-bassin = m_FeBl.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_FeBl.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_FeBl.nbQ():m_FeBl.nbQ()+3] = X0[m_FeBl.nbQ():m_FeBl.nbQ() + 3] + np.cross(r, X0[m_FeBl.nbQ()+3:m_FeBl.nbQ()+6])  # correction pour la translation
-
-simuler("FeBl bras gauche bas, droit descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_FeBl.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_FeBl.CoM(X0[:m_FeBl.nbQ()]).to_array()
-bassin = m_FeBl.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_FeBl.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_FeBl.nbQ():m_FeBl.nbQ()+3] = X0[m_FeBl.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_FeBl.nbQ()+3:m_FeBl.nbQ()+6])  # correction pour la translation
-
-simuler("FeBl bras droit bas, gauche descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# EvZl
-# debut bras en haut
-X0 = np.zeros(m_EvZl.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_EvZl.CoM(X0[:m_EvZl.nbQ()]).to_array()
-bassin = m_EvZl.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_EvZl.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_EvZl.nbQ():m_EvZl.nbQ()+3] = X0[m_EvZl.nbQ():m_EvZl.nbQ() + 3] + np.cross(r, X0[m_EvZl.nbQ()+3:m_EvZl.nbQ()+6])  # correction pour la translation
-
-simuler("EvZl bras en haut", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("EvZl bras descendent", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("EvZl bras gauche descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("EvZl bras droit descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_EvZl.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_EvZl.CoM(X0[:m_EvZl.nbQ()]).to_array()
-bassin = m_EvZl.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_EvZl.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_EvZl.nbQ():m_EvZl.nbQ()+3] = X0[m_EvZl.nbQ():m_EvZl.nbQ() + 3] + np.cross(r, X0[m_EvZl.nbQ()+3:m_EvZl.nbQ()+6])  # correction pour la translation
-
-simuler("EvZl bras gauche bas, droit descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_EvZl.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_EvZl.CoM(X0[:m_EvZl.nbQ()]).to_array()
-bassin = m_EvZl.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_EvZl.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_EvZl.nbQ():m_EvZl.nbQ()+3] = X0[m_EvZl.nbQ():m_EvZl.nbQ() + 3] + np.cross(r, X0[m_EvZl.nbQ()+3:m_EvZl.nbQ()+6])  # correction pour la translation
-
-simuler("EvZl bras droit bas, gauche descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# ElMe
-# debut bras en haut
-X0 = np.zeros(m_ElMe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
-bassin = m_ElMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
-
-simuler("ElMe bras en haut", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("ElMe bras descendent", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("ElMe bras gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("ElMe bras droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_ElMe.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
-bassin = m_ElMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
-
-simuler("ElMe bras gauche bas, droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_ElMe.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
-bassin = m_ElMe.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
-
-simuler("ElMe bras droit bas, gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# Benjamin
-# debut bras en haut
-X0 = np.zeros(m_Benjamin.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_Benjamin.CoM(X0[:m_Benjamin.nbQ()]).to_array()
-bassin = m_Benjamin.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_Benjamin.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_Benjamin.nbQ():m_Benjamin.nbQ()+3] = X0[m_Benjamin.nbQ():m_Benjamin.nbQ() + 3] + np.cross(r, X0[m_Benjamin.nbQ()+3:m_Benjamin.nbQ()+6])  # correction pour la translation
-
-simuler("Benjamin bras en haut", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("Benjamin bras descendent", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("Benjamin bras gauche descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("Benjamin bras droit descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_Benjamin.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_Benjamin.CoM(X0[:m_Benjamin.nbQ()]).to_array()
-bassin = m_Benjamin.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_Benjamin.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_Benjamin.nbQ():m_Benjamin.nbQ()+3] = X0[m_Benjamin.nbQ():m_Benjamin.nbQ() + 3] + np.cross(r, X0[m_Benjamin.nbQ()+3:m_Benjamin.nbQ()+6])  # correction pour la translation
-
-simuler("Benjamin bras gauche bas, droit descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_Benjamin.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_Benjamin.CoM(X0[:m_Benjamin.nbQ()]).to_array()
-bassin = m_Benjamin.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_Benjamin.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_Benjamin.nbQ():m_Benjamin.nbQ()+3] = X0[m_Benjamin.nbQ():m_Benjamin.nbQ() + 3] + np.cross(r, X0[m_Benjamin.nbQ()+3:m_Benjamin.nbQ()+6])  # correction pour la translation
-
-simuler("Benjamin bras droit bas, gauche descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-# AlAd
-# debut bras en haut
-X0 = np.zeros(m_AlAd.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_AlAd.CoM(X0[:m_AlAd.nbQ()]).to_array()
-bassin = m_AlAd.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_AlAd.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_AlAd.nbQ():m_AlAd.nbQ()+3] = X0[m_AlAd.nbQ():m_AlAd.nbQ() + 3] + np.cross(r, X0[m_AlAd.nbQ()+3:m_AlAd.nbQ()+6])  # correction pour la translation
-
-simuler("AlAd bras en haut", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("AlAd bras descendent", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("AlAd bras gauche descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("AlAd bras droit descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_AlAd.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_AlAd.CoM(X0[:m_AlAd.nbQ()]).to_array()
-bassin = m_AlAd.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_AlAd.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_AlAd.nbQ():m_AlAd.nbQ()+3] = X0[m_AlAd.nbQ():m_AlAd.nbQ() + 3] + np.cross(r, X0[m_AlAd.nbQ()+3:m_AlAd.nbQ()+6])  # correction pour la translation
-
-simuler("AlAd bras gauche bas, droit descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_AlAd.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_AlAd.CoM(X0[:m_AlAd.nbQ()]).to_array()
-bassin = m_AlAd.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_AlAd.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_AlAd.nbQ():m_AlAd.nbQ()+3] = X0[m_AlAd.nbQ():m_AlAd.nbQ() + 3] + np.cross(r, X0[m_AlAd.nbQ()+3:m_AlAd.nbQ()+6])  # correction pour la translation
-
-simuler("AlAd bras droit bas, gauche descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
-
-# AdCh
-# debut bras en haut
-X0 = np.zeros(m_AdCh.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Q0
-
-CoM_func = m_AdCh.CoM(X0[:m_AdCh.nbQ()]).to_array()
-bassin = m_AdCh.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_AdCh.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_AdCh.nbQ():m_AdCh.nbQ()+3] = X0[m_AdCh.nbQ():m_AdCh.nbQ() + 3] + np.cross(r, X0[m_AdCh.nbQ()+3:m_AdCh.nbQ()+6])  # correction pour la translation
-
-simuler("AdCh bras en haut", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
-simuler("AdCh bras descendent", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
-simuler("AdCh bras gauche descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-simuler("AdCh bras droit descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras droit en haut, gauche bas
-X0 = np.zeros(m_AdCh.nbQ() * 2)
-X0[DROITE] = -Q0
-X0[GAUCHE] = Qf
-
-CoM_func = m_AdCh.CoM(X0[:m_AdCh.nbQ()]).to_array()
-bassin = m_AdCh.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_AdCh.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_AdCh.nbQ():m_AdCh.nbQ()+3] = X0[m_AdCh.nbQ():m_AdCh.nbQ() + 3] + np.cross(r, X0[m_AdCh.nbQ()+3:m_AdCh.nbQ()+6])  # correction pour la translation
-
-simuler("AdCh bras gauche bas, droit descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
-
-# debut bras gauche en haut, droit bas
-X0 = np.zeros(m_AdCh.nbQ() * 2)
-X0[DROITE] = -Qf
-X0[GAUCHE] = Q0
-
-CoM_func = m_AdCh.CoM(X0[:m_AdCh.nbQ()]).to_array()
-bassin = m_AdCh.globalJCS(0).to_array()
-QCoM = CoM_func.reshape(1, 3)
-Qbassin = bassin[-1, :3]
-r = QCoM - Qbassin
-
-X0[m_AdCh.nbQ() + 3] = 2 * np.pi  # Salto rot
-X0[m_AdCh.nbQ():m_AdCh.nbQ()+3] = X0[m_AdCh.nbQ():m_AdCh.nbQ() + 3] + np.cross(r, X0[m_AdCh.nbQ()+3:m_AdCh.nbQ()+6])  # correction pour la translation
-
-simuler("AdCh bras droit bas, gauche descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
-
+models = [JeCh]
+for i in range(len(models)):
+    model = biorbd.Model(models[i])
+    name = models[i]
+    column = 0
+    row = i*6  +1
+
+    # JeCh
+    # debut bras en haut
+    X0 = np.zeros(model.nbQ() * 2)
+    X0[DROITE] = -Q0
+    X0[GAUCHE] = Q0
+
+    CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
+    bassin = model.globalJCS(0).to_array()
+    QCoM = CoM_func.reshape(1, 3)
+    Qbassin = bassin[-1, :3]
+    r = QCoM - Qbassin
+
+    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
+    X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
+
+    # row = i +1
+    situation = 'debut bras en haut'
+    simuler(f"{name} bras en haut", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True, row= row, column=column, situation= situation)
+    row+=1
+    simuler(f"{name} bras descendent", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=False, row=row, column=column, situation = situation)
+
+
+    row+=1
+    simuler(f"{name} bras gauche descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=False, row=row, column=column, situation = situation)
+    row+=1
+    simuler(f"{name} bras droit descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=False, row=row, column=column, situation = situation )
+
+    # debut bras droit en haut, gauche bas
+    situation = 'debut bras droit en haut, gauche bas'
+    X0 = np.zeros(model.nbQ() * 2)
+    X0[DROITE] = -Q0
+    X0[GAUCHE] = Qf
+
+    CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
+    bassin = model.globalJCS(0).to_array()
+    QCoM = CoM_func.reshape(1, 3)
+    Qbassin = bassin[-1, :3]
+    r = QCoM - Qbassin
+
+    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
+    X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
+    row+=1
+    simuler(f"{name} bras gauche bas, droit descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=False, row=row, column=column, situation=situation)
+
+    situation = 'debut bras gauche en haut, droit bas'
+    X0 = np.zeros(model.nbQ() * 2)
+    X0[DROITE] = -Qf
+    X0[GAUCHE] = Q0
+
+    CoM_func = model.CoM(X0[:model.nbQ()]).to_array()
+    bassin = model.globalJCS(0).to_array()
+    QCoM = CoM_func.reshape(1, 3)
+    Qbassin = bassin[-1, :3]
+    r = QCoM - Qbassin
+
+    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
+    X0[model.nbQ():model.nbQ()+3] = X0[model.nbQ():model.nbQ() + 3] + np.cross(r, X0[model.nbQ()+3:model.nbQ()+6])  # correction pour la translation
+    row+=1
+    simuler(f"{name} bras droit bas, gauche descend", model, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=False, row=row, column=column, situation = situation)
+
+
+workbook.close()
+
+
+
+
+
+#
+# # SaMi
+# # debut bras en haut
+# X0 = np.zeros(m_SaMi.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_SaMi.CoM(X0[:m_SaMi.nbQ()]).to_array()
+# bassin = m_SaMi.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])  # correction pour la translation
+#
+# simuler("SaMi bras en haut", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("SaMi bras descendent", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("SaMi bras gauche descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("SaMi bras droit descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_SaMi.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_SaMi.CoM(X0[:m_SaMi.nbQ()]).to_array()
+# bassin = m_SaMi.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])  # correction pour la translation
+#
+# simuler("SaMi bras gauche bas, droit descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_SaMi.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_SaMi.CoM(X0[:m_SaMi.nbQ()]).to_array()
+# bassin = m_SaMi.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_SaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_SaMi.nbQ():m_SaMi.nbQ()+3] = X0[m_SaMi.nbQ():m_SaMi.nbQ() + 3] + np.cross(r, X0[m_SaMi.nbQ()+3:m_SaMi.nbQ()+6])  # correction pour la translation
+#
+# simuler("SaMi bras droit bas, gauche descend", m_SaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # El Me
+# # debut bras en haut
+# X0 = np.zeros(m_ElMe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+# bassin = m_ElMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("ELMe bras en haut", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("ElMe bras descendent", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("ElMe bras gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("ElMe bras droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_ElMe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+# bassin = m_ElMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("ElMe bras gauche bas, droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_ElMe.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+# bassin = m_ElMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("ElMe bras droit bas, gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # ZoTs
+# # debut bras en haut
+# X0 = np.zeros(m_ZoTs.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_ZoTs.CoM(X0[:m_ZoTs.nbQ()]).to_array()
+# bassin = m_ZoTs.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ZoTs.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ZoTS.nbQ():m_ZoTs.nbQ()+3] = X0[m_ZoTs.nbQ():m_ZoTs.nbQ() + 3] + np.cross(r, X0[m_ZoTs.nbQ()+3:m_ZoTs.nbQ()+6])  # correction pour la translation
+#
+# simuler("ZoTs bras en haut", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("ZoTs bras descendent", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("ZoTs bras gauche descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("ZoTs bras droit descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_ZoTs.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_ZoTs.CoM(X0[:m_ZoTs.nbQ()]).to_array()
+# bassin = m_ZoTs.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ZoTs.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ZoTs.nbQ():m_ZoTs.nbQ()+3] = X0[m_ZoTs.nbQ():m_ZoTs.nbQ() + 3] + np.cross(r, X0[m_ZoTs.nbQ()+3:m_ZoTs.nbQ()+6])  # correction pour la translation
+#
+# simuler("ZoTs bras gauche bas, droit descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_ZoTs.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_ZoTs.CoM(X0[:m_ZoTs.nbQ()]).to_array()
+# bassin = m_ZoTs.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ZoTs.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ZoTs.nbQ():m_ZoTs.nbQ()+3] = X0[m_ZoTs.nbQ():m_ZoTs.nbQ() + 3] + np.cross(r, X0[m_ZoTs.nbQ()+3:m_ZoTs.nbQ()+6])  # correction pour la translation
+#
+# simuler("ZoTs bras droit bas, gauche descend", m_ZoTs, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+# # WeEm
+# # debut bras en haut
+# X0 = np.zeros(m_WeEm.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_WeEm.CoM(X0[:m_WeEm.nbQ()]).to_array()
+# bassin = m_WeEm.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_WeEm.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_WeEm.nbQ():m_WeEm.nbQ()+3] = X0[m_WeEm.nbQ():m_WeEm.nbQ() + 3] + np.cross(r, X0[m_WeEm.nbQ()+3:m_WeEm.nbQ()+6])  # correction pour la translation
+#
+# simuler("WeEm bras en haut", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("WeEm bras descendent", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("WeEm bras gauche descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("WeEm bras droit descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_WeEm.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_WeEm.CoM(X0[:m_WeEm.nbQ()]).to_array()
+# bassin = m_WeEm.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_WeEm.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_WeEm.nbQ():m_WeEm.nbQ()+3] = X0[m_WeEm.nbQ():m_WeEm.nbQ() + 3] + np.cross(r, X0[m_WeEm.nbQ()+3:m_WeEm.nbQ()+6])  # correction pour la translation
+#
+# simuler("WeEm bras gauche bas, droit descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_WeEm.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_WeEm.CoM(X0[:m_WeEm.nbQ()]).to_array()
+# bassin = m_WeEm.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_WeEm.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_WeEm.nbQ():m_WeEm.nbQ()+3] = X0[m_WeEm.nbQ():m_WeEm.nbQ() + 3] + np.cross(r, X0[m_WeEm.nbQ()+3:m_WeEm.nbQ()+6])  # correction pour la translation
+#
+# simuler("WeEm bras droit bas, gauche descend", m_WeEm, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+# # SoMe
+# # debut bras en haut
+# X0 = np.zeros(m_SoMe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_SoMe.CoM(X0[:m_SoMe.nbQ()]).to_array()
+# bassin = m_SoMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_SoMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_SoMe.nbQ():m_SoMe.nbQ()+3] = X0[m_SoMe.nbQ():m_SoMe.nbQ() + 3] + np.cross(r, X0[m_SoMe.nbQ()+3:m_SoMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("SoMe bras en haut", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("SoMe bras descendent", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("SoMe bras gauche descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("SoMe bras droit descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_SoMe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_SoMe.CoM(X0[:m_SoMe.nbQ()]).to_array()
+# bassin = m_SoMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_SoMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_SoMe.nbQ():m_SoMe.nbQ()+3] = X0[m_SoMe.nbQ():m_SoMe.nbQ() + 3] + np.cross(r, X0[m_SoMe.nbQ()+3:m_SoMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("SoMe bras gauche bas, droit descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_SoMe.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_SoMe.CoM(X0[:m_SoMe.nbQ()]).to_array()
+# bassin = m_SoMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_SoMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_SoMe.nbQ():m_SoMe.nbQ()+3] = X0[m_SoMe.nbQ():m_SoMe.nbQ() + 3] + np.cross(r, X0[m_SoMe.nbQ()+3:m_SoMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("SoMe bras droit bas, gauche descend", m_SoMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # Sarah
+# # debut bras en haut
+# X0 = np.zeros(m_Sarah.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_Sarah.CoM(X0[:m_Sarah.nbQ()]).to_array()
+# bassin = m_Sarah.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_Sarah.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_Sarah.nbQ():m_Sarah.nbQ()+3] = X0[m_Sarah.nbQ():m_Sarah.nbQ() + 3] + np.cross(r, X0[m_Sarah.nbQ()+3:m_Sarah.nbQ()+6])  # correction pour la translation
+#
+# simuler("Sarah bras en haut", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("Sarah bras descendent", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("Sarah bras gauche descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("Sarah bras droit descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_Sarah.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_Sarah.CoM(X0[:m_Sarah.nbQ()]).to_array()
+# bassin = m_Sarah.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_Sarah.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_Sarah.nbQ():m_Sarah.nbQ()+3] = X0[m_Sarah.nbQ():m_Sarah.nbQ() + 3] + np.cross(r, X0[m_Sarah.nbQ()+3:m_Sarah.nbQ()+6])  # correction pour la translation
+#
+# simuler("Sarah bras gauche bas, droit descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_Sarah.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_Sarah.CoM(X0[:m_Sarah.nbQ()]).to_array()
+# bassin = m_Sarah.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_Sarah.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_Sarah.nbQ():m_Sarah.nbQ()+3] = X0[m_Sarah.nbQ():m_Sarah.nbQ() + 3] + np.cross(r, X0[m_Sarah.nbQ()+3:m_Sarah.nbQ()+6])  # correction pour la translation
+#
+# simuler("Sarah bras droit bas, gauche descend", m_Sarah, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # OlGa
+# # debut bras en haut
+# X0 = np.zeros(m_OlGa.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_OlGa.CoM(X0[:m_OlGa.nbQ()]).to_array()
+# bassin = m_OlGa.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_OlGa.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_OlGa.nbQ():m_OlGa.nbQ()+3] = X0[m_OlGa.nbQ():m_OlGa.nbQ() + 3] + np.cross(r, X0[m_OlGa.nbQ()+3:m_OlGa.nbQ()+6])  # correction pour la translation
+#
+# simuler("OlGa bras en haut", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("OlGa bras descendent", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("OlGa bras gauche descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("OlGa bras droit descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_OlGa.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_OlGa.CoM(X0[:m_OlGa.nbQ()]).to_array()
+# bassin = m_OlGa.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_OlGa.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_OlGa.nbQ():m_OlGa.nbQ()+3] = X0[m_OlGa.nbQ():m_OlGa.nbQ() + 3] + np.cross(r, X0[m_OlGa.nbQ()+3:m_OlGa.nbQ()+6])  # correction pour la translation
+#
+# simuler("OlGa bras gauche bas, droit descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_OlGa.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_OlGa.CoM(X0[:m_OlGa.nbQ()]).to_array()
+# bassin = m_OlGa.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_OlGa.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_OlGa.nbQ():m_OlGa.nbQ()+3] = X0[m_OlGa.nbQ():m_OlGa.nbQ() + 3] + np.cross(r, X0[m_OlGa.nbQ()+3:m_OlGa.nbQ()+6])  # correction pour la translation
+#
+# simuler("OlGa bras droit bas, gauche descend", m_OlGa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # MaJa
+# # debut bras en haut
+# X0 = np.zeros(m_MaJa.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_MaJa.CoM(X0[:m_MaJa.nbQ()]).to_array()
+# bassin = m_MaJa.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_MaJa.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_MaJa.nbQ():m_MaJa.nbQ()+3] = X0[m_MaJa.nbQ():m_MaJa.nbQ() + 3] + np.cross(r, X0[m_MaJa.nbQ()+3:m_MaJa.nbQ()+6])  # correction pour la translation
+#
+# simuler("MaJa bras en haut", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("MaJa bras descendent", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("MaJa bras gauche descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("MaJa bras droit descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_MaJa.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_MaJa.CoM(X0[:m_MaJa.nbQ()]).to_array()
+# bassin = m_MaJa.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_MaJa.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_MaJa.nbQ():m_MaJa.nbQ()+3] = X0[m_MaJa.nbQ():m_MaJa.nbQ() + 3] + np.cross(r, X0[m_MaJa.nbQ()+3:m_MaJa.nbQ()+6])  # correction pour la translation
+#
+# simuler("MaJa bras gauche bas, droit descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_MaJa.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_MaJa.CoM(X0[:m_MaJa.nbQ()]).to_array()
+# bassin = m_MaJa.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_MaJa.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_MaJa.nbQ():m_MaJa.nbQ()+3] = X0[m_MaJa.nbQ():m_MaJa.nbQ() + 3] + np.cross(r, X0[m_MaJa.nbQ()+3:m_MaJa.nbQ()+6])  # correction pour la translation
+#
+# simuler("MaJa bras droit bas, gauche descend", m_MaJa, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+# # MaCu
+# # debut bras en haut
+# X0 = np.zeros(m_MaCu.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_MaCu.CoM(X0[:m_MaCu.nbQ()]).to_array()
+# bassin = m_MaCu.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_MaCu.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_MaCu.nbQ():m_MaCu.nbQ()+3] = X0[m_MaCu.nbQ():m_MaCu.nbQ() + 3] + np.cross(r, X0[m_MaCu.nbQ()+3:m_MaCu.nbQ()+6])  # correction pour la translation
+#
+# simuler("MaCu bras en haut", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("MaCu bras descendent", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("MaCu bras gauche descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("MaCu bras droit descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_MaCu.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_MaCu.CoM(X0[:m_MaCu.nbQ()]).to_array()
+# bassin = m_MaCu.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_MaCu.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_MaCu.nbQ():m_MaCu.nbQ()+3] = X0[m_MaCu.nbQ():m_MaCu.nbQ() + 3] + np.cross(r, X0[m_MaCu.nbQ()+3:m_MaCu.nbQ()+6])  # correction pour la translation
+#
+# simuler("MaCu bras gauche bas, droit descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_MaCu.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_MaCu.CoM(X0[:m_MaCu.nbQ()]).to_array()
+# bassin = m_MaCu.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_MaCu.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_MaCu.nbQ():m_MaCu.nbQ()+3] = X0[m_MaCu.nbQ():m_MaCu.nbQ() + 3] + np.cross(r, X0[m_MaCu.nbQ()+3:m_MaCu.nbQ()+6])  # correction pour la translation
+#
+# simuler("MaCu bras droit bas, gauche descend", m_MaCu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+#
+# # LaDe
+# # debut bras en haut
+# X0 = np.zeros(m_LaDe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_LaDe.CoM(X0[:m_LaDe.nbQ()]).to_array()
+# bassin = m_LaDe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_LaDe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_LaDe.nbQ():m_LaDe.nbQ()+3] = X0[m_LaDe.nbQ():m_LaDe.nbQ() + 3] + np.cross(r, X0[m_LaDe.nbQ()+3:m_LaDe.nbQ()+6])  # correction pour la translation
+#
+# simuler("LaDe bras en haut", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("LaDe bras descendent", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("LaDe bras gauche descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("LaDe bras droit descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_LaDe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_LaDe.CoM(X0[:m_LaDe.nbQ()]).to_array()
+# bassin = m_LaDe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_LaDe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_LaDe.nbQ():m_LaDe.nbQ()+3] = X0[m_LaDe.nbQ():m_LaDe.nbQ() + 3] + np.cross(r, X0[m_LaDe.nbQ()+3:m_LaDe.nbQ()+6])  # correction pour la translation
+#
+# simuler("LaDe bras gauche bas, droit descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_LaDe.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_LaDe.CoM(X0[:m_LaDe.nbQ()]).to_array()
+# bassin = m_LaDe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_LaDe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_LaDe.nbQ():m_LaDe.nbQ()+3] = X0[m_LaDe.nbQ():m_LaDe.nbQ() + 3] + np.cross(r, X0[m_LaDe.nbQ()+3:m_LaDe.nbQ()+6])  # correction pour la translation
+#
+# simuler("LaDe bras droit bas, gauche descend", m_LaDe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+#
+# # KaMi
+# # debut bras en haut
+# X0 = np.zeros(m_KaMi.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_KaMi.CoM(X0[:m_KaMi.nbQ()]).to_array()
+# bassin = m_KaMi.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_KaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_KaMi.nbQ():m_KaMi.nbQ()+3] = X0[m_KaMi.nbQ():m_KaMi.nbQ() + 3] + np.cross(r, X0[m_KaMi.nbQ()+3:m_KaMi.nbQ()+6])  # correction pour la translation
+#
+# simuler("KaMi bras en haut", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("KaMi bras descendent", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("KaMi bras gauche descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("KaMi bras droit descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_KaMi.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_KaMi.CoM(X0[:m_KaMi.nbQ()]).to_array()
+# bassin = m_KaMi.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_KaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_KaMi.nbQ():m_KaMi.nbQ()+3] = X0[m_KaMi.nbQ():m_KaMi.nbQ() + 3] + np.cross(r, X0[m_KaMi.nbQ()+3:m_KaMi.nbQ()+6])  # correction pour la translation
+#
+# simuler("KaMi bras gauche bas, droit descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_KaMi.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_KaMi.CoM(X0[:m_KaMi.nbQ()]).to_array()
+# bassin = m_KaMi.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_KaMi.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_KaMi.nbQ():m_KaMi.nbQ()+3] = X0[m_KaMi.nbQ():m_KaMi.nbQ() + 3] + np.cross(r, X0[m_KaMi.nbQ()+3:m_KaMi.nbQ()+6])  # correction pour la translation
+#
+# simuler("KaMi bras droit bas, gauche descend", m_KaMi, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+# # KaFu
+# # debut bras en haut
+# X0 = np.zeros(m_KaFu.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_KaFu.CoM(X0[:m_KaFu.nbQ()]).to_array()
+# bassin = m_KaFu.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_KaFu.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_KaFu.nbQ():m_KaFu.nbQ()+3] = X0[m_KaFu.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_KaFu.nbQ()+3:m_KaFu.nbQ()+6])  # correction pour la translation
+#
+# simuler("KaFu bras en haut", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("KaFu bras descendent", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("KaFu bras gauche descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("KaFu bras droit descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_KaFu.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_KaFu.CoM(X0[:m_KaFu.nbQ()]).to_array()
+# bassin = m_KaFu.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_KaFu.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_KaFu.nbQ():m_KaFu.nbQ()+3] = X0[m_KaFu.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_KaFu.nbQ()+3:m_KaFu.nbQ()+6])  # correction pour la translation
+#
+# simuler("KaFu bras gauche bas, droit descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_KaFu.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_KaFu.CoM(X0[:m_KaFu.nbQ()]).to_array()
+# bassin = m_KaFu.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_KaFu.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_KaFu.nbQ():m_KaFu.nbQ()+3] = X0[m_KaFu.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_KaFu.nbQ()+3:m_KaFu.nbQ()+6])  # correction pour la translation
+#
+# simuler("KaFu bras droit bas, gauche descend", m_KaFu, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+# # FeBl
+# # debut bras en haut
+# X0 = np.zeros(m_FeBl.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_FeBl.CoM(X0[:m_FeBl.nbQ()]).to_array()
+# bassin = m_FeBl.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_FeBl.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_FeBl.nbQ():m_FeBl.nbQ()+3] = X0[m_FeBl.nbQ():m_FeBl.nbQ() + 3] + np.cross(r, X0[m_FeBl.nbQ()+3:m_FeBl.nbQ()+6])  # correction pour la translation
+#
+# simuler("FeBl bras en haut", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("FeBl bras descendent", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("FeBl bras gauche descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("FeBl bras droit descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_FeBl.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_FeBl.CoM(X0[:m_FeBl.nbQ()]).to_array()
+# bassin = m_FeBl.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_FeBl.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_FeBl.nbQ():m_FeBl.nbQ()+3] = X0[m_FeBl.nbQ():m_FeBl.nbQ() + 3] + np.cross(r, X0[m_FeBl.nbQ()+3:m_FeBl.nbQ()+6])  # correction pour la translation
+#
+# simuler("FeBl bras gauche bas, droit descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_FeBl.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_FeBl.CoM(X0[:m_FeBl.nbQ()]).to_array()
+# bassin = m_FeBl.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_FeBl.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_FeBl.nbQ():m_FeBl.nbQ()+3] = X0[m_FeBl.nbQ():m_KaFu.nbQ() + 3] + np.cross(r, X0[m_FeBl.nbQ()+3:m_FeBl.nbQ()+6])  # correction pour la translation
+#
+# simuler("FeBl bras droit bas, gauche descend", m_FeBl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # EvZl
+# # debut bras en haut
+# X0 = np.zeros(m_EvZl.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_EvZl.CoM(X0[:m_EvZl.nbQ()]).to_array()
+# bassin = m_EvZl.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_EvZl.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_EvZl.nbQ():m_EvZl.nbQ()+3] = X0[m_EvZl.nbQ():m_EvZl.nbQ() + 3] + np.cross(r, X0[m_EvZl.nbQ()+3:m_EvZl.nbQ()+6])  # correction pour la translation
+#
+# simuler("EvZl bras en haut", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("EvZl bras descendent", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("EvZl bras gauche descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("EvZl bras droit descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_EvZl.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_EvZl.CoM(X0[:m_EvZl.nbQ()]).to_array()
+# bassin = m_EvZl.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_EvZl.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_EvZl.nbQ():m_EvZl.nbQ()+3] = X0[m_EvZl.nbQ():m_EvZl.nbQ() + 3] + np.cross(r, X0[m_EvZl.nbQ()+3:m_EvZl.nbQ()+6])  # correction pour la translation
+#
+# simuler("EvZl bras gauche bas, droit descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_EvZl.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_EvZl.CoM(X0[:m_EvZl.nbQ()]).to_array()
+# bassin = m_EvZl.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_EvZl.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_EvZl.nbQ():m_EvZl.nbQ()+3] = X0[m_EvZl.nbQ():m_EvZl.nbQ() + 3] + np.cross(r, X0[m_EvZl.nbQ()+3:m_EvZl.nbQ()+6])  # correction pour la translation
+#
+# simuler("EvZl bras droit bas, gauche descend", m_EvZl, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+# # ElMe
+# # debut bras en haut
+# X0 = np.zeros(m_ElMe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+# bassin = m_ElMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("ElMe bras en haut", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("ElMe bras descendent", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("ElMe bras gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("ElMe bras droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_ElMe.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+# bassin = m_ElMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("ElMe bras gauche bas, droit descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_ElMe.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_ElMe.CoM(X0[:m_ElMe.nbQ()]).to_array()
+# bassin = m_ElMe.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_ElMe.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_ElMe.nbQ():m_ElMe.nbQ()+3] = X0[m_ElMe.nbQ():m_ElMe.nbQ() + 3] + np.cross(r, X0[m_ElMe.nbQ()+3:m_ElMe.nbQ()+6])  # correction pour la translation
+#
+# simuler("ElMe bras droit bas, gauche descend", m_ElMe, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # Benjamin
+# # debut bras en haut
+# X0 = np.zeros(m_Benjamin.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_Benjamin.CoM(X0[:m_Benjamin.nbQ()]).to_array()
+# bassin = m_Benjamin.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_Benjamin.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_Benjamin.nbQ():m_Benjamin.nbQ()+3] = X0[m_Benjamin.nbQ():m_Benjamin.nbQ() + 3] + np.cross(r, X0[m_Benjamin.nbQ()+3:m_Benjamin.nbQ()+6])  # correction pour la translation
+#
+# simuler("Benjamin bras en haut", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("Benjamin bras descendent", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("Benjamin bras gauche descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("Benjamin bras droit descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_Benjamin.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_Benjamin.CoM(X0[:m_Benjamin.nbQ()]).to_array()
+# bassin = m_Benjamin.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_Benjamin.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_Benjamin.nbQ():m_Benjamin.nbQ()+3] = X0[m_Benjamin.nbQ():m_Benjamin.nbQ() + 3] + np.cross(r, X0[m_Benjamin.nbQ()+3:m_Benjamin.nbQ()+6])  # correction pour la translation
+#
+# simuler("Benjamin bras gauche bas, droit descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_Benjamin.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_Benjamin.CoM(X0[:m_Benjamin.nbQ()]).to_array()
+# bassin = m_Benjamin.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_Benjamin.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_Benjamin.nbQ():m_Benjamin.nbQ()+3] = X0[m_Benjamin.nbQ():m_Benjamin.nbQ() + 3] + np.cross(r, X0[m_Benjamin.nbQ()+3:m_Benjamin.nbQ()+6])  # correction pour la translation
+#
+# simuler("Benjamin bras droit bas, gauche descend", m_Benjamin, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+# # AlAd
+# # debut bras en haut
+# X0 = np.zeros(m_AlAd.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_AlAd.CoM(X0[:m_AlAd.nbQ()]).to_array()
+# bassin = m_AlAd.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_AlAd.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_AlAd.nbQ():m_AlAd.nbQ()+3] = X0[m_AlAd.nbQ():m_AlAd.nbQ() + 3] + np.cross(r, X0[m_AlAd.nbQ()+3:m_AlAd.nbQ()+6])  # correction pour la translation
+#
+# simuler("AlAd bras en haut", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("AlAd bras descendent", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("AlAd bras gauche descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("AlAd bras droit descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_AlAd.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_AlAd.CoM(X0[:m_AlAd.nbQ()]).to_array()
+# bassin = m_AlAd.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_AlAd.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_AlAd.nbQ():m_AlAd.nbQ()+3] = X0[m_AlAd.nbQ():m_AlAd.nbQ() + 3] + np.cross(r, X0[m_AlAd.nbQ()+3:m_AlAd.nbQ()+6])  # correction pour la translation
+#
+# simuler("AlAd bras gauche bas, droit descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_AlAd.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_AlAd.CoM(X0[:m_AlAd.nbQ()]).to_array()
+# bassin = m_AlAd.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_AlAd.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_AlAd.nbQ():m_AlAd.nbQ()+3] = X0[m_AlAd.nbQ():m_AlAd.nbQ() + 3] + np.cross(r, X0[m_AlAd.nbQ()+3:m_AlAd.nbQ()+6])  # correction pour la translation
+#
+# simuler("AlAd bras droit bas, gauche descend", m_AlAd, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
+#
+# # AdCh
+# # debut bras en haut
+# X0 = np.zeros(m_AdCh.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_AdCh.CoM(X0[:m_AdCh.nbQ()]).to_array()
+# bassin = m_AdCh.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_AdCh.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_AdCh.nbQ():m_AdCh.nbQ()+3] = X0[m_AdCh.nbQ():m_AdCh.nbQ() + 3] + np.cross(r, X0[m_AdCh.nbQ()+3:m_AdCh.nbQ()+6])  # correction pour la translation
+#
+# simuler("AdCh bras en haut", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_en_haut, viz=True)
+# simuler("AdCh bras descendent", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_descendent, viz=True)
+# simuler("AdCh bras gauche descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+# simuler("AdCh bras droit descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras droit en haut, gauche bas
+# X0 = np.zeros(m_AdCh.nbQ() * 2)
+# X0[DROITE] = -Q0
+# X0[GAUCHE] = Qf
+#
+# CoM_func = m_AdCh.CoM(X0[:m_AdCh.nbQ()]).to_array()
+# bassin = m_AdCh.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_AdCh.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_AdCh.nbQ():m_AdCh.nbQ()+3] = X0[m_AdCh.nbQ():m_AdCh.nbQ() + 3] + np.cross(r, X0[m_AdCh.nbQ()+3:m_AdCh.nbQ()+6])  # correction pour la translation
+#
+# simuler("AdCh bras gauche bas, droit descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_droit_descend, viz=True)
+#
+# # debut bras gauche en haut, droit bas
+# X0 = np.zeros(m_AdCh.nbQ() * 2)
+# X0[DROITE] = -Qf
+# X0[GAUCHE] = Q0
+#
+# CoM_func = m_AdCh.CoM(X0[:m_AdCh.nbQ()]).to_array()
+# bassin = m_AdCh.globalJCS(0).to_array()
+# QCoM = CoM_func.reshape(1, 3)
+# Qbassin = bassin[-1, :3]
+# r = QCoM - Qbassin
+#
+# X0[m_AdCh.nbQ() + 3] = 2 * np.pi  # Salto rot
+# X0[m_AdCh.nbQ():m_AdCh.nbQ()+3] = X0[m_AdCh.nbQ():m_AdCh.nbQ() + 3] + np.cross(r, X0[m_AdCh.nbQ()+3:m_AdCh.nbQ()+6])  # correction pour la translation
+#
+# simuler("AdCh bras droit bas, gauche descend", m_AdCh, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras=bras_gauche_descend, viz=True)
+#
