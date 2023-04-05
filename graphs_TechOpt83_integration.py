@@ -908,46 +908,42 @@ def prepare_ocp(
 
 
 model_path = "Models/JeCh_TechOpt83.bioMod"
-# folder_per_athlete = {'KaFu':"KaFu/"  }
 
-# folder_per_athlete = {'KaFu':"KaFu/", "KaMi": "KaMi/", "LaDe": "LaDe/", "Sarah":"Sarah/", "MaCu":"MaCu/", "JeCh":"JeCh/", "FeBl" :'FeBl/',"AuJo":"AuJo/", "EvZl":"EvZl/" }
 folder_per_athlete = {
-    "KaFu": "KaFu/",
-    # "KaMi": "KaMi/",
-    "LaDe": "LaDe/",
-    # "Sarah":"Sarah/",
-    "MaCu": "MaCu/",
-    "JeCh": "JeCh/",
-    "FeBl": "FeBl/",
     "AuJo": "AuJo/",
+    "ElMe": "ElMe/",
     "EvZl": "EvZl/",
+    "FeBl": "FeBl/",
+    "JeCh_2": "JeCh_2/",
+    "KaFu": "KaFu/",
+    "KaMi": "KaMi/",
+    "LaDe": "LaDe/",
+    "MaCu": "MaCu/",
+    "MaJa": "MaJa/",
+    "OlGa": "OlGa/",
+    "Sarah":"Sarah/",
+    "SoMe": "SoMe/",
 }
 
-folder_per_twist_nb = {"3": "Solutions_vrille_et_demi/", "5": "Solutions_double_vrille_et_demi/"}
+folder_per_twist_nb = {"3": "Solutions_vrille_et_demi/"} # , "5": "Solutions_double_vrille_et_demi/"}
 # , "2": "Solutions_double_vrille_et_demi/", "3": "Solutions_triple_vrille_et_demi/"}
 
-results_path = "/home/lim/Documents/Stage_Lisa/Solutions_Tech_opt_83/Sol_with_noise/"
-
-
-# cmap = cm.colors.Colormap
-# pour  un athlete on veut toutes les ol avec les bruits et le gradient de couleurs sur la valeur de la fonction objc
+results_path = "solutions_multi_start/"
 folder_graphs = "kinematics_graphs"
 
 
 FLAG_SAME_FIG = True
 
-model_path = "models"
-# choix de l'athlete ou boucle for :
-# athlete = 'Kafu'
-key = "3"
-folder = folder_per_twist_nb[key].removeprefix('Solutions_').removesuffix('/')
-done_athlete = os.listdir(f'{folder_graphs}/{folder}')
+model_path = "Models"
+num_half_twist = "3"
+folder = folder_per_twist_nb[num_half_twist].removeprefix('Solutions_').removesuffix('/')
+# done_athlete = os.listdir(f'{folder_graphs}/{folder}')
 athlete_done = []
-for i in range(len(done_athlete)):
-    filename = done_athlete[i]
-    athlete_done.append(filename.split(' ')[2].split('_')[0])
+# for i in range(len(done_athlete)):
+#     filename = done_athlete[i]
+#     athlete_done.append(filename.split(' ')[2].split('_')[0])
 for athlete in folder_per_athlete:
-    results_path_this_time = results_path + folder_per_twist_nb[key] + folder_per_athlete[athlete]
+    results_path_this_time = results_path + folder_per_twist_nb[num_half_twist] + folder_per_athlete[athlete]
 
     if athlete in athlete_done:
         print(f'{athlete} for {folder} has already a graph')
@@ -969,20 +965,20 @@ for athlete in folder_per_athlete:
     if not FLAG_SAME_FIG:
         fig, axs = plt.subplots(4, 4, figsize=(18, 9))
         axs = axs.ravel()
-    nb_twists = int(key)
+    nb_twists = int(num_half_twist)
     for filename in os.listdir(results_path_this_time):
         nb += 1
 
         athlete = filename.split("_")[0]
         if filename.removesuffix(".pkl")[-3] == "C":
-            file_name = f'/kinematics_graph for {athlete}_{folder_per_twist_nb[key].removesuffix("/")}.png'
+            file_name = f'/kinematics_graph for {athlete}_{folder_per_twist_nb[num_half_twist].removesuffix("/")}.png'
             Bruit += filename.split("_")[-2]
             print(filename)
             f = os.path.join(results_path_this_time, filename)
             filename = results_path_this_time + filename
             model = biorbd.Model(f"{model_path}/{athlete}.bioMod")
             ocp = prepare_ocp(
-                biorbd_model_path=model, nb_twist=int(key), seed=int(filename.split("_")[-2]), n_threads=3
+                biorbd_model_path=model, nb_twist=int(num_half_twist), seed=int(filename.split("_")[-2]), n_threads=3
             )
             if os.path.isfile(f):
                 if filename.endswith(".pkl"):
@@ -1027,10 +1023,7 @@ for athlete in folder_per_athlete:
 
         im = fig.figimage(C)
         fig.colorbar(im, cax=cbar_ax)
-   # if Bruit != [] and C != [] and Q != []
 
-   # Q = []
-   # Q_integrated = []
         for i in range(len(Bruit)):
             bruit = Bruit[i]
             cost = COST[i]
@@ -1052,10 +1045,6 @@ for athlete in folder_per_athlete:
                 else:
                     ratio = 1
 
-                # transparnce
-               # color = cmap(ratio, alpha)
-
-                #linewidth
                 color = cmap(ratio)
 
                 print(f"alpha is {alpha}")
@@ -1072,14 +1061,6 @@ for athlete in folder_per_athlete:
 
                     axs[degree].set_title(f"{model.nameDof()[degree].to_string()}")
 
-    # if not FLAG_SAME_FIG:
-    #     axs[0].legend(bbox_to_anchor=(4.8, 1), loc='upper left', borderaxespad=0., ncols=2, fontsize=12)
-    #     plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
-    #     plt.suptitle(f"{nb_twists}.5 twists")
-    #     plt.savefig(f'kinematics_graph_for_all_athletes_{nb_twists}.png', dpi=300)
-    #     plt.show()
-
-
     # fig.subplots_adjust()
     # alphabar_ax = fig.add_axes([0.4, 0.1, 0.1, 0.4])
     #alphabar_ax = fig.add_axes([0.05, 0.11, 0.07, 0.8])
@@ -1092,5 +1073,3 @@ for athlete in folder_per_athlete:
         plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
         plt.savefig(f"{folder_graphs}/{folder}/{file_name}", dpi=300)
         plt.show()
-
-print("Report the number of clusters of solutions per twist number + STD inside cluster?")
