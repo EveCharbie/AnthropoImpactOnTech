@@ -1,6 +1,7 @@
 
 import biorbd
 import numpy as np
+import pickle
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import bioviz
@@ -9,75 +10,167 @@ from IPython import embed
 
 # Compare the clusters for amplitude
 model_path = "Models/JeCh_TechOpt83.bioMod"
-twist_nb = 1
+model = biorbd.Model(model_path)
+nb_twists = 1
 chosen_clusters_dict = {}
 results_path = 'solutions_multi_start/'
-cmap = cm.get_cmap('viridis')
+results_path_this_time = results_path + 'Solutions_vrille_et_demi/'
+cmap = cm.get_cmap('magma')
+
+# good_sols_per_athlete = {
+#     "AuJo": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [8]},
+#     "ElMe": {"cluster_1": [], "cluster_2": [], "cluster_3": []}, # , "cluster_4": []},
+#     "EvZl": {"cluster_1": [1], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [5]},
+#     "FeBl": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [7]}, # , "cluster_4": []},
+#     "JeCh_2": {"cluster_1": [], "cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [6, 7]},
+#     "KaFu": {"cluster_1": [4], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
+#     "KaMi": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [9]},
+#     "LaDe": {"cluster_1": [0], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
+#     "MaCu": {"cluster_1": [0, 4], "cluster_2": [1], "cluster_3": [3]}, # , "cluster_4": [9]},
+#     "MaJa": {"cluster_1": [], "cluster_2": [8], "cluster_3": [9]}, # , "cluster_4": [4]},
+#     "OlGa": {"cluster_1": [4], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
+#     "Sarah":{"cluster_1": [0], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
+#     "SoMe": {"cluster_1": [], "cluster_2": [2], "cluster_3": [4]}, # , "cluster_4": []},
+# }
+
+good_sols_per_athlete = {
+    "AuJo": {"cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [8]},
+    "ElMe": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": []},
+    "EvZl": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [5]},
+    "FeBl": {"cluster_2": [3], "cluster_3": [7]}, # , "cluster_4": []},
+    "JeCh_2": {"cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [6, 7]},
+    "KaFu": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
+    "KaMi": {"cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [9]},
+    "LaDe": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
+    "MaCu": {"cluster_2": [1], "cluster_3": [3]}, # , "cluster_4": [9]},
+    "MaJa": {"cluster_2": [8], "cluster_3": [9]}, # , "cluster_4": [4]},
+    "OlGa": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
+    "Sarah":{"cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
+    "SoMe": {"cluster_2": [2], "cluster_3": [4]}, # , "cluster_4": []},
+}
 
 
-FLAG_SAME_FIG = False
+fig, axs = plt.subplots(4, 4, figsize=(18, 9))
+axs = axs.ravel()
 
-if FLAG_SAME_FIG:
-    fig, axs = plt.subplots(4, 4, figsize=(18, 9))
-    axs = axs.ravel()
+cluster_arrays = {key: np.zeros((16, 381, 1)) for key in good_sols_per_athlete['AuJo'].keys()}
+for i_name, name in enumerate(good_sols_per_athlete):
+    for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AuJo'].keys()):
+        for i_sol in good_sols_per_athlete[name][cluster_name]:
+            file_name = results_path_this_time + name + '/' + name + '_vrille_et_demi_' + str(i_sol) + "_CVG.pkl"
+            print(file_name)
+            with open(file_name, 'rb') as f:
+                data = pickle.load(f)
+            Q = data['q']
 
-for key in Folder_per_twist_nb:
-    num_athlete = 0
-    if not FLAG_SAME_FIG:
-        fig, axs = plt.subplots(4, 4, figsize=(18, 9))
-        axs = axs.ravel()
-    nb_twists = int(key)
-    results_path_this_time = results_path + Folder_per_twist_nb[key]
-    for foldername in os.listdir(results_path_this_time):
-        for filename in os.listdir(results_path_this_time + foldername + '/'):
-            f = os.path.join(results_path_this_time + foldername + '/', filename)
-            # checking if it is a file
-            if os.path.isfile(f):
-                if filename.endswith("-q.npy"):
+            q = np.zeros(np.shape(Q[0][:, :-1]))
+            q[:, :] = Q[0][:, :-1]
+            for i in range(1, len(Q)):
+                if i == len(Q) - 1:
+                    q = np.hstack((q, Q[i]))
+                else:
+                    q = np.hstack((q, Q[i][:, :-1]))
 
-                    num_athlete += 1
-                    athlete_name = filename.split("-")[0]
-                    print(athlete_name + ' - ' + str(num_athlete), '\n')
-                    model = biorbd.Model(model_path)
-                    if FLAG_SAME_FIG:
-                        if nb_twists == 1:
-                            rgba = cmap(num_athlete / 18 * 0.45)
-                        elif nb_twists == 2:
-                            rgba = cmap(num_athlete / 18 * 0.45 + 0.55)
-                        # else:
-                        #     rgba = cmap(num_athlete / 18 * 0.2 + 0.8)
-                    else:
-                        rgba = cmap(num_athlete / 18)
-                    # rgba = cmap(nb_twists / 3)
+            rgba = cmap(i_cluster * 0.25 + 0.25)
+            # Create a graph of the temporal evolution of Q (DoFs)
+            for i in range(q.shape[0]):
+                if i == 0:
+                    axs[i].plot(q[i, :], color=rgba, label=name)
+                else:
+                    axs[i].plot(q[i, :], color=rgba)
 
-                    # Load results
-                    q = np.load(f)
+                # if name == 'AuJo' and i_cluster == 0:
+                #     axs[i].set_title(f"{model.nameDof()[i].to_string()}")
 
-                    # # if athlete_name not in done_athletes and athlete_name not in problematic_althetes:
-                    # # Create an animation of the results
-                    # b = bioviz.Viz(model_path)
-                    # b.load_movement(q)
-                    # b.exec()
+            cluster_arrays[cluster_name] = np.concatenate((cluster_arrays[cluster_name], q[:, :, np.newaxis]), axis=2)
 
-                    # Create a graph of the temporal evolution of Q (DoFs)
-                    for i in range(q.shape[0]):
-                        if i == 0:
-                            axs[i].plot(q[i, :], color=rgba, label=athlete_name)
-                        else:
-                            axs[i].plot(q[i, :], color=rgba)
+axs[0].legend(bbox_to_anchor=(4.8, 1), loc='upper left', borderaxespad=0., ncols=2, fontsize=12)
+plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
+plt.suptitle(f"{nb_twists}.5 twists")
+plt.savefig(f'clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+plt.show()
 
-                        if num_athlete == 1:
-                            axs[i].set_title(f"{model.nameDof()[i].to_string()}")
-    if not FLAG_SAME_FIG:
-        axs[0].legend(bbox_to_anchor=(4.8, 1), loc='upper left', borderaxespad=0., ncols=2, fontsize=12)
-        plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
-        plt.suptitle(f"{nb_twists}.5 twists")
-        plt.savefig(f'kinematics_graph_for_all_athletes_{nb_twists}.png', dpi=300)
-        # plt.show()
-if FLAG_SAME_FIG:
-    axs[0].legend(bbox_to_anchor=(4.8, 1), loc='upper left', borderaxespad=0., ncols=2, fontsize=12)
-    plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
-    plt.savefig('kinematics_graph_for_all_athletes.png', dpi=300)
-    # plt.show()
+cluster_counter = {key: 0 for key in good_sols_per_athlete['AuJo'].keys()}
+mean_std_per_cluster = {key: np.zeros((16, )) for key in good_sols_per_athlete['AuJo'].keys()}
+mean_q_per_cluster = np.zeros((16, 381, 1))
+std_q_per_cluster = np.zeros((16, 381, 1))
+for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AuJo'].keys()):
+    cluster_arrays[cluster_name] = cluster_arrays[cluster_name][:, :, 1:]
+    for i_name, name in enumerate(good_sols_per_athlete):
+        if len(good_sols_per_athlete[name][cluster_name]) > 0:
+            cluster_counter[cluster_name] += 1
 
-print("Report the number of clusters of solutions per twist number + STD inside cluster?")
+    mean_std_per_cluster[cluster_name] = np.mean(np.std(cluster_arrays[cluster_name], axis=2), axis=1)
+    mean_q_per_cluster = np.concatenate((mean_q_per_cluster, np.mean(cluster_arrays[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
+    std_q_per_cluster = np.concatenate((std_q_per_cluster, np.std(cluster_arrays[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
+
+mean_q_per_cluster = mean_q_per_cluster[:, :, 1:]
+std_q_per_cluster = std_q_per_cluster[:, :, 1:]
+mean_std_between_clusters = np.mean(np.std(mean_q_per_cluster, axis=2), axis=1)
+
+fig, axs = plt.subplots(4, 4, figsize=(18, 9))
+axs = axs.ravel()
+for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AuJo'].keys()):
+    print(f"{cluster_name} was used by {cluster_counter[cluster_name]} / {len(good_sols_per_athlete)} athletes")
+    print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster[cluster_name][3:])}")
+
+    rgba = cmap(i_cluster * 0.25 + 0.25)
+    for i in range(mean_q_per_cluster.shape[0]):
+        axs[i].fill_between(np.arange(381), mean_q_per_cluster[i, :, i_cluster] - std_q_per_cluster[i, :, i_cluster],
+                            mean_q_per_cluster[i, :, i_cluster] + std_q_per_cluster[i, :,i_cluster], color=rgba, alpha=0.2)
+        axs[i].plot(mean_q_per_cluster[i, :, i_cluster], color=rgba)
+    if i_cluster == 0:
+        axs[i].set_title(f"{model.nameDof()[i].to_string()}")
+
+plt.suptitle(f"mean kinematics per cluster for {nb_twists}.5 twists")
+plt.savefig(f'mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+# plt.show()
+
+
+
+
+# # fig, axs = plt.subplots(4, 4, figsize=(18, 9))
+# # axs = axs.ravel()
+# plt.figure()
+# for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AuJo'].keys()):
+#     print(f"{cluster_name} was used by {cluster_counter[cluster_name]} / {len(good_sols_per_athlete)} athletes")
+#     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster[cluster_name][3:])}")
+#
+#     rgba = cmap(i_cluster * 0.25 + 0.25)
+#     # for i_trial in range(len(good_sols_per_athlete['AuJo'][cluster_name])):
+#     #     for i in range(mean_q_per_cluster.shape[0]):
+#     #         axs[i].plot(cluster_arrays[cluster_name][i, :, i_trial], color=rgba)
+#     #     if i_cluster == 0:
+#     #         axs[i].set_title(f"{model.nameDof()[i].to_string()}")
+#
+#     for i_trial in range(cluster_arrays[cluster_name].shape[2]):
+#         plt.plot(cluster_arrays[cluster_name][0, :, i_trial], color=rgba)
+#
+# plt.suptitle(f"Cluster for {nb_twists}.5 twists")
+# plt.savefig(f'test_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+# # plt.show()
+
+
+plt.figure()
+plt.plot(cluster_arrays["cluster_2"][0, :, :])
+plt.savefig(f'test_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+
+plt.figure()
+plt.plot(cluster_arrays["cluster_3"][0, :, :])
+plt.savefig(f'test_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+
+
+
+
+fig, axs = plt.subplots(4, 4, figsize=(18, 9))
+axs = axs.ravel()
+rgba = cmap(0)
+for i in range(mean_q_per_cluster.shape[0]):
+    axs[i].fill_between(np.arange(381), np.mean(mean_q_per_cluster, axis=2)[i, :] - np.std(mean_q_per_cluster, axis=2)[i, :],
+                        np.mean(mean_q_per_cluster, axis=2)[i, :] + np.std(mean_q_per_cluster, axis=2)[i, :], color=rgba, alpha=0.2)
+    for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AuJo'].keys()):
+        axs[i].plot(mean_q_per_cluster[i, :, i_cluster], color=rgba)
+    axs[i].set_title(f"{model.nameDof()[i].to_string()}")
+np.std(mean_q_per_cluster, axis=2)
+plt.show()
+print(f"Whereas the weighted mean std between clusters was {np.sum(mean_std_between_clusters[3:])}")
