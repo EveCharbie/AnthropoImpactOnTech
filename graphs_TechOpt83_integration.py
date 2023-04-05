@@ -921,7 +921,7 @@ folder_per_athlete = {
     "MaCu": "MaCu/",
     "MaJa": "MaJa/",
     "OlGa": "OlGa/",
-    "Sarah":"Sarah/",
+    "Sarah": "Sarah/",
     "SoMe": "SoMe/",
 }
 
@@ -948,7 +948,7 @@ for athlete in folder_per_athlete:
     if athlete in athlete_done:
         print(f'{athlete} for {folder} has already a graph')
         continue
-    else :
+    else:
         print(f'Building graph for {athlete} doing {folder}')
 
     Bruit = []

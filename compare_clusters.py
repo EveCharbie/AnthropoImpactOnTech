@@ -17,45 +17,28 @@ results_path = 'solutions_multi_start/'
 results_path_this_time = results_path + 'Solutions_vrille_et_demi/'
 cmap = cm.get_cmap('magma')
 
-# good_sols_per_athlete = {
-#     "AuJo": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [8]},
-#     "ElMe": {"cluster_1": [], "cluster_2": [], "cluster_3": []}, # , "cluster_4": []},
-#     "EvZl": {"cluster_1": [1], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [5]},
-#     "FeBl": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [7]}, # , "cluster_4": []},
-#     "JeCh_2": {"cluster_1": [], "cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [6, 7]},
-#     "KaFu": {"cluster_1": [4], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
-#     "KaMi": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [9]},
-#     "LaDe": {"cluster_1": [0], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
-#     "MaCu": {"cluster_1": [0, 4], "cluster_2": [1], "cluster_3": [3]}, # , "cluster_4": [9]},
-#     "MaJa": {"cluster_1": [], "cluster_2": [8], "cluster_3": [9]}, # , "cluster_4": [4]},
-#     "OlGa": {"cluster_1": [4], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
-#     "Sarah":{"cluster_1": [0], "cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
-#     "SoMe": {"cluster_1": [], "cluster_2": [2], "cluster_3": [4]}, # , "cluster_4": []},
-# }
-
 good_sols_per_athlete = {
-    "AuJo": {"cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [8]},
-    "ElMe": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": []},
-    "EvZl": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [5]},
-    "FeBl": {"cluster_2": [3], "cluster_3": [7]}, # , "cluster_4": []},
-    "JeCh_2": {"cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [6, 7]},
-    "KaFu": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
-    "KaMi": {"cluster_2": [3], "cluster_3": [2]}, # , "cluster_4": [9]},
-    "LaDe": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [9]},
-    "MaCu": {"cluster_2": [1], "cluster_3": [3]}, # , "cluster_4": [9]},
-    "MaJa": {"cluster_2": [8], "cluster_3": [9]}, # , "cluster_4": [4]},
-    "OlGa": {"cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
-    "Sarah":{"cluster_2": [], "cluster_3": []}, # , "cluster_4": [1]},
-    "SoMe": {"cluster_2": [2], "cluster_3": [4]}, # , "cluster_4": []},
+    "AuJo": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [1, 2], "cluster_4": [4, 6, 7, 8], "cluster_5": []},
+    "ElMe": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [1, 2], "cluster_4": [], "cluster_5": []},
+    "EvZl": {"cluster_1": [1, 3], "cluster_2": [], "cluster_3": [], "cluster_4": [0, 2, 4, 5, 6, 7, 8, 9], "cluster_5": []},
+    "FeBl": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [1, 2, 4, 5, 6, 7], "cluster_4": [8, 9], "cluster_5": []},
+    "JeCh_2": {"cluster_1": [], "cluster_2": [3], "cluster_3": [1, 2], "cluster_4": [0, 6, 7, 9], "cluster_5": []},
+    "KaFu": {"cluster_1": [0, 4], "cluster_2": [], "cluster_3": [], "cluster_4": [5, 6], "cluster_5": [1, 9]},
+    "KaMi": {"cluster_1": [0], "cluster_2": [3], "cluster_3": [2, 4, 5], "cluster_4": [6, 7], "cluster_5": [1, 9]},
+    "LaDe": {"cluster_1": [0, 4], "cluster_2": [], "cluster_3": [], "cluster_4": [5, 6, 7], "cluster_5": [1, 9]},
+    "MaCu": {"cluster_1": [0, 4], "cluster_2": [3], "cluster_3": [1, 2], "cluster_4": [9], "cluster_5": []},
+    "MaJa": {"cluster_1": [], "cluster_2": [8], "cluster_3": [9], "cluster_4": [0, 2, 4, 5, 6, 7], "cluster_5": []},
+    "OlGa": {"cluster_1": [4], "cluster_2": [], "cluster_3": [], "cluster_4": [5, 6, 7], "cluster_5": [0, 1, 9]},
+    "Sarah":{"cluster_1": [0, 4], "cluster_2": [], "cluster_3": [], "cluster_4": [5, 6, 7], "cluster_5": [1, 9]},
+    "SoMe": {"cluster_1": [], "cluster_2": [3], "cluster_3": [2, 4], "cluster_4": [], "cluster_5": []},
 }
-
 
 fig, axs = plt.subplots(4, 4, figsize=(18, 9))
 axs = axs.ravel()
 
 cluster_arrays = {key: np.zeros((16, 381, 1)) for key in good_sols_per_athlete['AuJo'].keys()}
-for i_name, name in enumerate(good_sols_per_athlete):
-    for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AuJo'].keys()):
+for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AuJo'].keys()):
+    for i_name, name in enumerate(good_sols_per_athlete):
         for i_sol in good_sols_per_athlete[name][cluster_name]:
             file_name = results_path_this_time + name + '/' + name + '_vrille_et_demi_' + str(i_sol) + "_CVG.pkl"
             print(file_name)
@@ -152,13 +135,24 @@ plt.savefig(f'mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 
 
 plt.figure()
-plt.plot(cluster_arrays["cluster_2"][0, :, :])
-plt.savefig(f'test_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+plt.plot(cluster_arrays["cluster_1"][4, :, :])
+plt.savefig(f'test1_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 
 plt.figure()
-plt.plot(cluster_arrays["cluster_3"][0, :, :])
-plt.savefig(f'test_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+plt.plot(cluster_arrays["cluster_2"][4, :, :])
+plt.savefig(f'test2_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 
+plt.figure()
+plt.plot(cluster_arrays["cluster_3"][4, :, :])
+plt.savefig(f'test3_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+
+plt.figure()
+plt.plot(cluster_arrays["cluster_4"][4, :, :])
+plt.savefig(f'test4_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+
+plt.figure()
+plt.plot(cluster_arrays["cluster_5"][4, :, :])
+plt.savefig(f'test5_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 
 
 
