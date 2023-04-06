@@ -950,11 +950,11 @@ def prepare_multi_start(
     return MultiStart(
         combinatorial_parameters=combinatorial_parameters,
         prepare_ocp_callback=prepare_ocp,
-        post_optimization_callback=save_results,
-        should_solve_callback=check_already_done,
+        post_optimization_callback=(save_results,{'save_folder': save_folder}),
+        should_solve_callback=(check_already_done, {'save_folder':save_folder}),
         solver=Solver.IPOPT(show_online_optim=False),  # You cannot use show_online_optim with multi-start
         n_pools=n_pools,
-        save_folder= save_folder,
+        # save_folder= save_folder,
     )
 
 def main():
@@ -974,7 +974,7 @@ def main():
     all_paths = []
     for athlete in athletes :
         path = f'{athlete}'+'.bioMod'
-        biorbd_model_path = "/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Models/Models_Lisa/" + f'{path}'
+        biorbd_model_path = "/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Models/" + f'{path}'
         all_paths.append(biorbd_model_path)
 
 
