@@ -35,16 +35,6 @@ The goal of this program is to optimize the movement to achieve a rudi out pike 
 """
 
 
-def check_already_done(self, args):
-    """
-    Check if the filename already appears in the folder where files are saved, if not ocp must be solved
-    """
-    already_done_filenames = os.listdir(f"/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol")
-    for i, title in enumerate(already_done_filenames):
-        title = title[0:-8]
-        already_done_filenames[i] = title
-    return self.post_optimization_callback([None], *args, only_save_filename=True) not in already_done_filenames
-
 class Model:
     """
     Attributes
@@ -936,11 +926,21 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
         with open(f'{path_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
             pickle.dump(dict_state, file)
 
+def check_already_done(self, args):
+    """
+    Check if the filename already appears in the folder where files are saved, if not ocp must be solved
+    """
+    already_done_filenames = os.listdir(f"/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol")
+    for i, title in enumerate(already_done_filenames):
+        title = title[0:-8]
+        already_done_filenames[i] = title
+    return self.post_optimization_callback([None], *args, only_save_filename=True) not in already_done_filenames
+
 def check_already_done(args,save_folder, save_results= save_results):
     """
     Check if the filename already appears in the folder where files are saved, if not ocp must be solved
     """
-    already_done_filenames = os.listdir(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_multistart/")
+    already_done_filenames = os.listdir(f"{save_folder}")
     for i, title in enumerate(already_done_filenames):
         title = title[0:-8]
         already_done_filenames[i] = title
@@ -979,8 +979,9 @@ def main():
 
     seed = [0,1,2,3,4,5,6,7,8,9]
     nb_twist = [3]
-    athletes = ["AdCh", "AlAd", "AuJo", "Benjamin", "ElMe", "EvZl", "FeBl", "JeCh", "KaFu", "KaMi", "LaDe", "MaCu", "MaJa",
-                "MeVa", "OlGa", "Sarah", "SoMe", "WeEm", "ZoTs"]
+    athletes = ["AdCh", "AlAd", "AuJo", "Benjamin", "ElMe", "EvZl", "FeBl", "JeCh", "KaFu"]
+    #, "KaMi", "LaDe", "MaCu", "MaJa",
+               # "MeVa", "OlGa", "Sarah", "SoMe", "WeEm", "ZoTs"]
 
     all_paths = []
     for athlete in athletes :
@@ -990,9 +991,9 @@ def main():
 
 
     #path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/"
-    combinatorial_parameters = {'bio_model_path': biorbd_model_path,'nb_twist':nb_twist,
+    combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist':nb_twist,
                                 'seed': seed}
-    save_folder = "./temporary_results"
+    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_with_updated_models"
 
     multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder)
 
