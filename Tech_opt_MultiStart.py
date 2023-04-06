@@ -39,7 +39,7 @@ def check_already_done(self, args):
     """
     Check if the filename already appears in the folder where files are saved, if not ocp must be solved
     """
-    already_done_filenames = os.listdir(f"/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol")
+    already_done_filenames = os.listdir("/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_with_updated_models")
     for i, title in enumerate(already_done_filenames):
         title = title[0:-8]
         already_done_filenames[i] = title
@@ -900,7 +900,7 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
     #states = sol.states["all"]
     stunt = stunts[nb_twist]
     athlete=biorbd_model_path.split('/')[-1].removesuffix('.bioMod')
-    path_folder = '/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol'
+    path_folder = '/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_with_updated_models'
     title_before_solve = f"{athlete}_{stunt}_{seed}"
 
     if only_save_filename == True :
@@ -943,7 +943,7 @@ def prepare_multi_start(biorbd_model_path: list, nb_twist: list, seed: list, sho
         prepare_ocp,
         solver=Solver.IPOPT(show_online_optim=False),  # You cannot use show_online_optim with multi-start
         post_optimization_callback=save_results,
-        n_pools=2,
+        n_pools=5,
         biorbd_model_path=biorbd_model_path,
         nb_twist=nb_twist,
         seed=seed,
@@ -962,14 +962,15 @@ def main():
 
     n_threads = 25
 
-    seed = [ 4,5]
+    seed = [0,1,2,3,4,5,6,7,8,9]
     nb_twist = [3]
-    athletes = ["JeCh"]# "JeCh_2"]
+    athletes = ["AdCh", "AlAd", "AuJo", "Benjamin", "ElMe", "EvZl", "FeBl", "JeCh", "KaFu", "KaMi", "LaDe", "MaCu", "MaJa",
+                "MeVa", "OlGa", "Sarah", "SoMe", "WeEm", "ZoTs"]
 
     all_paths = []
     for athlete in athletes :
         path = f'{athlete}'+'.bioMod'
-        biorbd_model_path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/models/Models/" + f'{path}'
+        biorbd_model_path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/" + f'{path}'
         all_paths.append(biorbd_model_path)
 
 
