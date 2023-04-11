@@ -923,6 +923,7 @@ folder_per_athlete = {
     "OlGa": "OlGa/",
     "Sarah": "Sarah/",
     "SoMe": "SoMe/",
+    "AdCh": "AdCh/",
 }
 
 folder_per_twist_nb = {"3": "Solutions_vrille_et_demi/"} # , "5": "Solutions_double_vrille_et_demi/"}

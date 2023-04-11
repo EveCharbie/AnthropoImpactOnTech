@@ -1179,8 +1179,8 @@ def prepare_ocp(
 def main():
 #    models =
 # mettre tout les models
-    os.listdir('/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/')
-    model_paths = ("/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/AuJo_TechOpt83.bioMod","/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/AuJo_TechOpt83.bioMod")
+    os.listdir('Models/')
+    model_paths = ("Models/AuJo_TechOpt83.bioMod","Models/AuJo_TechOpt83.bioMod")
 
     n_threads = 4
 
