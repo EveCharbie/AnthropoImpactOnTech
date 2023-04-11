@@ -11,7 +11,7 @@ from bioptim import (
     ObjectiveList,
     ObjectiveFcn,
     BoundsList,
-    QAndQDotBounds,
+    BiorbdModel,
     InitialGuessList,
     InterpolationType,
     OdeSolver,
@@ -22,7 +22,7 @@ from bioptim import (
     ConstraintList,
     ConstraintFcn,
     PenaltyNodeList,
-    BiorbdInterface,
+    #BiorbdInterface,
 )
 import time
 
@@ -91,7 +91,7 @@ def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     diff = 0
     for i, dof in enumerate(dofs):
         diff += (all_pn.nlp.states['q'].mx[dof] - targets[i])**2
-    return BiorbdInterface.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
+    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
 
 
 def prepare_ocp(
@@ -116,11 +116,11 @@ def prepare_ocp(
     The OptimalControlProgram ready to be solved
     """
 
-    biorbd_model = ( biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path), biorbd.Model(biorbd_model_path) )
+    biorbd_model = ( BiorbdModel(biorbd_model_path),  BiorbdModel(biorbd_model_path),  BiorbdModel(biorbd_model_path), BiorbdModel(biorbd_model_path),  BiorbdModel(biorbd_model_path) )
 
-    nb_q = biorbd_model[0].nbQ()
-    nb_qdot = biorbd_model[0].nbQdot()
-    nb_qddot_joints = nb_q - biorbd_model[0].nbRoot()
+    nb_q = biorbd_model[0].nb_q
+    nb_qdot = biorbd_model[0].nb_qdot
+    nb_qddot_joints = nb_q - biorbd_model[0].nb_root
 
     # Pour la lisibilite
     X = 0
@@ -211,11 +211,11 @@ def prepare_ocp(
 
     # Path constraint
     x_bounds = BoundsList()
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
-    x_bounds.add(bounds=QAndQDotBounds(biorbd_model[0]))
+    x_bounds.add(bounds=biorbd_model[0].bounds_from_ranges(["q", "qdot"]))
+    x_bounds.add(bounds=biorbd_model[0].bounds_from_ranges(["q", "qdot"]))
+    x_bounds.add(bounds=biorbd_model[0].bounds_from_ranges(["q", "qdot"]))
+    x_bounds.add(bounds=biorbd_model[0].bounds_from_ranges(["q", "qdot"]))
+    x_bounds.add(bounds=biorbd_model[0].bounds_from_ranges(["q", "qdot"]))
 
     # Pour la lisibilite
     DEBUT, MILIEU, FIN = 0, 1, 2
@@ -288,9 +288,9 @@ def prepare_ocp(
     # decalage entre le bassin et le CoM
     CoM_Q_sym = MX.sym('CoM', nb_q)
     CoM_Q_init = x_bounds[0].min[:nb_q, DEBUT]  # min ou max ne change rien a priori, au DEBUT ils sont egaux normalement
-    CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].CoM(CoM_Q_sym).to_mx()])
+    CoM_Q_func = Function('CoM_Q_func', [CoM_Q_sym], [biorbd_model[0].center_of_mass(CoM_Q_sym)])
     bassin_Q_func = Function('bassin_Q_func', [CoM_Q_sym],
-                             [biorbd_model[0].globalJCS(0).to_mx()])  # retourne la RT du bassin
+                             [biorbd_model[0].homogeneous_matrices_in_global(CoM_Q_sym, 0).to_mx()])  # retourne la RT du bassin
 
     r = np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]  # selectionne seulement la translation de la RT
 
@@ -794,7 +794,7 @@ def main():
     Prepares and solves an ocp for a 803<. Animates the results
     """
 
-    biorbd_model_path = 'Documents/Stage_Lisa/AnthropoImpactOnTech/Models/ElMe.bioMod'
+    biorbd_model_path = 'Models/ElMe.bioMod'
     Mod = Model(model = biorbd_model_path)
     n_shooting = (40, 100, 100, 100, 40)
 
@@ -828,7 +828,7 @@ def main():
 
     # Print the last solution
     #sol.animate(n_frames=-1, show_floor=False)
-     sol.graphs(show_bounds=True)
+    sol.graphs(show_bounds=True)
 
 if __name__ == "__main__":
     main()

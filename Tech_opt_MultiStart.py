@@ -35,15 +35,6 @@ The goal of this program is to optimize the movement to achieve a rudi out pike 
 """
 
 
-def check_already_done(self, args):
-    """
-    Check if the filename already appears in the folder where files are saved, if not ocp must be solved
-    """
-    already_done_filenames = os.listdir(f"/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol")
-    for i, title in enumerate(already_done_filenames):
-        title = title[0:-8]
-        already_done_filenames[i] = title
-    return self.post_optimization_callback([None], *args, only_save_filename=True) not in already_done_filenames
 
 class Model:
     """
@@ -879,7 +870,9 @@ def prepare_ocp(
     )
 
 
-def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: int, only_save_filename : bool = False):
+
+
+def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: int,save_folder:str=None, only_save_filename : bool = False):
     """
     Solving the ocp
     Parameters
@@ -927,28 +920,41 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
     if convergence == 0 :
         convergence = 'CVG'
         print(f'{athlete}  doing' + f' {stunt}' + ' converge')
-    else :
+    else:
         convergence = 'DVG'
         print( f'{athlete} doing ' + f'{stunt}' + ' doesn t converge')
+    if save_folder :
+        with open(f'{path_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
+            pickle.dump(dict_state, file)
 
-    with open(f'{path_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
-        pickle.dump(dict_state, file)
+def check_already_done(args,save_folder, save_results= save_results):
+    """
+    Check if the filename already appears in the folder where files are saved, if not ocp must be solved
+    """
+    already_done_filenames = os.listdir(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_multistart/")
+    for i, title in enumerate(already_done_filenames):
+        title = title[0:-8]
+        already_done_filenames[i] = title
+    return save_results([None], *args,save_folder, only_save_filename=True) not in already_done_filenames
 
 
-def prepare_multi_start(biorbd_model_path: list, nb_twist: list, seed: list, should_solve: Function, use_multi_process: bool) -> MultiStart:
+def prepare_multi_start(
+    combinatorial_parameters: dict[tuple,...],
+    save_folder: str = None,
+    n_pools: int = 1
+) -> MultiStart:
+
     """
     The initialization of the multi-start
     """
     return MultiStart(
-        prepare_ocp,
+        combinatorial_parameters=combinatorial_parameters,
+        prepare_ocp_callback=prepare_ocp,
+        post_optimization_callback=(save_results,{'save_folder': save_folder}),
+        should_solve_callback=(check_already_done, {'save_folder':save_folder}),
         solver=Solver.IPOPT(show_online_optim=False),  # You cannot use show_online_optim with multi-start
-        post_optimization_callback=save_results,
-        n_pools=2,
-        biorbd_model_path=biorbd_model_path,
-        nb_twist=nb_twist,
-        seed=seed,
-        should_solve=should_solve,
-        use_multi_process=use_multi_process,
+        n_pools=n_pools,
+        # save_folder= save_folder,
     )
 
 def main():
@@ -961,21 +967,25 @@ def main():
     #Mod = Model(savesol= True, with_hsl=True)
 
     n_threads = 25
-
     seed = [ 4,5]
     nb_twist = [3]
-    athletes = ["JeCh"]# "JeCh_2"]
+    athletes = ["KaMi"]# "JeCh_2"]
 
     all_paths = []
     for athlete in athletes :
         path = f'{athlete}'+'.bioMod'
-        biorbd_model_path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/models/Models/" + f'{path}'
+        biorbd_model_path = "/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Models/" + f'{path}'
         all_paths.append(biorbd_model_path)
 
 
     #path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/"
+    combinatorial_parameters = {'bio_model_path': biorbd_model_path,'nb_twist':nb_twist,
+                                'seed': seed}
+    save_folder = "./temporary_results"
 
-    multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
+    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder)
+
+    # multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
 
 
     multi_start.solver = Solver.IPOPT(show_online_optim=False, show_options=dict(show_bounds=False))
@@ -1019,17 +1029,6 @@ def main():
 #
 # with open('/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Sol/Sarah_vrille_et_demi_0_1.pkl', 'rb') as f:
 #     data = pickle.load(f)
-
-
-# def check_already_done_filenames(args, already_done_filenames):
-#
-#     args_copy = [None]
-#     for i in range(len(args)):
-#         args_copy.append(args[i])
-#     if save_results(*args_copy, only_save_filename=True) in already_done_filenames:
-#         return True
-#     else:
-#         return False
 
 
 if __name__ == "__main__":
