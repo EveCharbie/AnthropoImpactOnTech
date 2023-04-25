@@ -8,7 +8,6 @@ import bioviz
 import os
 from IPython import embed
 
-# Compare the clusters for amplitude
 model_path = "Models/JeCh_TechOpt83.bioMod"
 model = biorbd.Model(model_path)
 nb_twists = 1
@@ -158,11 +157,8 @@ for i_name, name in enumerate(names):
             for i, DoF in enumerate([6, 7, 10, 11, 14, 15]):
                 axs[i].set_title(f"{model.nameDof()[DoF].to_string()}")
 
-# axs[0].legend(bbox_to_anchor=(4.8, 1), loc='upper left', borderaxespad=0., ncols=2, fontsize=12)
-# axs[0].legend(bbox_to_anchor=(4, 1))
-# plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
 plt.suptitle(f"{nb_twists}.5 twists")
-plt.savefig(f'clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 plt.show()
 
 cluster_counter_right_arm = {key: 0 for key in cluster_right_arm["AlAd"].keys()}
@@ -264,7 +260,7 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
         axs[5].set_title(f"{model.nameDof()[15].to_string()}")
 
 plt.suptitle(f"mean kinematics per cluster for {nb_twists}.5 twists")
-plt.savefig(f'mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+plt.savefig(f'cluster_graphs/mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 # plt.show()
 
 
@@ -279,18 +275,5 @@ for i_var in range(len(var_list)):
         for i in range(len(DoF_index[i_var])):
             axs[i].plot(var_list[i_var][key][DoF_index[i_var][i], :, :])
         plt.suptitle(key)
-        plt.savefig(f'test_{var_name[i_var]}_{key}_graph_for_all_athletes_{nb_twists}.png', dpi=300)
+        plt.savefig(f'cluster_graphs/test_{var_name[i_var]}_{key}_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 plt.show()
-
-# fig, axs = plt.subplots(4, 4, figsize=(18, 9))
-# axs = axs.ravel()
-# rgba = cmap(0)
-# for i in range(mean_q_per_cluster.shape[0]):
-#     axs[i].fill_between(np.arange(381), np.mean(mean_q_per_cluster, axis=2)[i, :] - np.std(mean_q_per_cluster, axis=2)[i, :],
-#                         np.mean(mean_q_per_cluster, axis=2)[i, :] + np.std(mean_q_per_cluster, axis=2)[i, :], color=rgba, alpha=0.2)
-#     for i_cluster, cluster_name in enumerate(good_sols_per_athlete['AlAd'].keys()):
-#         axs[i].plot(mean_q_per_cluster[i, :, i_cluster], color=rgba)
-#     axs[i].set_title(f"{model.nameDof()[i].to_string()}")
-# np.std(mean_q_per_cluster, axis=2)
-# plt.show()
-# print(f"Whereas the weighted mean std between clusters was {np.sum(mean_std_between_clusters[3:])}")
