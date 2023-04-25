@@ -3,13 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from decimal import *
-# import Colormap as normalize
 import bioviz
-
-# from ..misc.enums import (
-#             Shooting,
-#             )
-# import Shooting
 
 from IPython import embed
 import pickle
@@ -910,20 +904,25 @@ def prepare_ocp(
 model_path = "Models/JeCh_TechOpt83.bioMod"
 
 folder_per_athlete = {
-    "AuJo": "AuJo/",
-    "ElMe": "ElMe/",
-    "EvZl": "EvZl/",
-    "FeBl": "FeBl/",
-    "JeCh_2": "JeCh_2/",
-    "KaFu": "KaFu/",
-    "KaMi": "KaMi/",
-    "LaDe": "LaDe/",
-    "MaCu": "MaCu/",
-    "MaJa": "MaJa/",
-    "OlGa": "OlGa/",
-    "Sarah": "Sarah/",
-    "SoMe": "SoMe/",
-    "AdCh": "AdCh/",
+    # "AdCh": "AdCh/",
+    # "AlAd": "AlAd/",
+    # "AuJo": "AuJo/",
+    # "Benjamin": "Benjamin/",
+    # "ElMe": "ElMe/",
+    # "EvZl": "EvZl/",
+    # "FeBl": "FeBl/",
+    # "JeCh": "JeCh/",
+    # "KaFu": "KaFu/",
+    # "KaMi": "KaMi/",
+    # "LaDe": "LaDe/",
+    # "MaCu": "MaCu/",
+    # "MaJa": "MaJa/",
+    # "MeVa": "MeVa/",
+    # "OlGa": "OlGa/",
+    # "Sarah": "Sarah/",
+    # "SoMe": "SoMe/",
+    # "WeEm": "WeEm/",
+    "ZoTs": "ZoTs/",
 }
 
 folder_per_twist_nb = {"3": "Solutions_vrille_et_demi/"} # , "5": "Solutions_double_vrille_et_demi/"}
