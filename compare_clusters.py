@@ -1,5 +1,6 @@
 
 import biorbd
+import bioviz
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
@@ -14,8 +15,9 @@ nb_twists = 1
 chosen_clusters_dict = {}
 results_path = 'solutions_multi_start/'
 results_path_this_time = results_path + 'Solutions_vrille_et_demi/'
-cmap = cm.get_cmap('magma')
+cmap = cm.get_cmap('viridis')
 
+# Define the clusters of solutions per joint
 cluster_right_arm = {
     "AdCh":     {"cluster_1": [1, 2, 5, 6, 7, 8],             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [0, 4, 9], "cluster_5": [],                          "cluster_6": []},
     "AlAd":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": []},
@@ -26,8 +28,8 @@ cluster_right_arm = {
     "FeBl":     {"cluster_1": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [],           "cluster_4": [5],       "cluster_5": [],                          "cluster_6": []},
     "JeCh":     {"cluster_1": [6],                            "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [0, 1, 2, 3, 4, 5, 7, 8, 9]},
     "KaFu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 3, 8],    "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 2, 4, 5, 6, 9]},
-    "KaMi":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 7, 9],                "cluster_3": [4],          "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 5, 6, 8]},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [2],                            "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 3, 4, 5, 6, 7, 8, 9]},
+    "KaMi":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 7],                   "cluster_3": [4, 9],       "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 5, 6, 8]},
+    "LaDe":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [2],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 3, 4, 5, 6, 7, 8, 9]},
     "MaCu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [1, 3],       "cluster_4": [],        "cluster_5": [],                          "cluster_6": [2, 4, 6, 7, 8, 9]},
     "MaJa":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": []},
     "MeVa":     {"cluster_1": [],                             "cluster_2": [2, 7],                         "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [0, 1, 3, 4, 5, 6, 8, 9]},
@@ -104,6 +106,8 @@ cluster_thighs = {
 #     "ZoTs":     {"cluster_1": [], "cluster_2": [], "cluster_3": [], "cluster_4": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]},
 # }
 
+
+# print all the solutions at once
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
 axs = axs.ravel()
 
@@ -161,6 +165,8 @@ plt.suptitle(f"{nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 plt.show()
 
+
+# Find the mean and std of each cluster
 cluster_counter_right_arm = {key: 0 for key in cluster_right_arm["AlAd"].keys()}
 mean_std_per_cluster_right_arm = {key: np.zeros((16, )) for key in cluster_right_arm["AlAd"].keys()}
 mean_q_per_cluster_right_arm = np.zeros((16, 381, 1))
@@ -211,6 +217,7 @@ mean_q_per_cluster_thighs = mean_q_per_cluster_thighs[:, :, 1:]
 std_q_per_cluster_thighs = std_q_per_cluster_thighs[:, :, 1:]
 mean_std_between_clusters_thighs = np.mean(np.std(mean_q_per_cluster_thighs, axis=2), axis=1)
 
+# Plot the clusters with different colors
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
 axs = axs.ravel()
 for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
@@ -263,8 +270,24 @@ plt.suptitle(f"mean kinematics per cluster for {nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 # plt.show()
 
+data_to_save = {"mean_q_per_cluster_right_arm": mean_q_per_cluster_right_arm,
+                "mean_q_per_cluster_left_arm": mean_q_per_cluster_left_arm,
+                "mean_q_per_cluster_thighs": mean_q_per_cluster_thighs,
+                "std_q_per_cluster_right_arm": std_q_per_cluster_right_arm,
+                "std_q_per_cluster_left_arm": std_q_per_cluster_left_arm,
+                "std_q_per_cluster_thighs": std_q_per_cluster_thighs,
+                "q_right_arm" : q_right_arm,
+                "q_left_arm" : q_left_arm,
+                "q_thighs" : q_thighs,
+                "cluster_right_arm" : cluster_right_arm,
+                "cluster_left_arm" : cluster_left_arm,
+                "cluster_thighs": cluster_thighs,}
 
-# plot clusters to make sure they were correctly identified
+
+with open(f'overview_graphs/clusters_sol.pkl', 'wb') as f:
+    pickle.dump(, f)
+
+# Plot the clusters one by one to make sure they were correctly identified
 var_name = ["right_arm", "left_arm", "thighs"]
 var_list = [q_right_arm, q_left_arm, q_thighs]
 DoF_index = [[6, 7], [10, 11], [14, 15]]
@@ -277,3 +300,64 @@ for i_var in range(len(var_list)):
         plt.suptitle(key)
         plt.savefig(f'cluster_graphs/test_{var_name[i_var]}_{key}_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 plt.show()
+
+
+# Generate animations of the movements in the clusters
+for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
+    print(f"right_arm_{cluster_name}")
+    Q_to_animate = np.zeros((model.nbQ(), 381))
+    Q_to_animate[5, :] = np.pi/2
+    Q_to_animate[6, :] = mean_q_per_cluster_right_arm[6, :, i_cluster]
+    Q_to_animate[7, :] = mean_q_per_cluster_right_arm[7, :, i_cluster]
+    Q_to_animate[8, :] = mean_q_per_cluster_right_arm[8, :, i_cluster]
+    Q_to_animate[9, :] = mean_q_per_cluster_right_arm[9, :, i_cluster]
+    b = bioviz.Viz(model_path)
+    b.set_camera_zoom(0.5)
+    b.load_movement(Q_to_animate)
+    b.exec()
+    # b.start_recording(f"videos_clusters/right_arm_{cluster_name}.ogv")
+    # b.load_movement(Q_to_animate)
+    # for f in range(Q_to_animate.shape[1] + 1):
+    #     b.movement_slider[0].setValue(f)
+    # b.add_frame()
+    # b.stop_recording()
+    # b.quit()
+
+for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
+    print(f"left_arm_{cluster_name}")
+    Q_to_animate = np.zeros((model.nbQ(), 381))
+    Q_to_animate[5, :] = np.pi/2
+    Q_to_animate[10, :] = mean_q_per_cluster_left_arm[10, :, i_cluster]
+    Q_to_animate[11, :] = mean_q_per_cluster_left_arm[11, :, i_cluster]
+    Q_to_animate[12, :] = mean_q_per_cluster_left_arm[12, :, i_cluster]
+    Q_to_animate[13, :] = mean_q_per_cluster_left_arm[13, :, i_cluster]
+    b = bioviz.Viz(model_path)
+    b.set_camera_zoom(0.5)
+    b.load_movement(Q_to_animate)
+    b.exec()
+    # b.start_recording(f"videos_clusters/left_arm_{cluster_name}.ogv")
+    # b.load_movement(Q_to_animate)
+    # for f in range(Q_to_animate.shape[1] + 1):
+    #     b.movement_slider[0].setValue(f)
+    #     b.add_frame()
+    # b.stop_recording()
+    # b.quit()
+
+for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
+    print(f"thighs_{cluster_name}")
+    Q_to_animate = np.zeros((model.nbQ(), 381))
+    Q_to_animate[5, :] = np.pi/2
+    Q_to_animate[14, :] = mean_q_per_cluster_thighs[14, :, i_cluster]
+    Q_to_animate[15, :] = mean_q_per_cluster_thighs[15, :, i_cluster]
+    b = bioviz.Viz(model_path)
+    b.set_camera_zoom(0.5)
+    b.load_movement(Q_to_animate)
+    b.exec()
+    # b.start_recording(f"videos_clusters/thighs_{cluster_name}.ogv")
+    # b.load_movement(Q_to_animate)
+    # for f in range(Q_to_animate.shape[1] + 1):
+    #     b.movement_slider[0].setValue(f)
+    #     b.add_frame()
+    # b.stop_recording()
+    # b.quit()
+
