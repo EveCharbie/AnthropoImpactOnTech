@@ -865,7 +865,8 @@ def prepare_ocp(
         u_bounds=u_bounds,
         objective_functions=objective_functions,
         constraints=constraints,
-        n_threads=n_threads
+        n_threads=n_threads,
+        assume_phase_dynamics=True,
     )
 
 
@@ -892,7 +893,7 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
     #states = sol.states["all"]
     stunt = stunts[nb_twist]
     athlete=biorbd_model_path.split('/')[-1].removesuffix('.bioMod')
-    path_folder = '/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_with_updated_models'
+    path_folder = '/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille'
     title_before_solve = f"{athlete}_{stunt}_{seed}"
 
     if only_save_filename == True :
@@ -978,10 +979,27 @@ def main():
     n_threads = 25
 
     seed = [0,1,2,3,4,5,6,7,8,9]
-    nb_twist = [3]
-    athletes = ["AdCh", "AlAd", "AuJo", "Benjamin", "ElMe", "EvZl", "FeBl", "JeCh", "KaFu"]
-    #, "KaMi", "LaDe", "MaCu", "MaJa",
-               # "MeVa", "OlGa", "Sarah", "SoMe", "WeEm", "ZoTs"]
+    nb_twist = [5]
+    athletes = [
+       "AdCh",
+        "AlAd",
+        "AuJo",
+        "Benjamin",
+        "ElMe",
+        "EvZl",
+        "FeBl",
+        "JeCh",
+        "KaFu",
+        "KaMi",
+        "LaDe",
+        "MaCu",
+        "MaJa",
+        "MeVa",
+        "OlGa",
+        "Sarah",
+        "SoMe",
+        "WeEm",
+        "ZoTs"]
 
     all_paths = []
     for athlete in athletes :
@@ -993,9 +1011,9 @@ def main():
     #path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/"
     combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist':nb_twist,
                                 'seed': seed}
-    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_with_updated_models"
+    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
 
-    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder)
+    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools = 5)
 
     # multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
 
