@@ -900,9 +900,6 @@ def prepare_ocp(
         n_threads=3,
     )
 
-
-model_path = "Models/JeCh_TechOpt83.bioMod"
-
 folder_per_athlete = {
     # "AdCh": "AdCh/",
     # "AlAd": "AlAd/",
@@ -917,7 +914,6 @@ folder_per_athlete = {
     # "LaDe": "LaDe/",
     # "MaCu": "MaCu/",
     # "MaJa": "MaJa/",
-    # "MeVa": "MeVa/",
     # "OlGa": "OlGa/",
     # "Sarah": "Sarah/",
     # "SoMe": "SoMe/",
@@ -926,22 +922,13 @@ folder_per_athlete = {
 }
 
 folder_per_twist_nb = {"3": "Solutions_vrille_et_demi/"} # , "5": "Solutions_double_vrille_et_demi/"}
-# , "2": "Solutions_double_vrille_et_demi/", "3": "Solutions_triple_vrille_et_demi/"}
 
 results_path = "solutions_multi_start/"
 folder_graphs = "kinematics_graphs"
-
-
-FLAG_SAME_FIG = True
-
 model_path = "Models"
 num_half_twist = "3"
 folder = folder_per_twist_nb[num_half_twist].removeprefix('Solutions_').removesuffix('/')
-# done_athlete = os.listdir(f'{folder_graphs}/{folder}')
 athlete_done = []
-# for i in range(len(done_athlete)):
-#     filename = done_athlete[i]
-#     athlete_done.append(filename.split(' ')[2].split('_')[0])
 for athlete in folder_per_athlete:
     results_path_this_time = results_path + folder_per_twist_nb[num_half_twist] + folder_per_athlete[athlete]
 
@@ -951,28 +938,24 @@ for athlete in folder_per_athlete:
     else:
         print(f'Building graph for {athlete} doing {folder}')
 
-    Bruit = []
+    nb_twists = int(num_half_twist)
+    noise = []
     C = []
     Q = []
     Q_integrated = []
     Error = []
     nb = 0
-    if FLAG_SAME_FIG:
-        fig = None
-        axs = None
-        fig, axs = plt.subplots(4, 4, figsize=(18, 9))
-        axs = axs.ravel()
-    if not FLAG_SAME_FIG:
-        fig, axs = plt.subplots(4, 4, figsize=(18, 9))
-        axs = axs.ravel()
-    nb_twists = int(num_half_twist)
+    fig = None
+    axs = None
+
+    fig, axs = plt.subplots(4, 4, figsize=(18, 9))
+    axs = axs.ravel()
     for filename in os.listdir(results_path_this_time):
         nb += 1
-
         athlete = filename.split("_")[0]
         if filename.removesuffix(".pkl")[-3] == "C":
             file_name = f'/kinematics_graph for {athlete}_{folder_per_twist_nb[num_half_twist].removesuffix("/")}.png'
-            Bruit += filename.split("_")[-2]
+            noise += filename.split("_")[-2]
             print(filename)
             f = os.path.join(results_path_this_time, filename)
             filename = results_path_this_time + filename
@@ -1008,7 +991,7 @@ for athlete in folder_per_athlete:
     if Error != []:
         min_error = np.array(Error).min()
         max_error = np.array(Error).max()
-    #if C != []:
+
         COST = C
         C = np.array(C)
 
@@ -1024,51 +1007,50 @@ for athlete in folder_per_athlete:
         im = fig.figimage(C)
         fig.colorbar(im, cax=cbar_ax)
 
-        for i in range(len(Bruit)):
-            bruit = Bruit[i]
-            cost = COST[i]
+        for i in range(len(noise)):
+            noise_i = noise[i]
+            cost_i = COST[i]
             q = Q[i]
             q_integrated = Q_integrated[i]  # pour chaque opti
-            error = Error[i]
-            alpha =abs((error - max_error)/(min_error - max_error))
+            error_i = Error[i]
+            alpha =abs((error_i - max_error)/(min_error - max_error))
             alpha_decimal = Decimal(alpha)
-            alpha_roundresult = alpha_decimal.quantize(Decimal('.0001'), rounding=ROUND_HALF_UP)
+            error_i_roundresult = error_i.round(4)
             linewidth_max = 3
             linewidth_min =0.4
             linewidth = lambda alpha : (linewidth_max-linewidth_min)*alpha +linewidth_min
 
+            if min != max:
+                ratio = (cost_i - min) / (max - min)
+            else:
+                ratio = 1
 
-            if FLAG_SAME_FIG:
-                if min != max:
-                    ratio = (cost - min) / (max - min)
+            color = cmap(ratio)
+
+            print(f"alpha is {alpha}")
+            for degree in range(len(q[0])):
+                q_plot = []
+                for phase in range(len(q)):
+                    q_plot += q[phase][degree].tolist()[:]
+
+                if degree == 0:
+                    axs[degree].plot(q_plot, color=color, label=f'{noise_i}, {error_i_roundresult}', linewidth = linewidth(alpha))
 
                 else:
-                    ratio = 1
+                    axs[degree].plot(q_plot, color=color,  linewidth =linewidth(alpha))
 
-                color = cmap(ratio)
+                axs[degree].set_title(f"{model.nameDof()[degree].to_string()}")
 
-                print(f"alpha is {alpha}")
-                for degree in range(len(q[0])):
-                    q_plot = []
-                    for phase in range(len(q)):
-                        q_plot += q[phase][degree].tolist()[:]
+        data_to_save = {'cost': COST,
+                        'q': Q,
+                        'q_integrated': Q_integrated,
+                        'reintegration_error': Error,
+                        'noise': noise,}
+        with open(f"kinematics_graphs/vrille_et_demi/data_pickled/{athlete}.pkl", "wb") as f:
+            pickle.dump(data_to_save, f)
 
-                    if degree == 0:
-                        axs[degree].plot(q_plot, color=color, label=f'{bruit}, {alpha_roundresult}', linewidth = linewidth(alpha))
 
-                    else:
-                        axs[degree].plot(q_plot, color=color,  linewidth =linewidth(alpha))
-
-                    axs[degree].set_title(f"{model.nameDof()[degree].to_string()}")
-
-    # fig.subplots_adjust()
-    # alphabar_ax = fig.add_axes([0.4, 0.1, 0.1, 0.4])
-    #alphabar_ax = fig.add_axes([0.05, 0.11, 0.07, 0.8])
-
-    #im = fig.figimage(alpha_list)
-    #fig.colorbar(im, cax=alphabar_ax)
-
-    if FLAG_SAME_FIG and Q!= []:
+    if Q!= []:
         axs[0].legend(bbox_to_anchor=(0.5, 1), loc="upper left", borderaxespad=-5, ncols=nb, fontsize=12)
         plt.subplots_adjust(left=0.05, right=0.8, hspace=0.4)
         plt.savefig(f"{folder_graphs}/{folder}/{file_name}", dpi=300)
