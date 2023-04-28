@@ -25,6 +25,7 @@ from bioptim import (
     ObjectiveList,
     ObjectiveFcn,
     BoundsList,
+    Bounds,
     InitialGuessList,
     InterpolationType,
     OdeSolver,
@@ -80,7 +81,7 @@ def superimpose_markers(
 
     for index_model, biorbd_model in enumerate(nlp.model.models):
 
-        q = nlp.states["q"].mx[nlp.model.variable_index('q', index_model) ] #[model_index: (model_index+1)*16, :].mx
+        q = nlp.states[0]["q"].mx[nlp.model.variable_index('q', index_model) ] #[model_index: (model_index+1)*16, :].mx
         diff_markers = nlp.model.models[index_model].marker(q, second_marker).to_mx() - nlp.model.models[index_model].marker(q, first_marker).to_mx()
         sum_diff= 0
         for i in range(diff_markers.shape[0]):
@@ -89,16 +90,16 @@ def superimpose_markers(
 
     return nlp.mx_to_cx(
         f"diff_markers",
-        diff_markers,
-        nlp.states["q"],
+        total_diff,
+        nlp.states[0]["q"],
     )
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> cas.MX:
     diff = 0
     if isinstance(dofs, int):
         dofs = [dofs]
     for i, dof in enumerate(dofs):
-        diff += (all_pn.nlp.states["q"].mx[dof] - targets[i]) ** 2
-    return all_pn.nlp.mx_to_cx("minimize_dofs", diff, all_pn.nlp.states["q"])
+        diff += (all_pn.nlp.states[0]["q"].mx[dof] - targets[i]) ** 2
+    return all_pn.nlp.mx_to_cx("minimize_dofs", diff, all_pn.nlp.states[0]["q"])
 
 # def custom_func_track_markers(all_pn: PenaltyNodeList, first_marker: str, second_marker: str, method: int) -> MX:
 #
@@ -164,7 +165,7 @@ def set_fancy_names_index(biorbd_models):
     return fancy_names_index
 
 
-def set_x_bounds(biorbd_models, fancy_names_index, final_time):
+def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
     # for
     nb_q = biorbd_models[0].nb_q
     nb_qdot = biorbd_models[0].nb_qdot
@@ -179,7 +180,7 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time):
     x_bounds.add(bounds=biorbd_models[0].bounds_from_ranges(["q", "qdot"]))
 
 
-
+    #
     # Path constraint
 
     # Pour la lisibilite
@@ -677,18 +678,18 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time):
         x_bounds[4].max[fancy_names_index["Z"][i], FIN] = 0.1
 
         # le salto autour de x
-        x_bounds[4].min[fancy_names_index["Xrot"][i], :] = 2 * 3.14 + 3 / 2 * 3.14 - 0.2  # penche vers avant -> moins de salto
-        x_bounds[4].max[fancy_names_index["Xrot"][i], :] = -0.50 + 4 * 3.14  # un peu carpe a la fin
-        x_bounds[4].min[fancy_names_index["Xrot"][i], FIN] = -0.50 + 4 * 3.14 - 0.1
-        x_bounds[4].max[fancy_names_index["Xrot"][i], FIN] = -0.50 + 4 * 3.14 + 0.1  # 2 salto fin un peu carpe
+        x_bounds[4].min[fancy_names_index["Xrot"][i], :] = 2 * 3.14 + 3 / 2 * 3.14 - 0.5  # penche vers avant -> moins de salto # -0.2
+        x_bounds[4].max[fancy_names_index["Xrot"][i], :] = -0.50 + 4 * 3.14 + 0.5 # un peu carpe a la fin
+        x_bounds[4].min[fancy_names_index["Xrot"][i], FIN] = -0.50 + 4 * 3.14 - 0.5
+        x_bounds[4].max[fancy_names_index["Xrot"][i], FIN] = -0.50 + 4 * 3.14 + 0.5  # 2 salto fin un peu carpe
 
         # limitation du tilt autour de y
-        x_bounds[4].min[fancy_names_index["Yrot"][i], :] = -3.14 / 16
-        x_bounds[4].max[fancy_names_index["Yrot"][i], :] = 3.14 / 16
+        x_bounds[4].min[fancy_names_index["Yrot"][i], :] = -3.14 / 16 -0.5     #-3.14/16
+        x_bounds[4].max[fancy_names_index["Yrot"][i], :] = 3.14 / 16  +0.5
 
         # la vrille autour de z
-        x_bounds[4].min[fancy_names_index["Zrot"][i], :] = 3 * 3.14 - 0.1  # complete la vrille
-        x_bounds[4].max[fancy_names_index["Zrot"][i], :] = 3 * 3.14 + 0.1
+        x_bounds[4].min[fancy_names_index["Zrot"][i], :] = 3 * 3.14 - 0.5  # complete la vrille  #3 * 3.14 - 0.1
+        x_bounds[4].max[fancy_names_index["Zrot"][i], :] = 3 * 3.14 + 0.5
 
     # bras droit
     x_bounds[4].min[fancy_names_index["YrotBD"], FIN] = 2.9 - 0.1  # debut bras aux oreilles
@@ -767,12 +768,21 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time):
     x_bounds[4].min[fancy_names_index["vYrotC"], :] = -100
     x_bounds[4].max[fancy_names_index["vYrotC"], :] = 100
 
+    x_bounds_real = BoundsList()
+    nb_q = biorbd_models[0].nb_q
+    nb_qdot = biorbd_models[0].nb_qdot
+    for phase in range(len(x_bounds.options)):
+        # for idx_model in range(len(biorbd_models)):
+        x_min = list(mappings['q'].to_first.map(x_bounds.options[phase][0].min[:nb_q]))
+        x_min+= list(mappings['qdot'].to_first.map(x_bounds.options[phase][0].min[nb_q: ]))
+        x_max = list(mappings['q'].to_first.map(x_bounds.options[phase][0].max[:nb_q]))
+        x_max+= list(mappings['qdot'].to_first.map(x_bounds.options[phase][0].max[nb_q: ]))
+
+        x_bounds_real.add(bounds=Bounds(np.array(x_min), np.array(x_max)))
+    return x_bounds_real
 
 
-    return x_bounds
-
-
-def set_x_init( biorbd_models, fancy_names_index):
+def set_x_init( biorbd_models, fancy_names_index, mappings):
     nb_q = biorbd_models[0].nb_q
     nb_qdot = biorbd_models[0].nb_qdot
     nb_models = len(biorbd_models[0].models)
@@ -824,22 +834,32 @@ def set_x_init( biorbd_models, fancy_names_index):
         x4[fancy_names_index["Zrot"][i]] = 3 * 3.14
     x4[fancy_names_index["XrotC"], 1] = -0.5
 
-    #x5[:] = x0[:]
-    #x6[:] = x1[:]
-    #x7[:] = x2[:]
-    #x8[:] = x3[:]
-    #x9[:] = x4[:]
+    nb_q = biorbd_models[0].nb_q
+    # nb_qdot = biorbd_models[0].nb_qdot
 
-        # x1[nb_q * i // len(biorbd_models):nb_q * 2 * i // len(biorbd_models), :] = x1[0:nb_q // len(biorbd_models)]
-        # x2[nb_q * i // len(biorbd_models):nb_q * 2 * i // len(biorbd_models), :] = x2[0:nb_q // len(biorbd_models)]
-        # x3[nb_q * i // len(biorbd_models):nb_q * 2 * i // len(biorbd_models), :] = x3[0:nb_q // len(biorbd_models)]
-        # x4[nb_q * i // len(biorbd_models):nb_q * 2 * i // len(biorbd_models), :] = x4[0:nb_q // len(biorbd_models)]
-        # X = [x0, x1, x2, x3, x4]
-    x_init.add(x0, interpolation=InterpolationType.LINEAR)
-    x_init.add(x1, interpolation=InterpolationType.LINEAR)
-    x_init.add(x2, interpolation=InterpolationType.LINEAR)
-    x_init.add(x3, interpolation=InterpolationType.LINEAR)
-    x_init.add(x4, interpolation=InterpolationType.LINEAR)
+    x0_mapped = list(mappings['q'].to_first.map(x0[:nb_q]))
+    x0_mapped += list(mappings['q'].to_first.map(x0[nb_q:]))
+    x1_mapped = list(mappings['q'].to_first.map(x1[:nb_q]))
+    x1_mapped += list(mappings['q'].to_first.map(x1[nb_q:]))
+    x2_mapped = list(mappings['q'].to_first.map(x2[:nb_q]))
+    x2_mapped += list(mappings['q'].to_first.map(x2[nb_q:]))
+    x3_mapped = list(mappings['q'].to_first.map(x3[:nb_q]))
+    x3_mapped += list(mappings['q'].to_first.map(x3[nb_q:]))
+    x4_mapped = list(mappings['q'].to_first.map(x4[:nb_q]))
+    x4_mapped += list(mappings['q'].to_first.map(x4[nb_q:]))
+
+    #
+    x_init.add(np.array(x0_mapped), interpolation=InterpolationType.LINEAR)
+    x_init.add(np.array(x1_mapped), interpolation=InterpolationType.LINEAR)
+    x_init.add(np.array(x2_mapped), interpolation=InterpolationType.LINEAR)
+    x_init.add(np.array(x3_mapped), interpolation=InterpolationType.LINEAR)
+    x_init.add(np.array(x4_mapped), interpolation=InterpolationType.LINEAR)
+    #
+    # x_init.add(np.array(x0), interpolation=InterpolationType.LINEAR)
+    # x_init.add(np.array(x1), interpolation=InterpolationType.LINEAR)
+    # x_init.add(np.array(x2), interpolation=InterpolationType.LINEAR)
+    # x_init.add(np.array(x3), interpolation=InterpolationType.LINEAR)
+    # x_init.add(np.array(x4), interpolation=InterpolationType.LINEAR)
 
     return x_init
 
@@ -977,22 +997,32 @@ def prepare_ocp(
         ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=4
     )
 
-    ## AuJo
+
     objective_functions.add(
         ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=0
     )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=1
+    )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=2
+    )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=3
+    )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=4
+    )
+    # objective_functions.add(
+    #     ObjectiveFcn.Mayer.MINIMIZE_STATE, key='q', index=fancy_names_index['Xrot'], node=Node.END, weight=100000, phase=4)
+    # objective_functions.add(
+    #     ObjectiveFcn.Mayer.MINIMIZE_STATE, key='q', index=fancy_names_index['Yrot'],  node=Node.END, weight=100000, phase=4)
+    # objective_functions.add(
+    #     ObjectiveFcn.Mayer.MINIMIZE_STATE, key='q', index=fancy_names_index['Zrot'], node=Node.END, weight=100000, phase=4)
+    #
 
     # Les hanches sont fixes a +-0.2 en bounds, mais les mains doivent quand meme être proches des jambes
-    ## AuJo
-    # objective_functions.add(
-#     ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS,
-    #     node=Node.END,
-    #     first_marker="MidMainG",
-    #     second_marker="CibleMainG",
-    #     weight=1000,
-    #     phase=0,
-    # )
-    # for i, model in enumerate(biorbd_models[0]):
+
     objective_functions.add(
         superimpose_markers,
         custom_type=ObjectiveFcn.Mayer,
@@ -1011,15 +1041,6 @@ def prepare_ocp(
         weight=10000,
         phase=0,
     )
-   # objective_functions.add(
-   #     ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS,
-   #     node=Node.END,
-   #     first_marker="MidMainD",
-  #      second_marker="CibleMainD",
-   #     weight=1000,
-   #     phase=0,
-   # )
-
 
     # arrete de gigoter les bras
     les_bras = []
@@ -1032,9 +1053,6 @@ def prepare_ocp(
     les_bras+=[fancy_names_index["YrotBG"]]
     les_bras+=[fancy_names_index["ZrotABG"]]
     les_bras+=[fancy_names_index["XrotABG"]]
-    # les_bras_copy= []
-    # for i in range(len(les_bras)):
-    #     les_bras_copy.append(les_bras[i][j] for j in range(len(les_bras[i])))
 
     les_coudes = [ ]
     # for i, model in enumerate(biorbd_models):
@@ -1043,7 +1061,6 @@ def prepare_ocp(
     les_coudes+=[fancy_names_index["ZrotABG"]]
     les_coudes+=[fancy_names_index["XrotABG"]]
 
-    ## AuJo
     objective_functions.add(
         minimize_dofs,
         custom_type=ObjectiveFcn.Lagrange,
@@ -1106,7 +1123,6 @@ def prepare_ocp(
         phase=3,
     )
 
-
     # Dynamics
     dynamics = DynamicsList()
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
@@ -1115,35 +1131,53 @@ def prepare_ocp(
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
     dynamics.add(DynamicsFcn.JOINTS_ACCELERATION_DRIVEN)
 
-    x_bounds = set_x_bounds(biorbd_models, fancy_names_index, final_time)
+    x_bounds = set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings)
 
     qddot_joints_min, qddot_joints_max, qddot_joints_init = -500, 500, 0
     u_bounds = BoundsList()
-    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
-    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
-    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
-    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
-    u_bounds.add([qddot_joints_min] * nb_qddot_joints, [qddot_joints_max] * nb_qddot_joints)
+
+    u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints),
+                 mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
+    u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
+    u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
+    u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
+    u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
+    u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
+
+    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
+    #            [qddot_joints_max] * nb_qddot_joints)
+    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
+    #              [qddot_joints_max] * nb_qddot_joints)
+    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
+    #              [qddot_joints_max] * nb_qddot_joints)
+    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
+    #              [qddot_joints_max] * nb_qddot_joints)
+    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
+    #              [qddot_joints_max] * nb_qddot_joints)
 
 
     u_init = InitialGuessList()
-    u_init.add([qddot_joints_init] * nb_qddot_joints)
-    u_init.add([qddot_joints_init] * nb_qddot_joints)
-    u_init.add([qddot_joints_init] * nb_qddot_joints)
-    u_init.add([qddot_joints_init] * nb_qddot_joints)
-    u_init.add([qddot_joints_init] * nb_qddot_joints)
+    u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
+    u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
+    u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
+    u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
+    u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
+
+    # u_init.add([qddot_joints_init] * nb_qddot_joints)
+    # u_init.add([qddot_joints_init] * nb_qddot_joints)
+    # u_init.add([qddot_joints_init] * nb_qddot_joints)
+    # u_init.add([qddot_joints_init] * nb_qddot_joints)
+    # u_init.add([qddot_joints_init] * nb_qddot_joints)
+
+    x_init = set_x_init(biorbd_models,fancy_names_index, mappings)
 
 
-
-    x_init = set_x_init(biorbd_models,fancy_names_index)
-
-
-    constraints = ConstraintList()
-    #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=1)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=3)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=4)
+    # constraints = ConstraintList()
+    # #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=1)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=3)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=4)
 
 
 
@@ -1168,21 +1202,20 @@ def prepare_ocp(
         x_bounds,
         u_bounds,
         objective_functions,
-        constraints,
         ode_solver=ode_solver,
         n_threads=n_threads,
-        variable_mappings = mappings, # node_mappings=node_mappings, #### ajouter le mapping , la les bounds ne sotn pas de la bonnes tailles
-        phase_transitions=phase_transitions,
+        variable_mappings=mappings,
+        assume_phase_dynamics = True# node_mappings=node_mappings, #### ajouter le mapping , la les bounds ne sotn pas de la bonnes tailles
     )
 
 
 def main():
 #    models =
 # mettre tout les models
-    os.listdir('/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/')
-    model_paths = ("/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/AuJo_TechOpt83.bioMod","/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/AuJo_TechOpt83.bioMod")
+#     os.listdir('/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/')
+    model_paths = ("/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/AlAd.bioMod","/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/AdCh.bioMod")
 
-    n_threads = 4
+    n_threads = 
 
     print_ocp_FLAG = False  # True.
 
@@ -1191,7 +1224,7 @@ def main():
     save_sol_FLAG = True
     # n_shooting = (40, 100, 100, 100, 40,
     #               40, 100, 100, 100, 40)
-    n_shooting = (1, 2, 2, 2, 1)
+    n_shooting = (10, 10, 10, 10, 10)
 
     ocp = prepare_ocp(model_paths, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     # ocp.add_plot_penalty(CostType.ALL)
@@ -1202,7 +1235,7 @@ def main():
         solver.set_linear_solver("ma57")
     else:
         print("Not using ma57")
-    solver.set_maximum_iterations(1)
+    solver.set_maximum_iterations(5)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 

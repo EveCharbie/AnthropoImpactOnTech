@@ -35,7 +35,6 @@ The goal of this program is to optimize the movement to achieve a rudi out pike 
 """
 
 
-
 class Model:
     """
     Attributes
@@ -866,7 +865,8 @@ def prepare_ocp(
         u_bounds=u_bounds,
         objective_functions=objective_functions,
         constraints=constraints,
-        n_threads=n_threads
+        n_threads=n_threads,
+        assume_phase_dynamics=True,
     )
 
 
@@ -893,7 +893,7 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
     #states = sol.states["all"]
     stunt = stunts[nb_twist]
     athlete=biorbd_model_path.split('/')[-1].removesuffix('.bioMod')
-    path_folder = '/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol'
+    path_folder = '/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille'
     title_before_solve = f"{athlete}_{stunt}_{seed}"
 
     if only_save_filename == True :
@@ -927,11 +927,21 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
         with open(f'{path_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
             pickle.dump(dict_state, file)
 
+def check_already_done(self, args):
+    """
+    Check if the filename already appears in the folder where files are saved, if not ocp must be solved
+    """
+    already_done_filenames = os.listdir(f"/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol")
+    for i, title in enumerate(already_done_filenames):
+        title = title[0:-8]
+        already_done_filenames[i] = title
+    return self.post_optimization_callback([None], *args, only_save_filename=True) not in already_done_filenames
+
 def check_already_done(args,save_folder, save_results= save_results):
     """
     Check if the filename already appears in the folder where files are saved, if not ocp must be solved
     """
-    already_done_filenames = os.listdir(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_multistart/")
+    already_done_filenames = os.listdir(f"{save_folder}")
     for i, title in enumerate(already_done_filenames):
         title = title[0:-8]
         already_done_filenames[i] = title
@@ -967,23 +977,43 @@ def main():
     #Mod = Model(savesol= True, with_hsl=True)
 
     n_threads = 25
-    seed = [ 4,5]
-    nb_twist = [3]
-    athletes = ["KaMi"]# "JeCh_2"]
+
+    seed = [0,1,2,3,4,5,6,7,8,9]
+    nb_twist = [5]
+    athletes = [
+       "AdCh",
+        "AlAd",
+        "AuJo",
+        "Benjamin",
+        "ElMe",
+        "EvZl",
+        "FeBl",
+        "JeCh",
+        "KaFu",
+        "KaMi",
+        "LaDe",
+        "MaCu",
+        "MaJa",
+        "MeVa",
+        "OlGa",
+        "Sarah",
+        "SoMe",
+        "WeEm",
+        "ZoTs"]
 
     all_paths = []
     for athlete in athletes :
         path = f'{athlete}'+'.bioMod'
-        biorbd_model_path = "/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Models/" + f'{path}'
+        biorbd_model_path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/" + f'{path}'
         all_paths.append(biorbd_model_path)
 
 
     #path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/"
-    combinatorial_parameters = {'bio_model_path': biorbd_model_path,'nb_twist':nb_twist,
+    combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist':nb_twist,
                                 'seed': seed}
-    save_folder = "./temporary_results"
+    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
 
-    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder)
+    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools = 5)
 
     # multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
 
