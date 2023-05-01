@@ -1,13 +1,22 @@
 
-import biorbd
-import bioviz
 import numpy as np
 import pickle
+import os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import bioviz
-import os
 from IPython import embed
+
+import biorbd
+import bioviz
+import sys
+sys.path.append("/home/charbie/Documents/Programmation/BiorbdOptim")
+import bioptim
+
+# ---------------------------------------------------------------------------------
+# To run this code, you should run the following line:
+#             python compare_clusters.py > compare_clusters.txt
+# ---------------------------------------------------------------------------------
+
 
 model_path = "Models/JeCh_TechOpt83.bioMod"
 model = biorbd.Model(model_path)
@@ -165,12 +174,14 @@ plt.suptitle(f"{nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 plt.show()
 
+print("\n\n")
 
 # Find the mean and std of each cluster
 cluster_counter_right_arm = {key: 0 for key in cluster_right_arm["AlAd"].keys()}
 mean_std_per_cluster_right_arm = {key: np.zeros((16, )) for key in cluster_right_arm["AlAd"].keys()}
 mean_q_per_cluster_right_arm = np.zeros((16, 381, 1))
 std_q_per_cluster_right_arm = np.zeros((16, 381, 1))
+range_q_per_cluster_right_arm = np.zeros((16, 381, 1))
 for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     q_right_arm[cluster_name] = q_right_arm[cluster_name][:, :, 1:]
     for i_name, name in enumerate(cluster_right_arm):
@@ -179,8 +190,13 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     mean_std_per_cluster_right_arm[cluster_name] = np.mean(np.std(q_right_arm[cluster_name], axis=2), axis=1)
     mean_q_per_cluster_right_arm = np.concatenate((mean_q_per_cluster_right_arm, np.mean(q_right_arm[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
     std_q_per_cluster_right_arm = np.concatenate((std_q_per_cluster_right_arm, np.std(q_right_arm[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
+    min_curve = np.min(q_right_arm[cluster_name], axis=2)[: , :, np.newaxis]
+    max_curve = np.max(q_right_arm[cluster_name], axis=2)[: , :, np.newaxis]
+    complete_range_curves = max_curve - min_curve
+    range_q_per_cluster_right_arm = np.concatenate((range_q_per_cluster_right_arm, complete_range_curves), axis=2)
 mean_q_per_cluster_right_arm = mean_q_per_cluster_right_arm[:, :, 1:]
 std_q_per_cluster_right_arm = std_q_per_cluster_right_arm[:, :, 1:]
+range_q_per_cluster_right_arm = range_q_per_cluster_right_arm[:, :, 1:]
 mean_std_between_clusters_right_arm = np.mean(np.std(mean_q_per_cluster_right_arm, axis=2), axis=1)
 
 
@@ -188,6 +204,7 @@ cluster_counter_left_arm = {key: 0 for key in cluster_left_arm['AlAd'].keys()}
 mean_std_per_cluster_left_arm = {key: np.zeros((16, )) for key in cluster_left_arm['AlAd'].keys()}
 mean_q_per_cluster_left_arm = np.zeros((16, 381, 1))
 std_q_per_cluster_left_arm = np.zeros((16, 381, 1))
+range_q_per_cluster_left_arm = np.zeros((16, 381, 1))
 for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     q_left_arm[cluster_name] = q_left_arm[cluster_name][:, :, 1:]
     for i_name, name in enumerate(cluster_left_arm):
@@ -196,8 +213,13 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     mean_std_per_cluster_left_arm[cluster_name] = np.mean(np.std(q_left_arm[cluster_name], axis=2), axis=1)
     mean_q_per_cluster_left_arm = np.concatenate((mean_q_per_cluster_left_arm, np.mean(q_left_arm[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
     std_q_per_cluster_left_arm = np.concatenate((std_q_per_cluster_left_arm, np.std(q_left_arm[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
+    min_curve = np.min(q_left_arm[cluster_name], axis=2)[: , :, np.newaxis]
+    max_curve = np.max(q_left_arm[cluster_name], axis=2)[: , :, np.newaxis]
+    complete_range_curves = max_curve - min_curve
+    range_q_per_cluster_left_arm = np.concatenate((range_q_per_cluster_left_arm, complete_range_curves), axis=2)
 mean_q_per_cluster_left_arm = mean_q_per_cluster_left_arm[:, :, 1:]
 std_q_per_cluster_left_arm = std_q_per_cluster_left_arm[:, :, 1:]
+range_q_per_cluster_left_arm = range_q_per_cluster_left_arm[:, :, 1:]
 mean_std_between_clusters_left_arm = np.mean(np.std(mean_q_per_cluster_left_arm, axis=2), axis=1)
 
 
@@ -205,6 +227,7 @@ cluster_counter_thighs = {key: 0 for key in cluster_thighs['AlAd'].keys()}
 mean_std_per_cluster_thighs = {key: np.zeros((16, )) for key in cluster_thighs['AlAd'].keys()}
 mean_q_per_cluster_thighs = np.zeros((16, 381, 1))
 std_q_per_cluster_thighs = np.zeros((16, 381, 1))
+range_q_per_cluster_thighs = np.zeros((16, 381, 1))
 for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     q_thighs[cluster_name] = q_thighs[cluster_name][:, :, 1:]
     for i_name, name in enumerate(cluster_thighs):
@@ -213,16 +236,25 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     mean_std_per_cluster_thighs[cluster_name] = np.mean(np.std(q_thighs[cluster_name], axis=2), axis=1)
     mean_q_per_cluster_thighs = np.concatenate((mean_q_per_cluster_thighs, np.mean(q_thighs[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
     std_q_per_cluster_thighs = np.concatenate((std_q_per_cluster_thighs, np.std(q_thighs[cluster_name], axis=2)[: , :, np.newaxis]), axis=2)
+    min_curve = np.min(q_thighs[cluster_name], axis=2)[: , :, np.newaxis]
+    max_curve = np.max(q_thighs[cluster_name], axis=2)[: , :, np.newaxis]
+    complete_range_curves = max_curve - min_curve
+    range_q_per_cluster_thighs = np.concatenate((range_q_per_cluster_thighs, complete_range_curves), axis=2)
 mean_q_per_cluster_thighs = mean_q_per_cluster_thighs[:, :, 1:]
 std_q_per_cluster_thighs = std_q_per_cluster_thighs[:, :, 1:]
+range_q_per_cluster_thighs = range_q_per_cluster_thighs[:, :, 1:]
 mean_std_between_clusters_thighs = np.mean(np.std(mean_q_per_cluster_thighs, axis=2), axis=1)
 
+print("Right arm clusters:")
 # Plot the clusters with different colors
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
 axs = axs.ravel()
 for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     print(f"{cluster_name} was used by {cluster_counter_right_arm[cluster_name]} / {len(cluster_right_arm)} athletes")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_right_arm[cluster_name][3:])}")
+    print(f"{cluster_name} has a right arm axial rotation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][6, :]) / (np.max(mean_q_per_cluster_right_arm[:, :, i_cluster][6, :]) - np.min(mean_q_per_cluster_right_arm[:, :, i_cluster][6, :])) * 100}% of the average movement amplitude")
+    print(f"{cluster_name} has a right arm elevation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][7, :]) / (np.max(mean_q_per_cluster_right_arm[:, :, i_cluster][7, :]) - np.min(mean_q_per_cluster_right_arm[:, :, i_cluster][7, :])) * 100}% of the average max amplitude")
+
     rgba = cmap(i_cluster * 1/8)
     axs[0].fill_between(np.arange(381), mean_q_per_cluster_right_arm[6, :, i_cluster] - std_q_per_cluster_right_arm[6, :, i_cluster],
                         mean_q_per_cluster_right_arm[6, :, i_cluster] + std_q_per_cluster_right_arm[6, :,i_cluster], color=rgba, alpha=0.2)
@@ -233,10 +265,16 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     if i_cluster == 0:
         axs[0].set_title(f"{model.nameDof()[6].to_string()}")
         axs[1].set_title(f"{model.nameDof()[7].to_string()}")
+    print('\n')
+print('\n')
 
+print("Left arm clusters:")
 for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     print(f"{cluster_name} was used by {cluster_counter_left_arm[cluster_name]} / {len(cluster_left_arm)} athletes")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_left_arm[cluster_name][3:])}")
+    print(f"{cluster_name} has a left arm axial rotation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][10, :]) / (np.max(mean_q_per_cluster_left_arm[:, :, i_cluster][10, :]) - np.min(mean_q_per_cluster_left_arm[:, :, i_cluster][10, :])) * 100}% of the average movement amplitude")
+    print(f"{cluster_name} has a left arm elevation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][11, :]) / (np.max(mean_q_per_cluster_left_arm[:, :, i_cluster][11, :]) - np.min(mean_q_per_cluster_left_arm[:, :, i_cluster][11, :])) * 100}% of the average max amplitude")
+
     rgba = cmap(i_cluster * 1/8)
     axs[2].fill_between(np.arange(381), mean_q_per_cluster_left_arm[10, :, i_cluster] - std_q_per_cluster_left_arm[10, :, i_cluster],
                         mean_q_per_cluster_left_arm[10, :, i_cluster] + std_q_per_cluster_left_arm[10, :,i_cluster], color=rgba, alpha=0.2)
@@ -247,12 +285,16 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     if i_cluster == 0:
         axs[2].set_title(f"{model.nameDof()[10].to_string()}")
         axs[3].set_title(f"{model.nameDof()[11].to_string()}")
+    print('\n')
+print('\n')
 
+print("Right thigh clusters:")
 for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
-    print(
-        f"{cluster_name} was used by {cluster_counter_thighs[cluster_name]} / {len(cluster_thighs)} athletes")
-    print(
-        f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_thighs[cluster_name][3:])}")
+    print(f"{cluster_name} was used by {cluster_counter_thighs[cluster_name]} / {len(cluster_thighs)} athletes")
+    print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_thighs[cluster_name][3:])}")
+    print(f"{cluster_name} has a hip flexion range of {np.mean(range_q_per_cluster_thighs[:, :, i_cluster][14, :]) / (np.max(mean_q_per_cluster_thighs[:, :, i_cluster][14, :]) - np.min(mean_q_per_cluster_thighs[:, :, i_cluster][14, :])) * 100}% of the average movement amplitude")
+    print(f"{cluster_name} has a hip lateral flexion range of {np.mean(range_q_per_cluster_thighs[:, :, i_cluster][15, :]) / (np.max(mean_q_per_cluster_thighs[:, :, i_cluster][15, :]) - np.min(mean_q_per_cluster_thighs[:, :, i_cluster][15, :])) * 100}% of the average max amplitude")
+
     rgba = cmap(i_cluster * 1 / 8)
     axs[4].fill_between(np.arange(381),
                         mean_q_per_cluster_thighs[14, :, i_cluster] - std_q_per_cluster_thighs[14, :, i_cluster],
@@ -265,6 +307,8 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     if i_cluster == 0:
         axs[4].set_title(f"{model.nameDof()[14].to_string()}")
         axs[5].set_title(f"{model.nameDof()[15].to_string()}")
+    print('\n')
+print('\n')
 
 plt.suptitle(f"mean kinematics per cluster for {nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
@@ -286,6 +330,7 @@ data_to_save = {"mean_q_per_cluster_right_arm": mean_q_per_cluster_right_arm,
 
 with open(f'overview_graphs/clusters_sol.pkl', 'wb') as f:
     pickle.dump(data_to_save, f)
+
 
 # Plot the clusters one by one to make sure they were correctly identified
 var_name = ["right_arm", "left_arm", "thighs"]
