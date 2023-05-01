@@ -65,6 +65,11 @@ segment RightUpperArm
 	meshscale 0.9024249350571385 0.9024249350571385 1.0634615384615385
 endsegment
 
+	marker RightArmNormalized
+		parent RightUpperArm
+		position 0 0 -1
+	endmarker
+	
 segment RightForearm
 	parent RightUpperArm
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.27649999999999997
@@ -116,6 +121,11 @@ segment LeftUpperArm
 	meshfile Model_mesh/bras.stl
 	meshscale 0.9024249350571385 0.9024249350571385 1.0634615384615385
 endsegment
+
+	marker LeftArmNormalized
+		parent LeftUpperArm
+		position 0 0 -1
+	endmarker
 
 segment LeftForearm
 	parent LeftUpperArm
@@ -169,6 +179,11 @@ segment Thighs
 	meshscale 0.85980256612863 0.85980256612863 0.9020556227327691
 endsegment
 
+	marker LegsNormalized
+		parent Thighs
+		position 0 0 -1
+	endmarker
+	
 segment Shanks
 	parent Thighs
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.373
