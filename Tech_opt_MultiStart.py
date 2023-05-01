@@ -94,12 +94,12 @@ except ImportError:
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     diff = 0
     for i, dof in enumerate(dofs):
-        diff += (all_pn.nlp.states['q'].mx[dof] - targets[i]) ** 2
-    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
+        diff += (all_pn.nlp.states[0]['q'].mx[dof] - targets[i]) ** 2
+    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states[0]['q'])
 
 
 def prepare_ocp(
-        biorbd_model_path: str, nb_twist: int, seed : int,  n_threads: int = 5 ,
+        biorbd_model_path: str, nb_twist: int, seed : int,  n_threads: int = 25 ,
         ode_solver: OdeSolver = OdeSolver.RK4(),
 ) -> OptimalControlProgram:
 
@@ -124,9 +124,9 @@ def prepare_ocp(
 
    # nom = biorbd_model_path[0].split('/')[-1].removesuffix('.bioMod')
     #print(nom)
-    biorbd_model = (
-    BiorbdModel(biorbd_model_path),BiorbdModel(biorbd_model_path), BiorbdModel(biorbd_model_path),
-    BiorbdModel(biorbd_model_path), BiorbdModel(biorbd_model_path))
+    biomodel = (BiorbdModel(biorbd_model_path))
+    biorbd_model = (biomodel,biomodel, biomodel, biomodel,biomodel)
+
 
     nb_q = biorbd_model[0].nb_q
     nb_qdot = biorbd_model[0].nb_qdot
@@ -865,7 +865,7 @@ def prepare_ocp(
         u_bounds=u_bounds,
         objective_functions=objective_functions,
         constraints=constraints,
-        n_threads=n_threads,
+        n_threads=1,
         assume_phase_dynamics=True,
     )
 
@@ -981,24 +981,23 @@ def main():
     seed = [0,1,2,3,4,5,6,7,8,9]
     nb_twist = [5]
     athletes = [
-       "AdCh",
-        "AlAd",
-        "AuJo",
-        "Benjamin",
-        "ElMe",
-        "EvZl",
-        "FeBl",
-        "JeCh",
-        "KaFu",
-        "KaMi",
-        "LaDe",
-        "MaCu",
-        "MaJa",
-        "MeVa",
-        "OlGa",
-        "Sarah",
-        "SoMe",
-        "WeEm",
+       # "AdCh",
+       #  "AlAd",
+       #  "AuJo",
+       #  "Benjamin",
+       #  "ElMe",
+       #  "EvZl",
+       #  "FeBl",
+       #  "JeCh",
+       #  "KaFu",
+       #  "KaMi",
+       #  "LaDe",
+       #  "MaCu",
+       #  "MaJa",
+       #  "OlGa",
+       #  "Sarah",
+       #  "SoMe",
+       #  "WeEm",
         "ZoTs"]
 
     all_paths = []
@@ -1013,7 +1012,7 @@ def main():
                                 'seed': seed}
     save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
 
-    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools = 5)
+    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools =25)
 
     # multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
 
