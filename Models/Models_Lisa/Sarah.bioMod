@@ -65,6 +65,11 @@ segment RightUpperArm
 	meshscale 0.9171918885398916 0.9171918885398916 0.9134615384615384
 endsegment
 
+	marker RightArmNormalized
+		parent RightUpperArm
+		position 0 0 -1
+	endmarker
+
 segment RightForearm
 	parent RightUpperArm
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.23750000000000004
@@ -117,6 +122,11 @@ segment LeftUpperArm
 	meshscale 0.9171918885398916 0.9171918885398916 0.9134615384615384
 endsegment
 
+	marker LeftArmNormalized
+		parent LeftUpperArm
+		position 0 0 -1
+	endmarker
+	
 segment LeftForearm
 	parent LeftUpperArm
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.23750000000000004
@@ -168,6 +178,11 @@ segment Thighs
 	meshfile Model_mesh/cuisse.stl
 	meshscale 1.0134694077345983 1.0134694077345983 0.9153567110036276
 endsegment
+
+	marker LegsNormalized
+		parent Thighs
+		position 0 0 -1
+	endmarker
 
 segment Shanks
 	parent Thighs

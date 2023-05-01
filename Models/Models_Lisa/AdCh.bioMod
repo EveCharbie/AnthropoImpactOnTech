@@ -65,6 +65,11 @@ segment RightUpperArm
 	meshscale 1.051735242493865 1.051735242493865 1.1788461538461539
 endsegment
 
+	marker RightArmNormalized
+		parent RightUpperArm
+		position 0 0 -1
+	endmarker
+	
 segment RightForearm
 	parent RightUpperArm
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.3065
@@ -117,6 +122,11 @@ segment LeftUpperArm
 	meshscale 1.051735242493865 1.051735242493865 1.1788461538461539
 endsegment
 
+	marker LeftArmNormalized
+		parent LeftUpperArm
+		position 0 0 -1
+	endmarker
+	
 segment LeftForearm
 	parent LeftUpperArm
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.3065
@@ -169,6 +179,11 @@ segment Thighs
 	meshscale 0.9137688974069166 0.9137688974069166 1.0544135429262396
 endsegment
 
+	marker LegsNormalized
+		parent Thighs
+		position 0 0 -1
+	endmarker
+	
 segment Shanks
 	parent Thighs
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.43599999999999994
