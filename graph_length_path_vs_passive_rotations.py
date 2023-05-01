@@ -219,8 +219,6 @@ axs[0, 2].set_title("Hips")
 plt.savefig(save_path + "length_path_for_all_athletes_per_clusters.png", dpi=300)
 
 
-
-embed()
 def plot_length_path_for_all_solutions_all_joints(data_to_graph):
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     i_athlete = 0

@@ -31,7 +31,7 @@ import time
 import pickle
 
 """
-The goal of this program is to optimize the movement to achieve a rudi out pike (803<).
+The goal of this program is to optimize the movement to achieve a rudi out pike (803<) for left twisters.
 """
 
 
