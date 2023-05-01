@@ -5,6 +5,7 @@ import scipy.integrate
 import bioviz
 import pickle
 import xlsxwriter
+import os
 
 """
 Ce code a été écrit pout faire les simulations pour Antoine, 
@@ -131,7 +132,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     athlete = titre.partition("debut")[0]
     n = len(values)
     for i in range(n):
-        file = open(f"Q_passive_rotations/{titre}-{titles[i]}.pkl", "wb")
+        file = open(f"/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Passive_rotations/Q_passive_rotations/{titre}-{titles[i]}.pkl", "wb")
         pickle.dump(values[i], file)
         file.close()
 
@@ -157,7 +158,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     fig.suptitle(suptitre)
 
     fig.tight_layout()
-    # fig.savefig(f'Videos/{suptitre}.pdf')
+    fig.savefig(f'Videos/{suptitre}.pdf')
     # fig.show()
 
 
@@ -231,7 +232,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     n = len(values)
     athlete = titre.partition("debut")[0]
     for i in range(n):
-        file = open(f"Q_passive_rotations/{titre}-{titles[i]}.pkl", "wb")
+        file = open(f"/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Passive_rotations/Q_passive_rotations/{titre}-{titles[i]}.pkl", "wb")
         pickle.dump(values[i], file)
         file.close()
 
@@ -258,7 +259,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     suptitre = "Translation du bassin" + f" - {titre}" if titre != "" else ""
     fig.suptitle(suptitre)
     fig.tight_layout()
-    # fig.savefig(f'Videos/{suptitre}.pdf')
+    fig.savefig(f'Videos/{suptitre}.pdf')
     # fig.show()
 
     figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, sharex=True)
@@ -284,12 +285,12 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     suptitre = "Rotation du bassin" + f" - {titre}" if titre != "" else ""
     figrot.suptitle(suptitre)
     figrot.tight_layout()
-    # figrot.savefig(f'Videos/{suptitre}.pdf')
+    figrot.savefig(f'Videos/{suptitre}.pdf')
     # figrot.show()
 
 
 workbook = xlsxwriter.Workbook(
-    "/home/lim/Documents/Stage_Lisa/AnthropoImpactOnTech/Passive_rotations/degrees_of_liberty.xlsx"
+    "/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Passive_rotations/degrees_of_liberty_2.xlsx"
 )
 
 # The workbook object is then used to add new
@@ -342,29 +343,36 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row, column, sit
 
         nom = nom.partition(".bioMod")[0].removeprefix("Models/")
         suptitre = nom.removeprefix("Models/") + " " + situation
-        plot_Q_Qdot_bras(model, t, X_tous, Qddot, titre=suptitre)
-        plot_Q_Qdot_bassin(model, t, X_tous, Qddot, titre=suptitre)
+        plot_Q_Qdot_bras(bio_model, t, X_tous, Qddot, titre=suptitre)
+        plot_Q_Qdot_bassin(bio_model, t, X_tous, Qddot, titre=suptitre)
 
-        b = bioviz.Viz(models[i], show_floor=False)
-        b.load_movement(X_tous[:, : model.nbQ()].T)
-        b.exec()
+        # b = bioviz.Viz(f'{models_path}{model}', show_floor=False)
+        # b.load_movement(X_tous[:, : bio_model.nbQ()].T)
+        # b.exec()
 
 
 N = 100
-JeCh = "Models/JeCh.bioMod"
-WeEm = "Models/WeEm.bioMod"
-SoMe = "Models/SoMe.bioMod"
-Sarah = "Models/Sarah.bioMod"
-OlGa = "Models/OlGa.bioMod"
-MaJa = "Models/MaJa.bioMod"
-MaCu = "Models/MaCu.bioMod"
-LaDe = "Models/LaDe.bioMod"
-FeBl = "Models/FeBl.bioMod"
-EvZl = "Models/EvZl.bioMod"
-Benjamin = "Models/Benjamin.bioMod"
-AuJo = "Models/AuJo.bioMod"
-AlAd = "Models/AlAd.bioMod"
-AdCh = "Models/AdCh.bioMod"
+models_path = "/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Models/Models_Lisa/"
+# for model in os.listdir(models_path):
+# JeCh = "Models/Models_Lisa/JeCh.bioMod"
+# WeEm = "Models/Models_Lisa/WeEm.bioMod"
+# SoMe = "Models/Models_Lisa/SoMe.bioMod"
+# Sarah = "Models/Models_Lisa/Sarah.bioMod"
+# OlGa = "Models/Models_Lisa/OlGa.bioMod"
+# MaJa = "Models/Models_Lisa/MaJa.bioMod"
+# MaCu = "Models/Models_Lisa/MaCu.bioMod"
+# LaDe = "Models/Models_Lisa/LaDe.bioMod"
+# FeBl = "Models/Models_Lisa/FeBl.bioMod"
+# EvZl = "Models/Models_Lisa/EvZl.bioMod"
+# ElMe = "Models/Models_Lisa/ElMe.bioMod"
+# KaFu = "Models/Models_Lisa/KaFu.bioMod"
+# KaMi = "Models/Models_Lisa/KaMi.bioMod"
+# MeVa = "Models/Models_Lisa/MeVa.bioMod"
+# Benjamin = "Models/Models_Lisa/Benjamin.bioMod"
+# AuJo = "Models/Models_Lisa/AuJo.bioMod"
+# AlAd = "Models/Models_Lisa/AlAd.bioMod"
+# AdCh = "Models/Models_Lisa/AdCh.bioMod"
+# ZoTs = "Models/Models_Lisa/ZoTs.bioMod"
 
 
 # JeCh_2 = "Models/JeCh_2.bioMod"
@@ -392,173 +400,173 @@ Tf = 0.2
 Q0 = 2.9
 Qf = 0.0
 
-models = [JeCh]
-for i in range(len(models)):
-    model = biorbd.Model(models[i])
-    name = models[i]
-    column = 0
-    row = i * 6 + 1
+models = os.listdir(models_path)
+for i , model in enumerate(models):
+    if model.endswith('.bioMod'):
+        name = model.removesuffix(".bioMod")
+        bio_model = biorbd.Model(f'{models_path}{models[i]}')
+        column = 0
+        row = i * 6 + 1
 
-    # JeCh
-    # debut bras en haut
-    X0 = np.zeros(model.nbQ() * 2)
-    X0[DROITE] = Q0
-    X0[GAUCHE] = -Q0
+        # debut bras en haut
+        X0 = np.zeros(bio_model.nbQ() * 2)
+        X0[DROITE] = Q0
+        X0[GAUCHE] = -Q0
 
-    CoM_func = model.CoM(X0[: model.nbQ()]).to_array()
-    bassin = model.globalJCS(0).to_array()
-    QCoM = CoM_func.reshape(1, 3)
-    Qbassin = bassin[-1, :3]
-    r = QCoM - Qbassin
+        CoM_func = bio_model.CoM(X0[: bio_model.nbQ()]).to_array()
+        bassin = bio_model.globalJCS(0).to_array()
+        QCoM = CoM_func.reshape(1, 3)
+        Qbassin = bassin[-1, :3]
+        r = QCoM - Qbassin
 
-    X0[model.nbQ() + 3] = -2 * np.pi  # Salto rot
-    X0[model.nbQ() : model.nbQ() + 3] = X0[model.nbQ() : model.nbQ() + 3] + np.cross(
-        r, X0[model.nbQ() + 3 : model.nbQ() + 6]
-    )  # correction pour la translation
+        X0[bio_model.nbQ() + 3] = -2 * np.pi  # Salto rot
+        X0[bio_model.nbQ() : bio_model.nbQ() + 3] = X0[bio_model.nbQ() : bio_model.nbQ() + 3] + np.cross(
+            r, X0[bio_model.nbQ() + 3 : bio_model.nbQ() + 6]
+        )  # correction pour la translation
 
-    # row = i +1
-    situation = "starts with arms up"
-    simuler(
-        f"{name} arms stay up",
-        model,
-        N,
-        t0,
-        tf,
-        T0,
-        Tf,
-        Q0,
-        Qf,
-        X0,
-        action_bras=bras_en_haut,
-        viz=False,
-        row=row,
-        column=column,
-        situation=situation,
-    )
-    row += 1
-    simuler(
-        f"{name} arms go down",
-        model,
-        N,
-        t0,
-        tf,
-        T0,
-        Tf,
-        Q0,
-        Qf,
-        X0,
-        action_bras=bras_descendent,
-        viz=True,
-        row=row,
-        column=column,
-        situation=situation,
-    )
+        # row = i +1
+        situation = "starts with arms up"
+        simuler(
+            f"{name} arms stay up",
+            bio_model,
+            N,
+            t0,
+            tf,
+            T0,
+            Tf,
+            Q0,
+            Qf,
+            X0,
+            action_bras=bras_en_haut,
+            viz=False,
+            row=row,
+            column=column,
+            situation=situation,
+        )
+        row += 1
+        simuler(
+            f"{name} arms go down",
+            bio_model,
+            N,
+            t0,
+            tf,
+            T0,
+            Tf,
+            Q0,
+            Qf,
+            X0,
+            action_bras=bras_descendent,
+            viz=True,
+            row=row,
+            column=column,
+            situation=situation,
+        )
 
-    row += 1
-    simuler(
-        f"{name} left arm goes down",
-        model,
-        N,
-        t0,
-        tf,
-        T0,
-        Tf,
-        Q0,
-        Qf,
-        X0,
-        action_bras=bras_gauche_descend,
-        viz=False,
-        row=row,
-        column=column,
-        situation=situation,
-    )
-    row += 1
-    simuler(
-        f"{name} right arm goes down",
-        model,
-        N,
-        t0,
-        tf,
-        T0,
-        Tf,
-        Q0,
-        Qf,
-        X0,
-        action_bras=bras_droit_descend,
-        viz=False,
-        row=row,
-        column=column,
-        situation=situation,
-    )
+        row += 1
+        simuler(
+            f"{name} left arm goes down",
+            bio_model,
+            N,
+            t0,
+            tf,
+            T0,
+            Tf,
+            Q0,
+            Qf,
+            X0,
+            action_bras=bras_gauche_descend,
+            viz=False,
+            row=row,
+            column=column,
+            situation=situation,
+        )
+        row += 1
+        simuler(
+            f"{name} right arm goes down",
+            bio_model,
+            N,
+            t0,
+            tf,
+            T0,
+            Tf,
+            Q0,
+            Qf,
+            X0,
+            action_bras=bras_droit_descend,
+            viz=False,
+            row=row,
+            column=column,
+            situation=situation,
+        )
 
-    # debut bras droit en haut, gauche bas
-    situation = "starts with right arm up and left arm down"
-    X0 = np.zeros(model.nbQ() * 2)
-    X0[DROITE] = -Q0
-    X0[GAUCHE] = Qf
+        # debut bras droit en haut, gauche bas
+        situation = "starts with right arm up and left arm down"
+        X0 = np.zeros(bio_model.nbQ() * 2)
+        X0[DROITE] = -Q0
+        X0[GAUCHE] = Qf
 
-    CoM_func = model.CoM(X0[: model.nbQ()]).to_array()
-    bassin = model.globalJCS(0).to_array()
-    QCoM = CoM_func.reshape(1, 3)
-    Qbassin = bassin[-1, :3]
-    r = QCoM - Qbassin
+        CoM_func = bio_model.CoM(X0[: bio_model.nbQ()]).to_array()
+        bassin = bio_model.globalJCS(0).to_array()
+        QCoM = CoM_func.reshape(1, 3)
+        Qbassin = bassin[-1, :3]
+        r = QCoM - Qbassin
 
-    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
-    X0[model.nbQ() : model.nbQ() + 3] = X0[model.nbQ() : model.nbQ() + 3] + np.cross(
-        r, X0[model.nbQ() + 3 : model.nbQ() + 6]
-    )  # correction pour la translation
-    row += 1
-    simuler(
-        f"{name} right goes down",
-        model,
-        N,
-        t0,
-        tf,
-        T0,
-        Tf,
-        Q0,
-        Qf,
-        X0,
-        action_bras=bras_droit_descend,
-        viz=False,
-        row=row,
-        column=column,
-        situation=situation,
-    )
+        X0[bio_model.nbQ() + 3] = 2 * np.pi  # Salto rot
+        X0[bio_model.nbQ() : bio_model.nbQ() + 3] = X0[bio_model.nbQ() : bio_model.nbQ() + 3] + np.cross(
+            r, X0[bio_model.nbQ() + 3 : bio_model.nbQ() + 6]
+        )  # correction pour la translation
+        row += 1
+        simuler(
+            f"{name} right goes down",
+            bio_model,
+            N,
+            t0,
+            tf,
+            T0,
+            Tf,
+            Q0,
+            Qf,
+            X0,
+            action_bras=bras_droit_descend,
+            viz=False,
+            row=row,
+            column=column,
+            situation=situation,
+        )
 
-    situation = "starts with left arm up, right arm down"
-    X0 = np.zeros(model.nbQ() * 2)
-    X0[DROITE] = -Qf
-    X0[GAUCHE] = Q0
+        situation = "starts with left arm up, right arm down"
+        X0 = np.zeros(bio_model.nbQ() * 2)
+        X0[DROITE] = -Qf
+        X0[GAUCHE] = Q0
 
-    CoM_func = model.CoM(X0[: model.nbQ()]).to_array()
-    bassin = model.globalJCS(0).to_array()
-    QCoM = CoM_func.reshape(1, 3)
-    Qbassin = bassin[-1, :3]
-    r = QCoM - Qbassin
+        CoM_func = bio_model.CoM(X0[: bio_model.nbQ()]).to_array()
+        bassin = bio_model.globalJCS(0).to_array()
+        QCoM = CoM_func.reshape(1, 3)
+        Qbassin = bassin[-1, :3]
+        r = QCoM - Qbassin
 
-    X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
-    X0[model.nbQ() : model.nbQ() + 3] = X0[model.nbQ() : model.nbQ() + 3] + np.cross(
-        r, X0[model.nbQ() + 3 : model.nbQ() + 6]
-    )  # correction pour la translation
-    row += 1
-    simuler(
-        f"{name} left arm goes down",
-        model,
-        N,
-        t0,
-        tf,
-        T0,
-        Tf,
-        Q0,
-        Qf,
-        X0,
-        action_bras=bras_gauche_descend,
-        viz=False,
-        row=row,
-        column=column,
-        situation=situation,
-    )
+        X0[bio_model.nbQ() + 3] = 2 * np.pi  # Salto rot
+        X0[bio_model.nbQ() : bio_model.nbQ() + 3] = X0[bio_model.nbQ() : bio_model.nbQ() + 3] + np.cross(
+            r, X0[bio_model.nbQ() + 3 : bio_model.nbQ() + 6]
+        )  # correction pour la translation
+        row += 1
+        simuler(
+            f"{name} left arm goes down",
+            bio_model,
+            N,
+            t0,
+            tf,
+            T0,
+            Tf,
+            Q0,
+            Qf,
+            X0,
+            action_bras=bras_gauche_descend,
+            viz=False,
+            row=row,
+            column=column,
+            situation=situation,
+        )
 
 print("fin")
 workbook.close()

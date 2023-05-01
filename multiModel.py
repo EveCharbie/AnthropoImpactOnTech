@@ -145,12 +145,12 @@ def set_fancy_names_index(biorbd_models):
     fancy_names_index["XrotABG"] = 13
     fancy_names_index["XrotC"] = 14
     fancy_names_index["YrotC"] = 15
-    fancy_names_index["vX"] = [0+nb_q+i*16 for i in range(nb_model)]
-    fancy_names_index["vY"] = [1+nb_q+i*16 for i in range(nb_model)]
-    fancy_names_index["vZ"] = [2+nb_q+i*16 for i in range(nb_model)]
-    fancy_names_index["vXrot"] = [3+nb_q+i*16 for i in range(nb_model)]
-    fancy_names_index["vYrot"] = [4+nb_q+i*16 for i in range(nb_model)]
-    fancy_names_index["vZrot"] = [5+nb_q+i*16 for i in range(nb_model)]
+    fancy_names_index["vX"] = [0+nb_q*nb_model+16*i for i in range(nb_model)]
+    fancy_names_index["vY"] = [1+nb_q*nb_model+i*16 for i in range(nb_model)]
+    fancy_names_index["vZ"] = [2+nb_q*nb_model+i*16 for i in range(nb_model)]
+    fancy_names_index["vXrot"] = [3+nb_q*nb_model+i*16 for i in range(nb_model)]
+    fancy_names_index["vYrot"] = [4+nb_q*nb_model+i*16 for i in range(nb_model)]
+    fancy_names_index["vZrot"] = [5+nb_q*nb_model+i*16 for i in range(nb_model)]
     fancy_names_index["vZrotBD"] = 6
     fancy_names_index["vYrotBD"] = 7
     fancy_names_index["vZrotABD"] = 8
@@ -171,7 +171,7 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
     nb_qdot = biorbd_models[0].nb_qdot
     nb_models = len(biorbd_models[0].models)
     nb_q_per_model = nb_q//nb_models
-    nb_qdot_per_model= nb_qdot//nb_models
+    nb_qdot_per_model = nb_qdot//nb_models
     x_bounds = BoundsList()
     x_bounds.add(bounds=biorbd_models[0].bounds_from_ranges(["q", "qdot"]))
     x_bounds.add(bounds=biorbd_models[0].bounds_from_ranges(["q", "qdot"]))
@@ -1205,7 +1205,7 @@ def prepare_ocp(
         ode_solver=ode_solver,
         n_threads=n_threads,
         variable_mappings=mappings,
-        assume_phase_dynamics = True# node_mappings=node_mappings, #### ajouter le mapping , la les bounds ne sotn pas de la bonnes tailles
+        assume_phase_dynamics= True# node_mappings=node_mappings, #### ajouter le mapping , la les bounds ne sotn pas de la bonnes tailles
     )
 
 
@@ -1213,9 +1213,9 @@ def main():
 #    models =
 # mettre tout les models
 #     os.listdir('/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/')
-    model_paths = ("/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/AlAd.bioMod","/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/AdCh.bioMod")
+    model_paths = ("/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models_Lisa/AdCh.bioMod","/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models_Lisa/AdCh.bioMod")
 
-    n_threads = 
+    n_threads = 4
 
     print_ocp_FLAG = False  # True.
 
@@ -1235,7 +1235,7 @@ def main():
         solver.set_linear_solver("ma57")
     else:
         print("Not using ma57")
-    solver.set_maximum_iterations(5)
+    solver.set_maximum_iterations(5000)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
@@ -1259,7 +1259,7 @@ def main():
     # Print the last solution
     #sol.animate(n_frames=-1, show_floor=False)
 
-    sol.graphs(show_bounds=True)
+    # sol.graphs(show_bounds=True)
 
 
 if __name__ == "__main__":
