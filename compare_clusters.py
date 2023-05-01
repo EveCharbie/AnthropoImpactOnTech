@@ -29,7 +29,7 @@ cluster_right_arm = {
     "JeCh":     {"cluster_1": [6],                            "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [0, 1, 2, 3, 4, 5, 7, 8, 9]},
     "KaFu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 3, 8],    "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 2, 4, 5, 6, 9]},
     "KaMi":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 7],                   "cluster_3": [4, 9],       "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 5, 6, 8]},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [2],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 3, 4, 5, 6, 7, 8, 9]},
+    "LaDe":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [2],          "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 3, 4, 5, 6, 7, 8, 9]},
     "MaCu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [1, 3],       "cluster_4": [],        "cluster_5": [],                          "cluster_6": [2, 4, 6, 7, 8, 9]},
     "MaJa":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": []},
     "MeVa":     {"cluster_1": [],                             "cluster_2": [2, 7],                         "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [0, 1, 3, 4, 5, 6, 8, 9]},
@@ -285,7 +285,7 @@ data_to_save = {"mean_q_per_cluster_right_arm": mean_q_per_cluster_right_arm,
 
 
 with open(f'overview_graphs/clusters_sol.pkl', 'wb') as f:
-    pickle.dump(, f)
+    pickle.dump(data_to_save, f)
 
 # Plot the clusters one by one to make sure they were correctly identified
 var_name = ["right_arm", "left_arm", "thighs"]
