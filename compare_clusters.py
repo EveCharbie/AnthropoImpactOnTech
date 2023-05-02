@@ -118,7 +118,6 @@ cluster_thighs = {
 
 # print all the solutions at once
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
-axs = axs.ravel()
 
 q_right_arm = {key: np.zeros((16, 381, 1)) for key in cluster_right_arm['AdCh'].keys()}
 q_left_arm = {key: np.zeros((16, 381, 1)) for key in cluster_left_arm['AdCh'].keys()}
@@ -133,6 +132,12 @@ for i_name, name in enumerate(names):
         with open(file_name, 'rb') as f:
             data = pickle.load(f)
         Q = data['q']
+        time_parameters = data['sol'].parameters['time']
+        time_vector = np.vstack((np.linspace(0, float(time_parameters[0]), 41)[:-1],
+                                 np.linspace(float(time_parameters[0]), float(time_parameters[0]+time_parameters[1]), 101)[:-1]))
+        time_vector = np.vstack((time_vector, np.linspace(float(time_parameters[0]+time_parameters[1]), float(time_parameters[0]+time_parameters[1]+time_parameters[2]), 101)[:-1]))
+        time_vector = np.vstack((time_vector, np.linspace(float(time_parameters[0]+time_parameters[1]+time_parameters[2]), float(time_parameters[0]+time_parameters[1]+time_parameters[2]+time_parameters[3]), 101)[:-1]))
+        time_vector = np.vstack((time_vector, np.linspace(float(time_parameters[0]+time_parameters[1]+time_parameters[2]+time_parameters[3]), float(time_parameters[0]+time_parameters[1]+time_parameters[2]+time_parameters[3]+time_parameters[4]), 41)))
 
         q = np.zeros(np.shape(Q[0][:, :-1]))
         q[:, :] = Q[0][:, :-1]
@@ -147,28 +152,32 @@ for i_name, name in enumerate(names):
                 q_right_arm[key] = np.concatenate((q_right_arm[key], q[:, :, np.newaxis]), axis=2)
                 i_cluster_right_arm = i_clust
                 rgba = cmap(i_cluster_right_arm * 1 / 7)
-                axs[0].plot(q[6, :], color=rgba)
-                axs[1].plot(q[7, :], color=rgba)
+                axs[0, 0].plot(q[6, :], color=rgba)
+                axs[1, 0].plot(q[7, :], color=rgba)
 
         for i_clust, key in enumerate(cluster_left_arm[name].keys()):
             if i_sol in cluster_left_arm[name][key]:
                 q_left_arm[key] = np.concatenate((q_left_arm[key], q[:, :, np.newaxis]), axis=2)
                 i_cluster_left_arm = i_clust
                 rgba = cmap(i_cluster_left_arm * 1 / 7)
-                axs[2].plot(q[10, :], color=rgba)
-                axs[3].plot(q[11, :], color=rgba)
+                axs[0, 1].plot(-q[10, :], color=rgba)
+                axs[1, 1].plot(-q[11, :], color=rgba)
 
         for i_clust, key in enumerate(cluster_thighs[name].keys()):
             if i_sol in cluster_thighs[name][key]:
                 q_thighs[key] = np.concatenate((q_thighs[key], q[:, :, np.newaxis]), axis=2)
                 i_cluster_thighs = i_clust
                 rgba = cmap(i_cluster_thighs * 1 / 7)
-                axs[4].plot(q[14, :], color=rgba)
-                axs[5].plot(q[15, :], color=rgba)
+                axs[0, 2].plot(q[14, :], color=rgba)
+                axs[1, 2].plot(q[15, :], color=rgba)
 
         if i_sol == 0:
-            for i, DoF in enumerate([6, 7, 10, 11, 14, 15]):
-                axs[i].set_title(f"{model.nameDof()[DoF].to_string()}")
+            axs[0, 0].set_title(f"Right arm change in elevation plane")
+            axs[1, 0].set_title(f"Right arm elevation")
+            axs[0, 1].set_title(f"Left arm change in elevation plane")
+            axs[1, 1].set_title(f"Left arm elevation")
+            axs[0, 2].set_title(f"Hips flexion")
+            axs[1, 2].set_title(f"Hips lateral flexion")
 
 plt.suptitle(f"{nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
@@ -248,7 +257,6 @@ mean_std_between_clusters_thighs = np.mean(np.std(mean_q_per_cluster_thighs, axi
 print("Right arm clusters:")
 # Plot the clusters with different colors
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
-axs = axs.ravel()
 for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     print(f"{cluster_name} was used by {cluster_counter_right_arm[cluster_name]} / {len(cluster_right_arm)} athletes")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_right_arm[cluster_name][3:])}")
@@ -256,15 +264,15 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     print(f"{cluster_name} has a right arm elevation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][7, :]) / (np.max(mean_q_per_cluster_right_arm[:, :, i_cluster][7, :]) - np.min(mean_q_per_cluster_right_arm[:, :, i_cluster][7, :])) * 100}% of the average max amplitude")
 
     rgba = cmap(i_cluster * 1/8)
-    axs[0].fill_between(np.arange(381), mean_q_per_cluster_right_arm[6, :, i_cluster] - std_q_per_cluster_right_arm[6, :, i_cluster],
+    axs[0, 0].fill_between(np.arange(381), mean_q_per_cluster_right_arm[6, :, i_cluster] - std_q_per_cluster_right_arm[6, :, i_cluster],
                         mean_q_per_cluster_right_arm[6, :, i_cluster] + std_q_per_cluster_right_arm[6, :,i_cluster], color=rgba, alpha=0.2)
-    axs[0].plot(mean_q_per_cluster_right_arm[6, :, i_cluster], color=rgba)
-    axs[1].fill_between(np.arange(381), mean_q_per_cluster_right_arm[7, :, i_cluster] - std_q_per_cluster_right_arm[7, :, i_cluster],
+    axs[0, 0].plot(mean_q_per_cluster_right_arm[6, :, i_cluster], color=rgba)
+    axs[1, 0].fill_between(np.arange(381), mean_q_per_cluster_right_arm[7, :, i_cluster] - std_q_per_cluster_right_arm[7, :, i_cluster],
                         mean_q_per_cluster_right_arm[7, :, i_cluster] + std_q_per_cluster_right_arm[7, :,i_cluster], color=rgba, alpha=0.2)
-    axs[1].plot(mean_q_per_cluster_right_arm[7, :, i_cluster], color=rgba)
+    axs[1, 0].plot(mean_q_per_cluster_right_arm[7, :, i_cluster], color=rgba)
     if i_cluster == 0:
-        axs[0].set_title(f"{model.nameDof()[6].to_string()}")
-        axs[1].set_title(f"{model.nameDof()[7].to_string()}")
+        axs[0, 0].set_title(f"Right arm change in elevation plane")
+        axs[1, 0].set_title(f"Right arm elevation")
     print('\n')
 print('\n')
 
@@ -276,15 +284,15 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     print(f"{cluster_name} has a left arm elevation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][11, :]) / (np.max(mean_q_per_cluster_left_arm[:, :, i_cluster][11, :]) - np.min(mean_q_per_cluster_left_arm[:, :, i_cluster][11, :])) * 100}% of the average max amplitude")
 
     rgba = cmap(i_cluster * 1/8)
-    axs[2].fill_between(np.arange(381), mean_q_per_cluster_left_arm[10, :, i_cluster] - std_q_per_cluster_left_arm[10, :, i_cluster],
-                        mean_q_per_cluster_left_arm[10, :, i_cluster] + std_q_per_cluster_left_arm[10, :,i_cluster], color=rgba, alpha=0.2)
-    axs[2].plot(mean_q_per_cluster_left_arm[10, :, i_cluster], color=rgba)
-    axs[3].fill_between(np.arange(381), mean_q_per_cluster_left_arm[11, :, i_cluster] - std_q_per_cluster_left_arm[11, :, i_cluster],
-                        mean_q_per_cluster_left_arm[11, :, i_cluster] + std_q_per_cluster_left_arm[11, :,i_cluster], color=rgba, alpha=0.2)
-    axs[3].plot(mean_q_per_cluster_left_arm[11, :, i_cluster], color=rgba)
+    axs[0, 1].fill_between(np.arange(381), -mean_q_per_cluster_left_arm[10, :, i_cluster] - std_q_per_cluster_left_arm[10, :, i_cluster],
+                        -mean_q_per_cluster_left_arm[10, :, i_cluster] + std_q_per_cluster_left_arm[10, :,i_cluster], color=rgba, alpha=0.2)
+    axs[0, 1].plot(-mean_q_per_cluster_left_arm[10, :, i_cluster], color=rgba)
+    axs[1, 1].fill_between(np.arange(381), -mean_q_per_cluster_left_arm[11, :, i_cluster] - std_q_per_cluster_left_arm[11, :, i_cluster],
+                        -mean_q_per_cluster_left_arm[11, :, i_cluster] + std_q_per_cluster_left_arm[11, :,i_cluster], color=rgba, alpha=0.2)
+    axs[1, 1].plot(-mean_q_per_cluster_left_arm[11, :, i_cluster], color=rgba)
     if i_cluster == 0:
-        axs[2].set_title(f"{model.nameDof()[10].to_string()}")
-        axs[3].set_title(f"{model.nameDof()[11].to_string()}")
+        axs[0, 1].set_title(f"Left arm change in elevation plane")
+        axs[1, 1].set_title(f"Left arm elevation")
     print('\n')
 print('\n')
 
@@ -296,17 +304,17 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     print(f"{cluster_name} has a hip lateral flexion range of {np.mean(range_q_per_cluster_thighs[:, :, i_cluster][15, :]) / (np.max(mean_q_per_cluster_thighs[:, :, i_cluster][15, :]) - np.min(mean_q_per_cluster_thighs[:, :, i_cluster][15, :])) * 100}% of the average max amplitude")
 
     rgba = cmap(i_cluster * 1 / 8)
-    axs[4].fill_between(np.arange(381),
+    axs[0, 2].fill_between(np.arange(381),
                         mean_q_per_cluster_thighs[14, :, i_cluster] - std_q_per_cluster_thighs[14, :, i_cluster],
                         mean_q_per_cluster_thighs[14, :, i_cluster] + std_q_per_cluster_thighs[14, :, i_cluster], color=rgba, alpha=0.2)
-    axs[4].plot(mean_q_per_cluster_thighs[14, :, i_cluster], color=rgba)
-    axs[5].fill_between(np.arange(381),
+    axs[0, 2].plot(mean_q_per_cluster_thighs[14, :, i_cluster], color=rgba)
+    axs[1, 2].fill_between(np.arange(381),
                         mean_q_per_cluster_thighs[15, :, i_cluster] - std_q_per_cluster_thighs[15, :, i_cluster],
                         mean_q_per_cluster_thighs[15, :, i_cluster] + std_q_per_cluster_thighs[15, :, i_cluster], color=rgba, alpha=0.2)
-    axs[5].plot(mean_q_per_cluster_thighs[15, :, i_cluster], color=rgba)
+    axs[1, 2].plot(mean_q_per_cluster_thighs[15, :, i_cluster], color=rgba)
     if i_cluster == 0:
-        axs[4].set_title(f"{model.nameDof()[14].to_string()}")
-        axs[5].set_title(f"{model.nameDof()[15].to_string()}")
+        axs[0, 2].set_title(f"Hips flexion")
+        axs[1, 2].set_title(f"Hips lateral flexion")
     print('\n')
 print('\n')
 
