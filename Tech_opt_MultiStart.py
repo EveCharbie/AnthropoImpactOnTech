@@ -94,8 +94,8 @@ except ImportError:
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     diff = 0
     for i, dof in enumerate(dofs):
-        diff += (all_pn.nlp.states['q'].mx[dof] - targets[i]) ** 2
-    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
+        diff += (all_pn.nlp.states[0]['q'].mx[dof] - targets[i]) ** 2
+    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states[0]['q'])
 
 
 def prepare_ocp(
@@ -117,16 +117,17 @@ def prepare_ocp(
     -------
     The OptimalControlProgram ready to be solved
     """
-
+    print('prepare')
+    print(biorbd_model_path, nb_twist, n_threads)
     final_time = 1.87
     n_shooting = (40, 100, 100, 100, 40)
     #n_shooting = (1, 1, 1, 1, 1)
 
    # nom = biorbd_model_path[0].split('/')[-1].removesuffix('.bioMod')
     #print(nom)
-    biorbd_model = (
-    BiorbdModel(biorbd_model_path),BiorbdModel(biorbd_model_path), BiorbdModel(biorbd_model_path),
-    BiorbdModel(biorbd_model_path), BiorbdModel(biorbd_model_path))
+    biomodel = (BiorbdModel(biorbd_model_path))
+    biorbd_model = (biomodel,biomodel, biomodel, biomodel,biomodel)
+
 
     nb_q = biorbd_model[0].nb_q
     nb_qdot = biorbd_model[0].nb_qdot
@@ -869,9 +870,6 @@ def prepare_ocp(
         assume_phase_dynamics=True,
     )
 
-
-
-
 def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: int,save_folder:str=None, only_save_filename : bool = False):
     """
     Solving the ocp
@@ -888,12 +886,8 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
     """
 
     stunts = dict({3: "vrille_et_demi", 5: "double_vrille_et_demi", 7: "triple_vrille_et_demi"})
-   # print('do somethin with biorbd_model_path to ge the name')
-    # OptimalControlProgram.save(sol, f"solutions/pendulum_multi_start_random{seed}.bo", stand_alone=True)
-    #states = sol.states["all"]
     stunt = stunts[nb_twist]
     athlete=biorbd_model_path.split('/')[-1].removesuffix('.bioMod')
-    path_folder = '/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille'
     title_before_solve = f"{athlete}_{stunt}_{seed}"
 
     if only_save_filename == True :
@@ -923,19 +917,17 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
     else:
         convergence = 'DVG'
         print( f'{athlete} doing ' + f'{stunt}' + ' doesn t converge')
-    if save_folder :
-        with open(f'{path_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
+    if save_folder:
+        with open(f'{save_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
             pickle.dump(dict_state, file)
 
-def check_already_done(self, args):
+def should_solve(args, save_folder, save_results=save_results):
     """
     Check if the filename already appears in the folder where files are saved, if not ocp must be solved
     """
-    already_done_filenames = os.listdir(f"/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/new_sol")
-    for i, title in enumerate(already_done_filenames):
-        title = title[0:-8]
-        already_done_filenames[i] = title
-    return self.post_optimization_callback([None], *args, only_save_filename=True) not in already_done_filenames
+    already_done_filenames = os.listdir(f"{save_folder}")
+    return save_results([None], *args, save_folder=save_folder, only_save_filename=True) not in already_done_filenames
+
 
 def check_already_done(args,save_folder, save_results= save_results):
     """
@@ -960,11 +952,10 @@ def prepare_multi_start(
     return MultiStart(
         combinatorial_parameters=combinatorial_parameters,
         prepare_ocp_callback=prepare_ocp,
-        post_optimization_callback=(save_results,{'save_folder': save_folder}),
-        should_solve_callback=(check_already_done, {'save_folder':save_folder}),
+        post_optimization_callback=(save_results, {'save_folder': save_folder}),
+        should_solve_callback=(check_already_done, {'save_folder': save_folder}),
         solver=Solver.IPOPT(show_online_optim=False),  # You cannot use show_online_optim with multi-start
         n_pools=n_pools,
-        # save_folder= save_folder,
     )
 
 def main():
@@ -972,33 +963,28 @@ def main():
     Prepares and solves an ocp for a 803<. Animates the results
     """
 
-
-    #biorbd_model_path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/models/Models/Sarah.bioMod"
-    #Mod = Model(savesol= True, with_hsl=True)
-
     n_threads = 25
 
     seed = [0,1,2,3,4,5,6,7,8,9]
     nb_twist = [5]
     athletes = [
-       "AdCh",
-        "AlAd",
-        "AuJo",
-        "Benjamin",
-        "ElMe",
-        "EvZl",
-        "FeBl",
-        "JeCh",
-        "KaFu",
-        "KaMi",
-        "LaDe",
-        "MaCu",
-        "MaJa",
-        "MeVa",
-        "OlGa",
-        "Sarah",
-        "SoMe",
-        "WeEm",
+       # "AdCh",
+       #  "AlAd",
+       #  "AuJo",
+       #  "Benjamin",
+       #  "ElMe",
+       #  "EvZl",
+       #  "FeBl",
+       #  "JeCh",
+       #  "KaFu",
+       #  "KaMi",
+       #  "LaDe",
+       #  "MaCu",
+       #  "MaJa",
+       #  "OlGa",
+       #  "Sarah",
+       #  "SoMe",
+       #  "WeEm",
         "ZoTs"]
 
     all_paths = []
@@ -1009,11 +995,11 @@ def main():
 
 
     #path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/"
-    combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist':nb_twist,
+    combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist': nb_twist,
                                 'seed': seed}
-    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
+    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/test"
 
-    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools = 5)
+    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools =5)
 
     # multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
 
@@ -1023,7 +1009,7 @@ def main():
     multi_start.solver.set_linear_solver('ma57')
     #else:
     #    print("Not using ma57")
-    multi_start.solver.set_maximum_iterations(10000)
+    multi_start.solver.set_maximum_iterations(0)
     multi_start.solver.set_convergence_tolerance(1e-4)
     #multi_start.solver.set_print_level(0)
 
