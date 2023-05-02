@@ -99,7 +99,7 @@ def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
 
 
 def prepare_ocp(
-        biorbd_model_path: str, nb_twist: int, seed : int,  n_threads: int = 25 ,
+        biorbd_model_path: str, nb_twist: int, seed : int,  n_threads: int = 5 ,
         ode_solver: OdeSolver = OdeSolver.RK4(),
 ) -> OptimalControlProgram:
 
@@ -117,7 +117,8 @@ def prepare_ocp(
     -------
     The OptimalControlProgram ready to be solved
     """
-
+    print('prepare')
+    print(biorbd_model_path, nb_twist, n_threads)
     final_time = 1.87
     n_shooting = (40, 100, 100, 100, 40)
     #n_shooting = (1, 1, 1, 1, 1)
@@ -865,8 +866,8 @@ def prepare_ocp(
         u_bounds=u_bounds,
         objective_functions=objective_functions,
         constraints=constraints,
-        n_threads=1,
-        assume_phase_dynamics=True,
+        n_threads=n_threads,
+        # assume_phase_dynamics=True,
     )
 
 
@@ -1012,7 +1013,7 @@ def main():
                                 'seed': seed}
     save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
 
-    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools =25)
+    multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools =5)
 
     # multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
 

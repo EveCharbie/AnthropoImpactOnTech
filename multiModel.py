@@ -1213,9 +1213,9 @@ def main():
 #    models =
 # mettre tout les models
 #     os.listdir('/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/')
-    model_paths = ("/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models_Lisa/AdCh.bioMod","/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models_Lisa/AdCh.bioMod")
+    model_paths = ("Models/Models_Lisa/AdCh.bioMod","Models/Models_Lisa/AlAd.bioMod")
 
-    n_threads = 4
+    n_threads = 28
 
     print_ocp_FLAG = False  # True.
 
@@ -1224,7 +1224,7 @@ def main():
     save_sol_FLAG = True
     # n_shooting = (40, 100, 100, 100, 40,
     #               40, 100, 100, 100, 40)
-    n_shooting = (10, 10, 10, 10, 10)
+    n_shooting = (20, 50, 50, 500, 20)
 
     ocp = prepare_ocp(model_paths, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     # ocp.add_plot_penalty(CostType.ALL)
@@ -1244,14 +1244,22 @@ def main():
     # il faut recuperer les Q de toutes les phases la onrecupere que lq premiere phase
     qs = sol.states[0]["q"]
     qdots = sol.states[0]["qdot"]
+    dict = {}
+    dict['q'] = qs
+    dict['qdot'] = qdots
+    # for i in range(1, len(sol.states)):
+    #     qs = np.hstack((qs, sol.states[i]["q"]))
+    #     qdots = np.hstack((qdots, sol.states[i]["qdot"]))
+    import pickle
+    name = 'AdCh_AlAd'
+    path = 'Solutions_MultiModel/'
+    with open(f'{path}/{name}.pkl') as f:
+        pickle.dump(dict, f)
 
-    for i in range(1, len(sol.states)):
-        qs = np.hstack((qs, sol.states[i]["q"]))
-        qdots = np.hstack((qdots, sol.states[i]["qdot"]))
-    if save_sol_FLAG:  # switch manuelle
-        np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-q.npy", qs)
-        np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-qdot.npy", qdots)
-        np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{nom}-{str(n_shooting).replace(', ', '_')}-{temps}-t.npy", sol.phase_time)
+    # if save_sol_FLAG:  # switch manuelle
+    #     np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{str(n_shooting)}q.npy", qs)
+    #     np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{str(n_shooting)}-qdot.npy", qdots)
+    #     np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{str(n_shooting)}-t.npy", sol.phase_time)
 
     if IPYTHON:
         IPython.embed()  # afin de pouvoir explorer plus en details la solution
