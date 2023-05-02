@@ -248,8 +248,12 @@ def plot_length_path_for_all_solutions_all_joints(data_to_graph, graph_type="arm
 
     fig.subplots_adjust(right=0.8)
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))  # Athlete number
-    ax.set_xlabel("Twist potential [$^\circ$]")  # 2*Arm + Hips
-    ax.set_ylabel("Normalized combined trajectories length [m]")
+    if graph_type == "arm_arm_hips":   # 2*Arm + Hips
+        ax.set_xlabel(r"2 $\times$ arm + hips twist potential [$^\circ$]")
+        ax.set_ylabel("Normalized combined arms and hips trajectories length [m]")
+    else:
+        ax.set_xlabel(r"2 $\times$ arm twist potential [$^\circ$]")
+        ax.set_ylabel("Normalized combined arms trajectories length [m]")
     if graph_type == "arm_arm_hips":
         ax.set_xlim(435, 725)
         ax.set_ylim(15.45, 29.15)
