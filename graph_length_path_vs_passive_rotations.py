@@ -3,7 +3,6 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import statsmodels.api as sm
 import pandas as pd
 import os
 from IPython import embed
@@ -113,7 +112,7 @@ for name in athletes_number.keys():
     hips_twist_potential = abs(excel[index_hips, 4]) * 360
 
     best_cost = np.min(cost)
-    noise_index_to_keep = np.where(cost <= 1.05*best_cost)[0]
+    noise_index_to_keep = np.where(cost <= 1.01*best_cost)[0]  # 1.05
 
     color = cmap(i_athlete / 18)
     for i, idx in enumerate(noise_index_to_keep):
@@ -154,11 +153,11 @@ axs[2].set_ylabel("Normalized legs trajectory length [m]")
 axs[0].set_xlim(0.45*360, 0.8*360)
 axs[0].set_ylim(3.8, 10.15)
 axs[1].set_xlim(0.45*360, 0.8*360)
-axs[1].set_ylim(5.9, 10.6)
+axs[1].set_ylim(3.8, 10.15)
 axs[2].set_xlim(0.27*360, 0.42*360)
-axs[2].set_ylim(6.1, 8.1)
-plt.show()
-# plt.savefig(save_path + "clusters_length_path_for_all_athletes.png", dpi=300)
+axs[2].set_ylim(3.8, 10.15)
+# plt.show()
+plt.savefig(save_path + "clusters_length_path_for_all_athletes.png", dpi=300)
 
 
 
@@ -219,46 +218,136 @@ axs[0, 2].set_title("Hips")
 plt.savefig(save_path + "length_path_for_all_athletes_per_clusters.png", dpi=300)
 
 
-def plot_length_path_for_all_solutions_all_joints(data_to_graph):
+def plot_length_path_for_all_solutions_all_joints(data_to_graph, graph_type="arm_arm_hips"):
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     i_athlete = 0
     i_trajectory = 0
     twist_potential = []
     joints_trajectories = []
+    twist_potential_per_athlete = {}
     for name in athletes_number.keys():
         color = cmap(i_athlete / 18)
         for i, idx in enumerate(data_to_graph[name]["noise_index_to_keep"]):
-            twist_potential += [2*data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"]]
-            joints_trajectories += [data_to_graph[name]["right_arm_trajectory"][idx] + data_to_graph[name]["left_arm_trajectory"][idx] + data_to_graph[name]["legs_trajectory"][idx]]
+            if graph_type == "arm_arm_hips":
+                twist_potential += [2*data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"]]
+                joints_trajectories += [data_to_graph[name]["right_arm_trajectory"][idx] + data_to_graph[name]["left_arm_trajectory"][idx] + data_to_graph[name]["legs_trajectory"][idx]]
+            elif graph_type == "arm_arm":
+                twist_potential += [2*data_to_graph[name]["arms_twist_potential"]]
+                joints_trajectories += [data_to_graph[name]["right_arm_trajectory"][idx] + data_to_graph[name]["left_arm_trajectory"][idx]]
+            else:
+                raise ValueError("graph_type must be either 'arm_arm_hips' or 'arm_arm'")
+
             ax.plot(twist_potential[i_trajectory], joints_trajectories[i_trajectory], 'o', color=color)
             i_trajectory += 1
+        if graph_type == "arm_arm_hips":
+            twist_potential_per_athlete[name] = 2*data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"]
+        else:
+            twist_potential_per_athlete[name] = 2*data_to_graph[name]["arms_twist_potential"]
         i_athlete += 1
         plt.plot(0, 0, 'o', color=color, label="Athlete #" + str(athletes_number[name]))
 
     fig.subplots_adjust(right=0.8)
     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))  # Athlete number
     ax.set_xlabel("Twist potential [$^\circ$]")  # 2*Arm + Hips
-    ax.set_ylabel("Normalized summed joint trajectories length [m]")
-    ax.set_xlim(1.235*360, 2*360)
-    ax.set_ylim(15.45, 29.15)
+    ax.set_ylabel("Normalized combined trajectories length [m]")
+    if graph_type == "arm_arm_hips":
+        ax.set_xlim(435, 725)
+        ax.set_ylim(15.45, 29.15)
+        print('ici')
+    else:
+        ax.set_xlim(335, 590)
+        ax.set_ylim(9, 21)
 
-    return twist_potential, joints_trajectories
+    return twist_potential, twist_potential_per_athlete, joints_trajectories
 
-twist_potential, joints_trajectories = plot_length_path_for_all_solutions_all_joints(data_to_graph)
+twist_potential, twist_potential_per_athlete, joints_trajectories = plot_length_path_for_all_solutions_all_joints(data_to_graph)
 # plt.show()
 plt.savefig(save_path + "length_path_for_all_solutions_all_joints.png", dpi=300)
 
-_, _ = plot_length_path_for_all_solutions_all_joints(data_to_graph)
+_, _, _ = plot_length_path_for_all_solutions_all_joints(data_to_graph, graph_type="arm_arm")
+# plt.show()
+plt.savefig(save_path + "length_path_for_all_solutions_arms.png", dpi=300)
+
+_, _, _ = plot_length_path_for_all_solutions_all_joints(data_to_graph)
 correlation = scipy.stats.spearmanr(np.array(twist_potential), np.array(joints_trajectories))[0]
 lin_regress = scipy.stats.linregress(np.array(twist_potential), np.array(joints_trajectories))
 slope = lin_regress.slope
 intercept = lin_regress.intercept
 
-x_lin_regress = np.linspace(1.235*360, 2*360, 10)
+x_lin_regress = np.linspace(435, 725, 10)
 y_lin_regress = slope*x_lin_regress + intercept
 plt.plot(x_lin_regress, y_lin_regress, '-k', linewidth=0.5)
-plt.text(2*360-25, 29.15-0.5, "S=" + str(round(correlation, 2)), fontsize=10)
+plt.text(2*360-20, 29.15-0.5, "S=" + str(round(correlation, 2)), fontsize=10)
 plt.savefig(save_path + "length_path_for_all_solutions_all_joints_with_correlation.png", dpi=300)
 plt.show()
 
+"""
+Spearman associsation:
+0-0.19 : very weak
+0.2-0.39 : weak
+0.4-0.59 : moderate
+0.6-0.79 : strong
+0.8-1 : very strong
+"""
 
+
+# plot the correlation between the twist potential and the anthropometry
+athletes_reduced_anthropo = {name: None for name in athletes_number.keys()}
+fig, ax = plt.subplots(1, 1, figsize=(7, 7))
+for i, name in enumerate(athletes_number.keys()):
+    ax.plot(data_to_graph[name]["arms_twist_potential"], data_to_graph[name]["hips_twist_potential"], '.k')
+    ax.text(data_to_graph[name]["arms_twist_potential"]+0.5, data_to_graph[name]["hips_twist_potential"]+0.5, str(athletes_number[name]), fontsize=10)
+ax.set_xlabel("Arm twist potential [$\circ$]")
+ax.set_ylabel("Hips twist potential [$\circ$]")
+plt.savefig("overview_graphs/arm_vs_hips_twist_potential.png", dpi=300)
+# plt.show()
+
+
+# plot the correlation between the arm twist potential and hip twist potential
+fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+for i, name in enumerate(athletes_number.keys()):
+    model_anthropo_file_name = f'Models/text_files/{name}.txt'
+    with open(model_anthropo_file_name) as f:
+        model_anthropo = f.readlines()
+
+    right_arm_perimeter = float(model_anthropo[24][6:-1])
+    left_arm_perimeter = float(model_anthropo[25][6:-1])
+    arm_perimeter = (right_arm_perimeter + left_arm_perimeter) / 2
+    height = float(model_anthropo[-1][14:-1])
+    athletes_reduced_anthropo[name] = {"arm_perimeter": arm_perimeter, "height": height}
+
+min_twist_potential = np.min(twist_potential)
+max_twist_potential = np.max(twist_potential)
+
+ax.scatter(athletes_reduced_anthropo["WeEm"]["arm_perimeter"], athletes_reduced_anthropo["WeEm"]["height"], c=twist_potential_per_athlete["WeEm"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #1 (MAG)")
+ax.scatter(athletes_reduced_anthropo["FeBl"]["arm_perimeter"], athletes_reduced_anthropo["FeBl"]["height"], c=twist_potential_per_athlete["FeBl"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #2 (MAG)")
+ax.scatter(athletes_reduced_anthropo["AdCh"]["arm_perimeter"], athletes_reduced_anthropo["AdCh"]["height"], c=twist_potential_per_athlete["AdCh"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #3 (MAG)")
+ax.scatter(athletes_reduced_anthropo["MaJa"]["arm_perimeter"], athletes_reduced_anthropo["MaJa"]["height"], c=twist_potential_per_athlete["MaJa"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #4 (MAG)")
+
+ax.scatter(athletes_reduced_anthropo["AlAd"]["arm_perimeter"], athletes_reduced_anthropo["AlAd"]["height"], c=twist_potential_per_athlete["AlAd"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #5 (MT)")
+ax.scatter(athletes_reduced_anthropo["JeCh"]["arm_perimeter"], athletes_reduced_anthropo["JeCh"]["height"], c=twist_potential_per_athlete["JeCh"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #6 (MT)")
+ax.scatter(athletes_reduced_anthropo["Benjamin"]["arm_perimeter"], athletes_reduced_anthropo["Benjamin"]["height"], c=twist_potential_per_athlete["Benjamin"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #7 (MT)")
+ax.scatter(athletes_reduced_anthropo["Sarah"]["arm_perimeter"], athletes_reduced_anthropo["Sarah"]["height"], c=twist_potential_per_athlete["Sarah"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #8 (WT)")
+ax.scatter(athletes_reduced_anthropo["SoMe"]["arm_perimeter"], athletes_reduced_anthropo["SoMe"]["height"], c=twist_potential_per_athlete["SoMe"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #9 (WT)")
+
+ax.scatter(athletes_reduced_anthropo["OlGa"]["arm_perimeter"], athletes_reduced_anthropo["OlGa"]["height"], c=twist_potential_per_athlete["OlGa"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #10 (MD)")
+ax.scatter(athletes_reduced_anthropo["KaFu"]["arm_perimeter"], athletes_reduced_anthropo["KaFu"]["height"], c=twist_potential_per_athlete["KaFu"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #11 (WD)")
+ax.scatter(athletes_reduced_anthropo["MaCu"]["arm_perimeter"], athletes_reduced_anthropo["MaCu"]["height"], c=twist_potential_per_athlete["MaCu"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #12 (MD)")
+ax.scatter(athletes_reduced_anthropo["KaMi"]["arm_perimeter"], athletes_reduced_anthropo["KaMi"]["height"], c=twist_potential_per_athlete["KaMi"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #13 (WD)")
+
+ax.scatter(athletes_reduced_anthropo["ElMe"]["arm_perimeter"], athletes_reduced_anthropo["ElMe"]["height"], c=twist_potential_per_athlete["ElMe"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #14 (WAG)")
+ax.scatter(athletes_reduced_anthropo["ZoTs"]["arm_perimeter"], athletes_reduced_anthropo["ZoTs"]["height"], c=twist_potential_per_athlete["ZoTs"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #15 (WAG)")
+ax.scatter(athletes_reduced_anthropo["LaDe"]["arm_perimeter"], athletes_reduced_anthropo["LaDe"]["height"], c=twist_potential_per_athlete["LaDe"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #16 (WAG)")
+ax.scatter(athletes_reduced_anthropo["EvZl"]["arm_perimeter"], athletes_reduced_anthropo["EvZl"]["height"], c=twist_potential_per_athlete["EvZl"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #17 (WAG)")
+
+color_bar_handle = ax.scatter(athletes_reduced_anthropo["AuJo"]["arm_perimeter"], athletes_reduced_anthropo["AuJo"]["height"], c=twist_potential_per_athlete["AuJo"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[4], label="Athlete #18 (WAS)")
+
+fig.subplots_adjust(left=0.07, right=0.74, bottom=0.1, top=0.9)
+ax.set_xlabel("Biceps perimeter [cm]")
+ax.set_ylabel("Height [cm]")
+ax.legend(loc="center left", bbox_to_anchor=(1.1, 0.5), ncol=1)
+cbar_ax = fig.add_axes([0.75, 0.1, 0.02, 0.8])
+cbar = fig.colorbar(color_bar_handle, cax=cbar_ax)
+cbar.ax.set_title('Combined\ntwist potential [$\circ$]')
+plt.savefig("overview_graphs/musculature_height_twist_potential.png", dpi=300)
+# plt.show()
