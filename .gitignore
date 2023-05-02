@@ -148,8 +148,6 @@ Images/
 
 *.yml
 
-*.xlsx
-
 *.npy
 
 *.png
@@ -157,10 +155,6 @@ Images/
 *.txt
 
 Models_all_dofs/
-
-Passive_rotations/Models/
-
-Passive_rotations/passive rotation results/Passive_rotations/Models
 
 *.ods#
 
