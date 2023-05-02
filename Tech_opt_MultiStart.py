@@ -94,8 +94,8 @@ except ImportError:
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     diff = 0
     for i, dof in enumerate(dofs):
-        diff += (all_pn.nlp.states['q'].mx[dof] - targets[i]) ** 2
-    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states['q'])
+        diff += (all_pn.nlp.states[0]['q'].mx[dof] - targets[i]) ** 2
+    return all_pn.nlp.mx_to_cx('minimize_dofs', diff, all_pn.nlp.states[0]['q'])
 
 
 def prepare_ocp(
@@ -867,7 +867,7 @@ def prepare_ocp(
         objective_functions=objective_functions,
         constraints=constraints,
         n_threads=n_threads,
-        # assume_phase_dynamics=True,
+        assume_phase_dynamics=True,
     )
 
 def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: int,save_folder:str=None, only_save_filename : bool = False):
