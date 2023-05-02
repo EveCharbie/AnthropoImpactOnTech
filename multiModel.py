@@ -1,4 +1,4 @@
-
+import time
 
 
 """
@@ -61,8 +61,6 @@ def superimpose_markers(
         all_pn: PenaltyNodeList,
         first_marker: str | int,
         second_marker: str | int,
-        #model_index : int,
-      #  models_list : list ,
 ):
     if first_marker == "MidMainD":
         first_marker = 0
@@ -75,13 +73,12 @@ def superimpose_markers(
     if second_marker == "CibleMainG":
         second_marker = 3
 
-    # boucle for
     nlp = all_pn.nlp
     total_diff = 0
 
     for index_model, biorbd_model in enumerate(nlp.model.models):
 
-        q = nlp.states[0]["q"].mx[nlp.model.variable_index('q', index_model) ] #[model_index: (model_index+1)*16, :].mx
+        q = nlp.states[0]["q"].mx[nlp.model.variable_index('q', index_model) ]
         diff_markers = nlp.model.models[index_model].marker(q, second_marker).to_mx() - nlp.model.models[index_model].marker(q, first_marker).to_mx()
         sum_diff= 0
         for i in range(diff_markers.shape[0]):
@@ -127,7 +124,6 @@ def set_fancy_names_index(biorbd_models):
     nb_model = len(biorbd_models[0].models)
 
     nb_q = biorbd_models[0].nb_q//nb_model
-    # for i inb_model):n range(
     fancy_names_index = {}
     fancy_names_index["X"] = [0+i*16 for i in range(nb_model)]
     fancy_names_index["Y"] = [1+i*16 for i in range(nb_model)]
@@ -946,6 +942,8 @@ def prepare_ocp(
 
     nb_models = len(biorbd_models[0].models)
     nb_freedom = nb_q // len(biorbd_models[0].models)
+    global q_to_first
+    global q_to_second
     q_to_first =list(range(nb_freedom))
     q_to_second = list(range(nb_freedom))
 
@@ -1210,9 +1208,6 @@ def prepare_ocp(
 
 
 def main():
-#    models =
-# mettre tout les models
-#     os.listdir('/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/')
     model_paths = ("Models/Models_Lisa/AdCh.bioMod","Models/Models_Lisa/AlAd.bioMod")
 
     n_threads = 28
@@ -1222,9 +1217,8 @@ def main():
     show_online_FLAG = False  # True
     HSL_FLAG = True
     save_sol_FLAG = True
-    # n_shooting = (40, 100, 100, 100, 40,
-    #               40, 100, 100, 100, 40)
-    n_shooting = (20, 50, 50, 500, 20)
+
+    n_shooting = (20, 50, 50, 50, 20)
 
     ocp = prepare_ocp(model_paths, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     # ocp.add_plot_penalty(CostType.ALL)
@@ -1235,31 +1229,35 @@ def main():
         solver.set_linear_solver("ma57")
     else:
         print("Not using ma57")
-    solver.set_maximum_iterations(5000)
+    solver.set_maximum_iterations(0)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
     temps = time.strftime("%Y-%m-%d-%H%M")
     nom = "MultiModel solutions "
     # il faut recuperer les Q de toutes les phases la onrecupere que lq premiere phase
-    qs = sol.states[0]["q"]
-    qdots = sol.states[0]["qdot"]
-    dict = {}
-    dict['q'] = qs
-    dict['qdot'] = qdots
-    # for i in range(1, len(sol.states)):
-    #     qs = np.hstack((qs, sol.states[i]["q"]))
-    #     qdots = np.hstack((qdots, sol.states[i]["qdot"]))
+    qs = sol.states[0]['q']
+    qdots = sol.states[0]['qdot']
+    q_mapped =[]
+    for i in range(1, len(sol.states)):
+        qs = np.hstack((qs, sol.states[i]["q"]))
+        qdots = np.hstack((qdots, sol.states[i]["qdot"]))
+
+    for i, index in enumerate(q_to_second):
+        q_mapped.append(qs[index, :])
+
+    dict_sol = {}
+    dict_sol['q'] = qs
+    dict_sol['qdot'] = qdots
+    dict_sol['q_mapped'] = q_mapped
+    dict_sol['mapping'] = {'to_first': q_to_first, 'to_second': q_to_second}
+
     import pickle
     name = 'AdCh_AlAd'
     path = 'Solutions_MultiModel/'
     with open(f'{path}/{name}.pkl') as f:
-        pickle.dump(dict, f)
+        pickle.dump(dict_sol, f)
 
-    # if save_sol_FLAG:  # switch manuelle
-    #     np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{str(n_shooting)}q.npy", qs)
-    #     np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{str(n_shooting)}-qdot.npy", qdots)
-    #     np.save(f"/home/laseche/Documents/Stage_Lisa/AnthropoImpactOnTech/Solutions_MultiModel/{str(n_shooting)}-t.npy", sol.phase_time)
 
     if IPYTHON:
         IPython.embed()  # afin de pouvoir explorer plus en details la solution
@@ -1271,5 +1269,7 @@ def main():
 
 
 if __name__ == "__main__":
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))
     # main()
