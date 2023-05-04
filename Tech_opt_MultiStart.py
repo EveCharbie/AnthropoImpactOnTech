@@ -901,7 +901,7 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
   #  sol = []
 
     for i in range(len(sol.states)) :
-        q.append( sol.states[i]['q'])
+        q.append(sol.states[i]['q'])
         qdot.append(sol.states[i]['qdot'])
         tau.append(sol.controls[i]['qddot_joints'])
 
@@ -970,22 +970,23 @@ def main():
     athletes = [
        # "AdCh",
        #  "AlAd",
-       #  "AuJo",
-       #  "Benjamin",
-       #  "ElMe",
-       #  "EvZl",
-       #  "FeBl",
-       #  "JeCh",
-       #  "KaFu",
-       #  "KaMi",
-       #  "LaDe",
-       #  "MaCu",
-       #  "MaJa",
-       #  "OlGa",
-       #  "Sarah",
-       #  "SoMe",
-       #  "WeEm",
-        "ZoTs"]
+        "AuJo",
+        # "Benjamin",
+        "ElMe",
+        "EvZl",
+        "FeBl",
+        "JeCh",
+        "KaFu",
+        "KaMi",
+        "LaDe",
+        "MaCu",
+        "MaJa",
+        "OlGa",
+        "Sarah",
+        "SoMe",
+        "WeEm",
+        # "ZoTs"
+        ]
 
     all_paths = []
     for athlete in athletes :
@@ -997,7 +998,7 @@ def main():
     #path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/"
     combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist': nb_twist,
                                 'seed': seed}
-    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/test"
+    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
 
     multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools =5)
 
@@ -1009,7 +1010,7 @@ def main():
     multi_start.solver.set_linear_solver('ma57')
     #else:
     #    print("Not using ma57")
-    multi_start.solver.set_maximum_iterations(0)
+    multi_start.solver.set_maximum_iterations(5000)
     multi_start.solver.set_convergence_tolerance(1e-4)
     #multi_start.solver.set_print_level(0)
 

@@ -147,16 +147,16 @@ def set_fancy_names_index(biorbd_models):
     fancy_names_index["vXrot"] = [3+nb_q*nb_model+i*16 for i in range(nb_model)]
     fancy_names_index["vYrot"] = [4+nb_q*nb_model+i*16 for i in range(nb_model)]
     fancy_names_index["vZrot"] = [5+nb_q*nb_model+i*16 for i in range(nb_model)]
-    fancy_names_index["vZrotBD"] = 6
-    fancy_names_index["vYrotBD"] = 7
-    fancy_names_index["vZrotABD"] = 8
-    fancy_names_index["vYrotABD"] = 9
-    fancy_names_index["vZrotBG"] = 10
-    fancy_names_index["vYrotBG"] = 11
-    fancy_names_index["vZrotABG"] = 12
-    fancy_names_index["vYrotABG"] = 13
-    fancy_names_index["vXrotC"] = 14
-    fancy_names_index["vYrotC"] = 15
+    fancy_names_index["vZrotBD"] = 6+nb_q*nb_model
+    fancy_names_index["vYrotBD"] = 7+nb_q*nb_model
+    fancy_names_index["vZrotABD"] = 8+nb_q*nb_model
+    fancy_names_index["vYrotABD"] = 9+nb_q*nb_model
+    fancy_names_index["vZrotBG"] = 10+nb_q*nb_model
+    fancy_names_index["vYrotBG"] = 11+nb_q*nb_model
+    fancy_names_index["vZrotABG"] = 12+nb_q*nb_model
+    fancy_names_index["vYrotABG"] = 13+nb_q*nb_model
+    fancy_names_index["vXrotC"] = 14+nb_q*nb_model
+    fancy_names_index["vYrotC"] = 15+nb_q*nb_model
 
     return fancy_names_index
 
@@ -256,13 +256,13 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
 
     x_bounds[0].min[fancy_names_index["ZrotABD"]: fancy_names_index["XrotABD"]+1, DEBUT] = 0
 
-    x_bounds[0].max[fancy_names_index["ZrotABD"]:fancy_names_index["XrotABD"]+ 1 , DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotABD"]:fancy_names_index["XrotABD"]+1 , DEBUT] = 0
 
 
     # coude gauche
-    x_bounds[0].min[fancy_names_index["ZrotABG"] : fancy_names_index["XrotABG"]+1 , DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["ZrotABG"]: fancy_names_index["XrotABG"]+1, DEBUT] = 0
 
-    x_bounds[0].max[fancy_names_index["ZrotABG"] : fancy_names_index["XrotABG"] +1 , DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["ZrotABG"]: fancy_names_index["XrotABG"]+1, DEBUT] = 0
 
 
     # le carpe
@@ -288,7 +288,7 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
 
     # en xy bassin
     for i in range(nb_models):
-        x_bounds[0].min[fancy_names_index["vX"][i]: fancy_names_index["vY"][i]+1 , :]=-10
+        x_bounds[0].min[fancy_names_index["vX"][i]: fancy_names_index["vY"][i]+1 , :] =-10
 
         x_bounds[0].max[fancy_names_index["vX"][i] :fancy_names_index["vY"][i]+1, :] = 10
         x_bounds[0].min[fancy_names_index["vX"][i]: fancy_names_index["vY"][i]+1 , DEBUT] = -0.5
@@ -769,7 +769,7 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
     nb_qdot = biorbd_models[0].nb_qdot
     for phase in range(len(x_bounds.options)):
         # for idx_model in range(len(biorbd_models)):
-        x_min = list(mappings['q'].to_first.map(x_bounds.options[phase][0].min[:nb_q]))
+        x_min = list(mappings['q'].to_first.map(x_bounds.options[phase][0].min[:nb_q+1]))
         x_min+= list(mappings['qdot'].to_first.map(x_bounds.options[phase][0].min[nb_q: ]))
         x_max = list(mappings['q'].to_first.map(x_bounds.options[phase][0].max[:nb_q]))
         x_max+= list(mappings['qdot'].to_first.map(x_bounds.options[phase][0].max[nb_q: ]))
@@ -1134,24 +1134,13 @@ def prepare_ocp(
     qddot_joints_min, qddot_joints_max, qddot_joints_init = -500, 500, 0
     u_bounds = BoundsList()
 
-    u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints),
-                 mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
+
     u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
     u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
     u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
     u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
     u_bounds.add(mappings['qddot_joints'].to_first.map([qddot_joints_min] * nb_qddot_joints), mappings['qddot_joints'].to_first.map([qddot_joints_max] * nb_qddot_joints))
 
-    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
-    #            [qddot_joints_max] * nb_qddot_joints)
-    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
-    #              [qddot_joints_max] * nb_qddot_joints)
-    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
-    #              [qddot_joints_max] * nb_qddot_joints)
-    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
-    #              [qddot_joints_max] * nb_qddot_joints)
-    # u_bounds.add([qddot_joints_min] * nb_qddot_joints,
-    #              [qddot_joints_max] * nb_qddot_joints)
 
 
     u_init = InitialGuessList()
@@ -1161,11 +1150,7 @@ def prepare_ocp(
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
 
-    # u_init.add([qddot_joints_init] * nb_qddot_joints)
-    # u_init.add([qddot_joints_init] * nb_qddot_joints)
-    # u_init.add([qddot_joints_init] * nb_qddot_joints)
-    # u_init.add([qddot_joints_init] * nb_qddot_joints)
-    # u_init.add([qddot_joints_init] * nb_qddot_joints)
+
 
     x_init = set_x_init(biorbd_models,fancy_names_index, mappings)
 
@@ -1218,7 +1203,7 @@ def main():
     HSL_FLAG = True
     save_sol_FLAG = True
 
-    n_shooting = (20, 50, 50, 50, 20)
+    n_shooting = (40, 100, 100, 100, 40)
 
     ocp = prepare_ocp(model_paths, n_shooting=n_shooting, n_threads=n_threads, final_time=1.87)
     # ocp.add_plot_penalty(CostType.ALL)
@@ -1229,7 +1214,7 @@ def main():
         solver.set_linear_solver("ma57")
     else:
         print("Not using ma57")
-    solver.set_maximum_iterations(0)
+    solver.set_maximum_iterations(10)
     solver.set_convergence_tolerance(1e-4)
     sol = ocp.solve(solver)
 
@@ -1254,8 +1239,8 @@ def main():
 
     import pickle
     name = 'AdCh_AlAd'
-    path = 'Solutions_MultiModel/'
-    with open(f'{path}/{name}.pkl') as f:
+    path = 'Solutions_MultiModel'
+    with open(f'{path}/{name}.pkl', 'wb') as f:
         pickle.dump(dict_sol, f)
 
 
