@@ -9,10 +9,7 @@ import pickle
 import xlsxwriter
 
 """
-Ce code a été écrit pout faire les simulations pour Antoine, 
-mais il pourra être modifié pour apporter d'autres infos utiles avec d'autres anthropo comme base.
-Attention, ici on considere des mouvements des joints à vitesse constante (Qddot_J = 0).
-C'est surement overkill d'utiliser un KR4 à 100 noeuds pour des mouvements à vitesse constante, mais bon
+This code allows to simulate the effect one segment's movement on the rotations of the floating base.
 """
 #
 # Physique
@@ -299,13 +296,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
 
 
 workbook = xlsxwriter.Workbook("/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/degrees_of_liberty.xlsx")
-
-# The workbook object is then used to add new
-# worksheet via the add_worksheet() method.
 worksheet = workbook.add_worksheet()
-
-# Use the worksheet object to write
-# data via the write() method.
 worksheet.write("A1", "Athlete")
 worksheet.write("B1", "Starting")
 worksheet.write("C1", "Salto")
@@ -359,9 +350,8 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row, column, sit
 
 N = 100
 
-
-GAUCHE =  11 #32 -> 6 # 42 -> 24; 10 -> 9
-DROITE = 7 # 32->10  # 42 -> 15; 10 -> 7
+GAUCHE = 11  #32 -> 6 # 42 -> 24; 10 -> 9
+DROITE = 7  # 32->10  # 42 -> 15; 10 -> 7
 YrotC = 15
 
 t0 = 0.0
@@ -377,6 +367,7 @@ models_path = '/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Models/Mod
 for i, model_name in enumerate(os.listdir(models_path)):
     if model_name.endswith('bioMod'):
         model = biorbd.Model(f'{models_path}/{model_name}')
+        model_fixe = biorbd.Model(f"{models_path}/{model_name.removesuffix('.bioMod')}_fixe.bioMod")
         name = model_name.removesuffix('.bioMod')
         column = 0
         row = i * 7 + 1
@@ -453,10 +444,12 @@ for i, model_name in enumerate(os.listdir(models_path)):
             column=column,
             situation=situation,
         )
+
+
         row += 1
         simuler(
-            f"{name} bras droit descend",
-            model,
+            f"{name} bras gauche descend, YZ fixe",
+            model_fixe,
             N,
             t0,
             tf,
@@ -465,8 +458,8 @@ for i, model_name in enumerate(os.listdir(models_path)):
             Q0,
             Qf,
             X0,
-            action_bras=bras_droit_descend,
-            viz=False,
+            action_bras=bras_gauche_descend,
+            viz=True,
             row=row,
             column=column,
             situation=situation,
@@ -507,73 +500,5 @@ for i, model_name in enumerate(os.listdir(models_path)):
             situation=situation,
         )
 
-        situation = "debut bras gauche en haut, droit bas"
-        X0 = np.zeros(model.nbQ() * 2)
-        X0[DROITE] = -Qf
-        X0[GAUCHE] = Q0
-
-        CoM_func = model.CoM(X0[: model.nbQ()]).to_array()
-        bassin = model.globalJCS(0).to_array()
-        QCoM = CoM_func.reshape(1, 3)
-        Qbassin = bassin[-1, :3]
-        r = QCoM - Qbassin
-
-        X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
-        X0[model.nbQ() : model.nbQ() + 3] = X0[model.nbQ() : model.nbQ() + 3] + np.cross(
-            r, X0[model.nbQ() + 3 : model.nbQ() + 6]
-        )  # correction pour la translation
-        row += 1
-        simuler(
-            f"{name} bras droit bas, gauche descend",
-            model,
-            N,
-            t0,
-            tf,
-            T0,
-            Tf,
-            Q0,
-            Qf,
-            X0,
-            action_bras=bras_gauche_descend,
-            viz=False,
-            row=row,
-            column=column,
-            situation=situation,
-        )
-
-        situation = "bras en bas"
-        X0 = np.zeros(model.nbQ() * 2)
-        X0[DROITE] = Qf
-        X0[GAUCHE] = Qf
-        X0[YrotC] = Q0_tilt
-
-        CoM_func = model.CoM(X0[: model.nbQ()]).to_array()
-        bassin = model.globalJCS(0).to_array()
-        QCoM = CoM_func.reshape(1, 3)
-        Qbassin = bassin[-1, :3]
-        r = QCoM - Qbassin
-
-        X0[model.nbQ() + 3] = 2 * np.pi  # Salto rot
-        X0[model.nbQ(): model.nbQ() + 3] = X0[model.nbQ(): model.nbQ() + 3] + np.cross(
-            r, X0[model.nbQ() + 3: model.nbQ() + 6]
-        )  # correction pour la translation
-        row += 1
-        simuler(
-            f"{name} bras en  bas, jambes tilt",
-            model,
-            N,
-            t0,
-            tf,
-            T0,
-            Tf,
-            Q0_tilt,
-            Qf_tilt,
-            X0,
-            action_bras=jambes_tilt,
-            viz=False,
-            row=row,
-            column=column,
-            situation=situation,
-        )
 workbook.close()
 print('fin')
