@@ -54,9 +54,9 @@ for key in Folder_per_twist_nb:
 
                     # # if athlete_name not in done_athletes and athlete_name not in problematic_althetes:
                     # # Create an animation of the results
-                    # b = bioviz.Viz(model_path)
-                    # b.load_movement(q)
-                    # b.exec()
+                    b = bioviz.Viz(model_path)
+                    b.load_movement(q)
+                    b.exec()
 
                     # Create a graph of the temporal evolution of Q (DoFs)
                     for i in range(q.shape[0]):
