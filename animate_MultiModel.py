@@ -1,3 +1,7 @@
+'''
+This code allows to animate de optimal solutions from the multi-model OCP.
+'''
+
 import bioviz
 import pickle
 import numpy as np
