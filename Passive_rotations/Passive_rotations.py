@@ -18,7 +18,6 @@ C'est surement overkill d'utiliser un KR4 à 100 noeuds pour des mouvements à v
 # Physique
 #
 
-
 def Quintic(t, Ti, Tj, Qi, Qj):  # Quintic est bonne
     if t < Ti:
         t = Ti
@@ -142,7 +141,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     values = [QbrasD, QbrasG, QdotbrasD, QdotbrasG, QddotbrasG, QddotbrasG]
     n = len(values)
     for i in range(n):
-        file = open(f"/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Q_passive_rotations/{titre}{titles[i]}.pkl", 'wb')
+        file = open(f"/passive rotations results/Q_passive_rotations/{titre}{titles[i]}.pkl", 'wb')
         pickle.dump(values[i], file)
         file.close()
 
@@ -168,7 +167,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     fig.suptitle(suptitre)
 
     fig.tight_layout()
-    # fig.savefig(f'/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Graphs/{suptitre}.pdf')
+    # fig.savefig(f'/passive rotations results/Graphs/{suptitre}.pdf')
     # fig.show()
 
 
@@ -242,7 +241,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     n = len(values)
     athlete = titre.partition("debut")[0]
     for i in range(n):
-        file = open(f"/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Q_passive_rotations/{titre}{titles[i]}.pkl", 'wb')
+        file = open(f"/passive rotations results/Q_passive_rotations/{titre}{titles[i]}.pkl", 'wb')
         pickle.dump(values[i], file)
         file.close()
 
@@ -294,11 +293,11 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     suptitre = "Rotation du bassin" + f" - {titre}" if titre != "" else ""
     figrot.suptitle(suptitre)
     figrot.tight_layout()
-    # figrot.savefig(f"/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Graphs/{suptitre}.pdf")
+    # figrot.savefig(f"passive rotations results/Graphs/{suptitre}.pdf")
     # figrot.show()
 
 
-workbook = xlsxwriter.Workbook("/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/degrees_of_liberty.xlsx")
+workbook = xlsxwriter.Workbook("/passive rotations results/degrees_of_liberty.xlsx")
 
 # The workbook object is then used to add new
 # worksheet via the add_worksheet() method.
@@ -360,8 +359,8 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row, column, sit
 N = 100
 
 
-GAUCHE =  11 #32 -> 6 # 42 -> 24; 10 -> 9
-DROITE = 7 # 32->10  # 42 -> 15; 10 -> 7
+GAUCHE =  11 #32 -> 7 # 42 -> 24; 10 -> 9
+DROITE = 7 # 32->11  # 42 -> 15; 10 -> 7
 YrotC = 15
 
 t0 = 0.0
@@ -373,7 +372,7 @@ Qf = 0
 Q0_tilt = 0
 Qf_tilt = 3.14/16
 
-models_path = '/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Models/Models_Lisa/'
+models_path = '/Models/Models_Lisa/'
 for i, model_name in enumerate(os.listdir(models_path)):
     if model_name.endswith('bioMod'):
         model = biorbd.Model(f'{models_path}/{model_name}')
