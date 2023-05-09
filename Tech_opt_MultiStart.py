@@ -969,13 +969,13 @@ def main():
     all_paths = []
     for athlete in athletes :
         path = f'{athlete}'+'.bioMod'
-        biorbd_model_path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/" + f'{path}'
+        biorbd_model_path = "Models/Models_Lisa/" + f'{path}'
         all_paths.append(biorbd_model_path)
 
 
     combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist': nb_twist,
                                 'seed': seed}
-    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
+    save_folder = "Multistart_double_vrille"
 
     multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools =5)
 
