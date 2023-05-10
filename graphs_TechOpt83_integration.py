@@ -46,8 +46,8 @@ import time
 def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> MX:
     diff = 0
     for i, dof in enumerate(dofs):
-        diff += (all_pn.nlp.states["q"].mx[dof] - targets[i]) ** 2
-    return all_pn.nlp.mx_to_cx("minimize_dofs", diff, all_pn.nlp.states["q"])
+        diff += (all_pn.nlp.states[0]["q"].mx[dof] - targets[i]) ** 2
+    return all_pn.nlp.mx_to_cx("minimize_dofs", diff, all_pn.nlp.states[0]["q"])
 
 
 def prepare_ocp(

@@ -117,14 +117,9 @@ def prepare_ocp(
     -------
     The OptimalControlProgram ready to be solved
     """
-    print('prepare')
-    print(biorbd_model_path, nb_twist, n_threads)
     final_time = 1.87
     n_shooting = (40, 100, 100, 100, 40)
-    #n_shooting = (1, 1, 1, 1, 1)
 
-   # nom = biorbd_model_path[0].split('/')[-1].removesuffix('.bioMod')
-    #print(nom)
     biomodel = (BiorbdModel(biorbd_model_path))
     biorbd_model = (biomodel,biomodel, biomodel, biomodel,biomodel)
 
@@ -183,11 +178,9 @@ def prepare_ocp(
 
     objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=1.0, weight=100000,
                             phase=0)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=1)
+
     objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=1.0, weight=100000,
                             phase=2)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=3)
-    # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=.0, max_bound=final_time, weight=.01, phase=4)
 
     objective_functions.add(ObjectiveFcn.Mayer.SUPERIMPOSE_MARKERS, node=Node.END, first_marker='MidMainG',
                             second_marker='CibleMainG', weight=1000, phase=0)
@@ -211,6 +204,7 @@ def prepare_ocp(
                             dofs=les_bras, targets=np.zeros(len(les_bras)), weight=10, phase=4)
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Lagrange, node=Node.ALL_SHOOTING,
                             dofs=les_coudes, targets=np.zeros(len(les_coudes)), weight=1000, phase=4)
+
     # ouvre les hanches rapidement apres la vrille
     objective_functions.add(minimize_dofs, custom_type=ObjectiveFcn.Mayer, node=Node.END, dofs=[XrotC],
                             targets=[0], weight=10000, phase=3)
@@ -595,10 +589,7 @@ def prepare_ocp(
     x_bounds[3].max[Xrot, :] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
     x_bounds[3].min[Xrot, FIN] = 2 * 3.14 + 3 / 2 * 3.14 - .1
     x_bounds[3].max[Xrot, FIN] = 2 * 3.14 + 3 / 2 * 3.14 + .1  # 1 salto 3/4
-    # x_bounds[3].max[Xrot, :] = -.50 + 4 * 3.14  # 1 salto 3/4
-    # x_bounds[3].min[Xrot, FIN] = 0
-    # 2 * 3.14 + 2 * 3.14 - .1
-    # x_bounds[3].max[Xrot, FIN] = 2 * 3.14 + 2 * 3.14 + .1  # 1 salto 3/4
+
     # limitation du tilt autour de y
     x_bounds[3].min[Yrot, :] = - 3.14 / 4
     x_bounds[3].max[Yrot, :] = 3.14 / 4
@@ -689,8 +680,8 @@ def prepare_ocp(
     # le salto autour de x
     x_bounds[4].min[Xrot, :] = 2 * 3.14 + 3 / 2 * 3.14 - .2  # penche vers avant -> moins de salto
     x_bounds[4].max[Xrot, :] = -.50 + 4 * 3.14  # un peu carpe a la fin
-    x_bounds[4].min[Xrot, FIN] = -.50 + 4 * 3.14 - .1  # 2 salto fin un peu carpe
-    x_bounds[4].max[Xrot, FIN] = -.50 + 4 * 3.14 + .1  # 2 salto fin un peu carpe
+    x_bounds[4].min[Xrot, FIN] = -.50 + 4 * 3.14 - .1  #  salto fin un peu carpe
+    x_bounds[4].max[Xrot, FIN] = -.50 + 4 * 3.14 + .1  #  salto fin un peu carpe
     # limitation du tilt autour de y
     x_bounds[4].min[Yrot, :] = - 3.14 / 16
     x_bounds[4].max[Yrot, :] = 3.14 / 16
@@ -817,23 +808,11 @@ def prepare_ocp(
     x4[XrotC, 1] = -.5
 
     x_init = InitialGuessList()
-  #  for i in range(nb_phases):
-   #    x_init.add(NoisedInitialGuess(
- #   self[i],
-  #  interpolation = self[i].type,
-  #  bounds = bounds[i],
- #   n_shooting = n_shooting[i],
-  #  bound_push = bound_push[i],
-  #  seed = seed[i],
-   # magnitude = magnitude[i],
-   # magnitude_type = magnitude_type,
-    #))
     x_init.add(x0, interpolation=InterpolationType.LINEAR)
     x_init.add(x1, interpolation=InterpolationType.LINEAR)
     x_init.add(x2, interpolation=InterpolationType.LINEAR)
     x_init.add(x3, interpolation=InterpolationType.LINEAR)
     x_init.add(x4, interpolation=InterpolationType.LINEAR)
-        #x_init = InitialGuess([i] * (nb_q + nb_qdot), interpolation=InterpolationType.LINEAR)
 
     x_init.add_noise(
         bounds=x_bounds,
@@ -898,7 +877,6 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
     q = []
     qdot = []
     tau = []
-  #  sol = []
 
     for i in range(len(sol.states)) :
         q.append(sol.states[i]['q'])
@@ -916,7 +894,7 @@ def save_results(sol: Solution, biorbd_model_path: str,  nb_twist : int , seed: 
         print(f'{athlete}  doing' + f' {stunt}' + ' converge')
     else:
         convergence = 'DVG'
-        print( f'{athlete} doing ' + f'{stunt}' + ' doesn t converge')
+        print(f'{athlete} doing ' + f'{stunt}' + ' doesn t converge')
     if save_folder:
         with open(f'{save_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
             pickle.dump(dict_state, file)
@@ -937,7 +915,7 @@ def check_already_done(args,save_folder, save_results= save_results):
     for i, title in enumerate(already_done_filenames):
         title = title[0:-8]
         already_done_filenames[i] = title
-    return save_results([None], *args,save_folder, only_save_filename=True) not in already_done_filenames
+    return save_results([None], *args, save_folder, only_save_filename=True) not in already_done_filenames
 
 
 def prepare_multi_start(
@@ -968,10 +946,10 @@ def main():
     seed = [0,1,2,3,4,5,6,7,8,9]
     nb_twist = [5]
     athletes = [
-       # "AdCh",
-       #  "AlAd",
+        "AdCh",
+        "AlAd",
         "AuJo",
-        # "Benjamin",
+        "Benjamin",
         "ElMe",
         "EvZl",
         "FeBl",
@@ -985,24 +963,21 @@ def main():
         "Sarah",
         "SoMe",
         "WeEm",
-        # "ZoTs"
+        "ZoTs"
         ]
 
     all_paths = []
     for athlete in athletes :
         path = f'{athlete}'+'.bioMod'
-        biorbd_model_path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/Models_Lisa/" + f'{path}'
+        biorbd_model_path = "Models/Models_Lisa/" + f'{path}'
         all_paths.append(biorbd_model_path)
 
 
-    #path = "/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/"
     combinatorial_parameters = {'bio_model_path': all_paths,'nb_twist': nb_twist,
                                 'seed': seed}
-    save_folder = "/home/mickaelbegon/Documents/Stage_Lisa/Anthropo Lisa/new_sol_double_vrille"
+    save_folder = "Multistart_double_vrille"
 
     multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools =5)
-
-    # multi_start = prepare_multi_start(biorbd_model_path=all_paths, nb_twist=nb_twist, seed=seed, should_solve=check_already_done, use_multi_process=True)
 
 
     multi_start.solver = Solver.IPOPT(show_online_optim=False, show_options=dict(show_bounds=False))
@@ -1016,36 +991,7 @@ def main():
 
     multi_start.solve()
 
-    #solve
-    #ocp.solver = Solver.IPOPT(show_online_optim=True, show_options=dict(show_bounds=True))
-    # if Mod.with_hsl:
-    #ocp.solver.set_linear_solver('ma57')
-    # else:
-    #    print("Not using ma57")
-
-    #ocp.solver.set_maximum_iterations(10000)
-    #ocp.solver.set_convergence_tolerance(1e-4)
-    #ocp.solve()
-    #ocp.solver.set_print_level()
-
-    #multi_start.solve()
-
-    temps = time.strftime("%Y-%m-%d-%H%M")
-    #    if Mod.savesol:  # switch manuelle
-    #        np.save(f"{folder}/{athlete}/{athlete}-{str(n_shooting).replace(', ', '_')}-{temps}-q.npy", qs)
-    #        np.save(f"{folder}/{athlete}/{athlete}-{str(n_shooting).replace(', ', '_')}-{temps}-qdot.npy", qdots)
-     #       np.save(f"{folder}/{athlete}/{athlete}-{str(n_shooting).replace(', ', '_')}-{temps}-t.npy", sol.phase_time)
-     #   sol.graphs(show_bounds=True, show_now=False, save_path=None)
-     #   print(f'{athlete}')
-        #sol.graphs(show_bounds=True, show_now=False, save_path=f'{folder}/{athlete}')
-
-
-
-#file = open('/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Sol/Sarah_vrille_et_demi_0_1.pkl', 'rb')
-#data = pickle.load(file)
-#
-# with open('/home/mickaelbegon/Documents/Stage_Lisa/AnthropoImpactOnTech/Sol/Sarah_vrille_et_demi_0_1.pkl', 'rb') as f:
-#     data = pickle.load(f)
+    #sol.graphs(show_bounds=True, show_now=False, save_path=f'{folder}/{athlete}')
 
 
 if __name__ == "__main__":

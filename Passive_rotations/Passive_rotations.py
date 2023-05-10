@@ -15,7 +15,6 @@ This code allows to simulate the effect one segment's movement on the rotations 
 # Physique
 #
 
-
 def Quintic(t, Ti, Tj, Qi, Qj):  # Quintic est bonne
     if t < Ti:
         t = Ti
@@ -150,6 +149,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     values = [QbrasD, QbrasG, QdotbrasD, QdotbrasG, QddotbrasG, QddotbrasG]
     n = len(values)
     for i in range(n):
+        file = open(f"/passive rotations results/Q_passive_rotations/{titre}{titles[i]}.pkl", 'wb')
         file = open(f"passive rotations results/Q_passive_rotations/{titre}{titles[i]}.pkl", 'wb')
         pickle.dump(values[i], file)
         file.close()
@@ -176,7 +176,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     fig.suptitle(suptitre)
 
     fig.tight_layout()
-    # fig.savefig(f'/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Graphs/{suptitre}.pdf')
+    # fig.savefig(f'/passive rotations results/Graphs/{suptitre}.pdf')
     # fig.show()
 
 
@@ -302,7 +302,7 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     suptitre = "Rotation du bassin" + f" - {titre}" if titre != "" else ""
     figrot.suptitle(suptitre)
     figrot.tight_layout()
-    # figrot.savefig(f"/home/laseche/Documents/Projects_/AnthropoImpactOnTech/Passive_rotations/passive rotations results/Graphs/{suptitre}.pdf")
+    # figrot.savefig(f"passive rotations results/Graphs/{suptitre}.pdf")
     # figrot.show()
 
 

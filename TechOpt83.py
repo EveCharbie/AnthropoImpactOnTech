@@ -67,19 +67,6 @@ class Model :
 
 
 
-
-#   parser = argparse.ArgumentParser()
-    #parser.add_argument("model", type=str, help="the bioMod file")
-   # parser.add_argument("--no-hsl", dest='with_hsl', action='store_false', help="do not use libhsl")
-   # parser.add_argument("-j", default=1, dest='n_threads', type=int, help="number of threads in the solver")
-   # parser.add_argument("--no-sol", action='store_false', dest='savesol', help="do not save the solution")
-   # parser.add_argument("--no-show-online", action='store_false', dest='show_online', help="do not show graphs during optimization")
-   # parser.add_argument("--print-ocp", action='store_true', dest='print_ocp', help="print the ocp")
-   # args = parser.parse_args()
-#
-
-
-
 try:
     import IPython
     IPYTHON = True
