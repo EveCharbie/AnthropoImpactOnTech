@@ -952,17 +952,17 @@ def prepare_ocp(
         ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=100000, phase=0
     )
     objective_functions.add(
-        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=100000, phase=1
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=1, phase=1  # 100000
     )
-    # objective_functions.add(
-    #     ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=2
-    # )
-    # objective_functions.add(
-    #     ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=3
-    # )
-    # objective_functions.add(
-    #     ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=4
-    # )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=1, phase=2
+    )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=1, phase=3
+    )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=1, phase=4
+    )
     # objective_functions.add(
     #     ObjectiveFcn.Mayer.MINIMIZE_STATE, key='q', index=fancy_names_index['Xrot'], node=Node.END, weight=1000, phase=4)
     # objective_functions.add(
@@ -978,10 +978,16 @@ def prepare_ocp(
         superimpose_markers,
         custom_type=ObjectiveFcn.Mayer,
         node=Node.END,
-        # first_marker="MidMainG",
-        # second_marker="CibleMainG",
         weight=1000,
         phase=0,
+    )
+
+    objective_functions.add(
+        superimpose_markers,
+        custom_type=ObjectiveFcn.Mayer,
+        node=Node.ALL,
+        weight=1000,
+        phase=1,
     )
 
     # arrete de gigoter les bras
@@ -1106,35 +1112,16 @@ def prepare_ocp(
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
 
-
-
     x_init = set_x_init(biorbd_models,fancy_names_index, mappings)
 
 
-    constraints = ConstraintList()
-    # #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=1)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=3)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=4)
-
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=1)
+    # constraints = ConstraintList()
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=1)
     # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=2)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.7, phase=3)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.5, phase=4)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.7, phase=3)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.5, phase=4)
 
-
-
-    # phase_transitions = PhaseTransitionList()
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=0)  # 0-1
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=1)  # 1-2
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=2)  # 2-3
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=3)  # 3-4
-
-
-    # Constraints
-    constraints = ConstraintList()
-    constraints.add(superimpose_markers_constraint, node=Node.ALL_SHOOTING, min_bound=0, max_bound=0.15**2, phase=1)
+    # constraints.add(superimpose_markers_constraint, node=Node.ALL_SHOOTING, min_bound=0, max_bound=0.30**2, phase=1)
 
     return OptimalControlProgram(
         biorbd_models,
@@ -1146,7 +1133,7 @@ def prepare_ocp(
         x_bounds,
         u_bounds,
         objective_functions,
-        constraints=constraints,
+        # constraints=constraints,
         ode_solver=ode_solver,
         n_threads=n_threads,
         variable_mappings=mappings,
@@ -1161,7 +1148,7 @@ def main():
 
     print_ocp_FLAG = False  # True.
 
-    show_online_FLAG = False  # True
+    show_online_FLAG = False # True
     HSL_FLAG = True
     save_sol_FLAG = True
 
