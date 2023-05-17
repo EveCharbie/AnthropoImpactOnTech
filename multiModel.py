@@ -291,7 +291,7 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
 
     # Contraintes de vitesse: PHASE 0 la montee en carpe
 
-    vzinit = 9.81 / (2 * final_time)  # vitesse initiale en z du CoM pour revenir a terre au temps final
+    vzinit = 9.81 * final_time / 2  # vitesse initiale en z du CoM pour revenir a terre au temps final
 
     # en xy bassin
     for i in range(nb_models):
@@ -884,7 +884,6 @@ def prepare_ocp(
     """
 
     biorbd_models = [MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths)]
-    #biorbd_model_list = [BiorbdModel(model) for model in model_paths]
 
     #mapping partout sauf sur les racines
     nb_q = biorbd_models[0].nb_q
@@ -929,7 +928,7 @@ def prepare_ocp(
     # Add objective functions
     objective_functions = ObjectiveList()
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
-    ## AuJo
+
     objective_functions.add(
         ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=0
     )
@@ -949,10 +948,10 @@ def prepare_ocp(
 
 
     objective_functions.add(
-        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=100000, phase=0
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=1000000, phase=0
     )
     objective_functions.add(
-        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=1, phase=1  # 100000
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=-100, phase=1  # 100000
     )
     objective_functions.add(
         ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=1, phase=2
@@ -1112,16 +1111,16 @@ def prepare_ocp(
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
 
-    x_init = set_x_init(biorbd_models,fancy_names_index, mappings)
+    x_init = set_x_init(biorbd_models, fancy_names_index, mappings)
 
 
-    # constraints = ConstraintList()
+    constraints = ConstraintList()
     # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=1)
     # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=2)
     # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.7, phase=3)
     # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.5, phase=4)
 
-    # constraints.add(superimpose_markers_constraint, node=Node.ALL_SHOOTING, min_bound=0, max_bound=0.30**2, phase=1)
+    constraints.add(superimpose_markers_constraint, node=Node.ALL_SHOOTING, min_bound=0, max_bound=0.15**2, phase=1)
 
     return OptimalControlProgram(
         biorbd_models,
@@ -1133,7 +1132,7 @@ def prepare_ocp(
         x_bounds,
         u_bounds,
         objective_functions,
-        # constraints=constraints,
+        constraints=constraints,
         ode_solver=ode_solver,
         n_threads=n_threads,
         variable_mappings=mappings,
@@ -1189,10 +1188,18 @@ def main():
     dict_sol['sol'] = sol
 
     import pickle
-    # name = input('what is the name of the file ?')
-    name = 'test_test'
+    save_name = ''
+    for model_name in model_paths:
+        save_name += model_name[-11:-7]
+        save_name += '_'
+    if sol.status == 0:
+        save_name += 'CVG'
+    else:
+        save_name += 'DVG'
+    save_name += '.pkl'
+
     path = 'Solutions_MultiModel'
-    with open(f'{path}/{name}.pkl', 'wb') as f:
+    with open(f'{path}/{save_name}', 'wb') as f:
         pickle.dump(dict_sol, f)
 
 
