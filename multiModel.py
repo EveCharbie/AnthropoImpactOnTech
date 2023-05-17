@@ -887,40 +887,37 @@ def prepare_ocp(
 
     #mapping partout sauf sur les racines
     nb_q = biorbd_models[0].nb_q
-    nb_qdot = biorbd_models[0].nb_qdot
     nb_qddot_joints = nb_q - biorbd_models[0].nb_root
 
     fancy_names_index = set_fancy_names_index(biorbd_models)
 
     nb_models = len(biorbd_models[0].models)
     nb_freedom = nb_q // len(biorbd_models[0].models)
+    nb_root = int(biorbd_models[0].nb_root/3)
+    nb_joints = int((biorbd_models[0].nb_q - biorbd_models[0].nb_root)/3)
     global q_to_first
     global q_to_second
-    q_to_first =list(range(nb_freedom))
+    q_to_first = list(range(nb_freedom))
     q_to_second = list(range(nb_freedom))
 
-
-    roots = list(range(biorbd_models[0].nb_root//len(biorbd_models[0].models)))
-    joints= list(range(roots[-1]+1, roots[-1]+nb_qddot_joints//len(biorbd_models[0].models)+1))
-
-    for degree_of_freedom in range(q_to_first[-1]+1,nb_q):
-        index = degree_of_freedom%nb_freedom
-        if index in roots:
-            q_to_first.append(degree_of_freedom)
-            q_to_second.append(degree_of_freedom)
-        if index in joints:
-            q_to_second.append(index)
+    q_to_first = []
+    q_to_second = []
+    current_index = 0
+    for i in range(nb_models):
+        q_to_first += list(range(current_index, current_index + nb_root))
+        q_to_second += list(range(current_index, current_index + nb_root))
+        current_index += nb_root
+        if i == 0:
+            q_to_first += list(range(current_index, current_index + nb_joints))
+            current_index += nb_joints
+        q_to_second += list(range(nb_root, nb_root+nb_joints))
 
     qdot_to_first = q_to_first
     qdot_to_second = q_to_second
-    qddot_to_first = joints
-    qddot_to_second = [i for i in range(len(qddot_to_first))]*nb_models # for j in range(nb_models)]
+    qddot_to_first = list(range(nb_joints))
+    qddot_to_second = list(range(nb_joints)) * nb_models
 
-    # qdot_to_first = [nb_q+i for i in q_to_first]
-    # qdot_to_second = [nb_q+i for i in qdot_to_first]
-
-    #
-    mappings= BiMappingList()
+    mappings = BiMappingList()
     mappings.add("q", to_first=q_to_first, to_second=q_to_second)
     mappings.add("qdot", to_first=qdot_to_first, to_second=qdot_to_second)
     mappings.add("qddot_joints", to_first=qddot_to_first, to_second=qddot_to_second)
@@ -972,7 +969,6 @@ def prepare_ocp(
 
     # Les hanches sont fixes a +-0.2 en bounds, mais les mains doivent quand meme être proches des jambes
     # for index_model, model in enumerate(biorbd_models[0].models):
-    model = biorbd_models[0].models
     objective_functions.add(
         superimpose_markers,
         custom_type=ObjectiveFcn.Mayer,
@@ -1141,7 +1137,9 @@ def prepare_ocp(
 
 
 def main():
-    model_paths = ("Models/Models_Lisa/AdCh.bioMod","Models/Models_Lisa/AlAd.bioMod")
+    model_paths = ("Models/Models_Lisa/AdCh.bioMod",
+                   "Models/Models_Lisa/AlAd.bioMod",
+                   "Models/Models_Lisa/AuJo.bioMod")
 
     n_threads = 28
 
