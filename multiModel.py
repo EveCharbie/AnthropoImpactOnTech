@@ -23,6 +23,8 @@ from bioptim import (
     BoundsList,
     Bounds,
     InitialGuessList,
+
+
     InterpolationType,
     OdeSolver,
     Node,
@@ -66,10 +68,10 @@ def superimpose_markers_constraint(
     for index_model, biorbd_model in enumerate(nlp.model.models):
 
         q = nlp.states[0]["q"].mx[nlp.model.variable_index('q', index_model)]
-        diff_markers_D = nlp.model.models[index_model].marker(q, second_marker_D) - nlp.model.models[
-            index_model].marker(q, first_marker_D)
-        diff_markers_G = nlp.model.models[index_model].marker(q, second_marker_G) - nlp.model.models[
-            index_model].marker(q, first_marker_G)
+        diff_markers_D = nlp.model.models[index_model].marker(q, second_marker_D).to_mx() - nlp.model.models[
+            index_model].marker(q, first_marker_D).to_mx()
+        diff_markers_G = nlp.model.models[index_model].marker(q, second_marker_G).to_mx() - nlp.model.models[
+            index_model].marker(q, first_marker_G).to_mx()
         sum_diff_D = 0
         sum_diff_G = 0
         for i in range(3):
@@ -95,8 +97,8 @@ def superimpose_markers(
     total_diff = 0
     for index_model, biorbd_model in enumerate(nlp.model.models):
         q = nlp.states[0]["q"].mx[nlp.model.variable_index('q', index_model) ]
-        diff_markers_D = nlp.model.models[index_model].marker(q, second_marker_D) - nlp.model.models[index_model].marker(q, first_marker_D)
-        diff_markers_G = nlp.model.models[index_model].marker(q, second_marker_G) - nlp.model.models[index_model].marker(q, first_marker_G)
+        diff_markers_D = nlp.model.models[index_model].marker(q, second_marker_D).to_mx() - nlp.model.models[index_model].marker(q, first_marker_D).to_mx()
+        diff_markers_G = nlp.model.models[index_model].marker(q, second_marker_G).to_mx() - nlp.model.models[index_model].marker(q, first_marker_G).to_mx()
         for i in range(3):
             total_diff += (diff_markers_D[i])**2
             total_diff += (diff_markers_G[i])**2
@@ -289,16 +291,16 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
 
     # Contraintes de vitesse: PHASE 0 la montee en carpe
 
-    vzinit = 9.81 / (2 * final_time)  # vitesse initiale en z du CoM pour revenir a terre au temps final
+    vzinit = 9.81 * final_time / 2  # vitesse initiale en z du CoM pour revenir a terre au temps final
 
     # en xy bassin
     for i in range(nb_models):
         x_bounds[0].min[fancy_names_index["vX"][i]: fancy_names_index["vY"][i]+1 , :] =-10
 
-        x_bounds[0].max[fancy_names_index["vX"][i] :fancy_names_index["vY"][i]+1, :] = 10
+        x_bounds[0].max[fancy_names_index["vX"][i]:fancy_names_index["vY"][i]+1, :] = 10
         x_bounds[0].min[fancy_names_index["vX"][i]: fancy_names_index["vY"][i]+1 , DEBUT] = -0.5
 
-        x_bounds[0].max[fancy_names_index["vX"][i] : fancy_names_index["vY"][i]+1, DEBUT] = 0.5
+        x_bounds[0].max[fancy_names_index["vX"][i]: fancy_names_index["vY"][i]+1, DEBUT] = 0.5
 
 
     # z bassin
@@ -338,21 +340,21 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
         x_bounds[0].max[fancy_names_index["vZrot"][i], DEBUT] = 0
 
         # decalage entre le bassin et le CoM
-        # AUJO
+        # A
         CoM_Q_sym = cas.MX.sym("CoM", nb_q_per_model)
         CoM_Q_init = x_bounds[0].min[
                      i*nb_q_per_model: (i+1)*nb_q_per_model, DEBUT
                      ]  # min ou max ne change rien a priori, au DEBUT ils sont egaux normalement
-        CoM_Q_func = cas.Function("CoM_Q_func", [CoM_Q_sym], [biorbd_models[0].models[i].center_of_mass(CoM_Q_sym)])
+        CoM_Q_func = cas.Function("CoM_Q_func", [CoM_Q_sym], [biorbd_models[0].models[i].CoM(CoM_Q_sym).to_mx()])
         bassin_Q_func = cas.Function(
-            "bassin_Q_func", [CoM_Q_sym], [biorbd_models[0].models[i].homogeneous_matrices_in_global(CoM_Q_sym, 0).to_mx()]
+            "bassin_Q_func", [CoM_Q_sym], [biorbd_models[0].models[i].globalJCS(CoM_Q_sym, 0).to_mx()]
         )  # retourne la RT du bassin
 
         r = (
                 np.array(CoM_Q_func(CoM_Q_init)).reshape(1, 3) - np.array(bassin_Q_func(CoM_Q_init))[-1, :3]
         )  # selectionne seulement la translation de la RT
-    # tenir compte du decalage entre bassin et CoM avec la rotation
-    # Qtransdot = Qtransdot + v cross Qrotdot
+        # tenir compte du decalage entre bassin et CoM avec la rotation
+        # Qtransdot = Qtransdot + v cross Qrotdot
 
         borne_inf = (
             x_bounds[0].min[fancy_names_index["vX"][i] : fancy_names_index["vZ"][i]+1, DEBUT]
@@ -374,42 +376,42 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
         )
 
     # bras droit
-    x_bounds[0].min[fancy_names_index["vZrotBD"]  : fancy_names_index["vYrotBD"] +1 , :] = -50
-    x_bounds[0].max[fancy_names_index["vZrotBD"]  : fancy_names_index["vYrotBD"]  +1, :] = 50
-    x_bounds[0].min[fancy_names_index["vZrotBD"]  : fancy_names_index["vYrotBD"]  +1, DEBUT] = 0
-    x_bounds[0].max[fancy_names_index["vZrotBD"]  : fancy_names_index["vYrotBD"]  +1, DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["vZrotBD"]: fancy_names_index["vYrotBD"] +1 , :] = -50
+    x_bounds[0].max[fancy_names_index["vZrotBD"]: fancy_names_index["vYrotBD"]  +1, :] = 50
+    x_bounds[0].min[fancy_names_index["vZrotBD"]: fancy_names_index["vYrotBD"]  +1, DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotBD"]: fancy_names_index["vYrotBD"]  +1, DEBUT] = 0
 
 
     # bras droit
-    x_bounds[0].min[fancy_names_index["vZrotBG"] : fancy_names_index["vYrotBG"] + 1 , :] = -50
+    x_bounds[0].min[fancy_names_index["vZrotBG"]: fancy_names_index["vYrotBG"] + 1 , :] = -50
     x_bounds[0].max[fancy_names_index["vZrotBG"]: fancy_names_index["vYrotBG"] + 1, :] = 50
-    x_bounds[0].min[fancy_names_index["vZrotBG"] : fancy_names_index["vYrotBG"] + 1 , DEBUT] = 0
-    x_bounds[0].max[fancy_names_index["vZrotBG"] : fancy_names_index["vYrotBG"] + 1 , DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["vZrotBG"]: fancy_names_index["vYrotBG"] + 1 , DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotBG"]: fancy_names_index["vYrotBG"] + 1 , DEBUT] = 0
 
     # coude droit
-    x_bounds[0].min[fancy_names_index["vZrotABD"] : fancy_names_index["vYrotABD"] + 1 , :] = -50
-    x_bounds[0].max[fancy_names_index["vZrotABD"]  : fancy_names_index["vYrotABD"] + 1 , :] = 50
-    x_bounds[0].min[fancy_names_index["vZrotABD"] : fancy_names_index["vYrotABD"] + 1 , DEBUT] = 0
-    x_bounds[0].max[fancy_names_index["vZrotABD"]  : fancy_names_index["vYrotABD"] + 1 , DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["vZrotABD"]: fancy_names_index["vYrotABD"] + 1 , :] = -50
+    x_bounds[0].max[fancy_names_index["vZrotABD"]: fancy_names_index["vYrotABD"] + 1 , :] = 50
+    x_bounds[0].min[fancy_names_index["vZrotABD"]: fancy_names_index["vYrotABD"] + 1 , DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotABD"]: fancy_names_index["vYrotABD"] + 1 , DEBUT] = 0
 
     # coude gauche
-    x_bounds[0].min[fancy_names_index["vZrotABD"]  : fancy_names_index["vYrotABG"] + 1, :] = -50
-    x_bounds[0].max[fancy_names_index["vZrotABD"]  : fancy_names_index["vYrotABG"] + 1 , :] = 50
-    x_bounds[0].min[fancy_names_index["vZrotABG"]  : fancy_names_index["vYrotABG"] + 1 , DEBUT] = 0
-    x_bounds[0].max[fancy_names_index["vZrotABG"]  : fancy_names_index["vYrotABG"] + 1 , DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["vZrotABD"]: fancy_names_index["vYrotABG"] + 1, :] = -50
+    x_bounds[0].max[fancy_names_index["vZrotABD"]: fancy_names_index["vYrotABG"] + 1 , :] = 50
+    x_bounds[0].min[fancy_names_index["vZrotABG"]: fancy_names_index["vYrotABG"] + 1 , DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vZrotABG"]: fancy_names_index["vYrotABG"] + 1 , DEBUT] = 0
 
 
     # du carpe
-    x_bounds[0].min[fancy_names_index["vXrotC"] , :] = -50
-    x_bounds[0].max[fancy_names_index["vXrotC"] , :] = 50
-    x_bounds[0].min[fancy_names_index["vXrotC"] , DEBUT] = 0
-    x_bounds[0].max[fancy_names_index["vXrotC"] , DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["vXrotC"], :] = -50
+    x_bounds[0].max[fancy_names_index["vXrotC"], :] = 50
+    x_bounds[0].min[fancy_names_index["vXrotC"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vXrotC"], DEBUT] = 0
 
     # du dehanchement
-    x_bounds[0].min[fancy_names_index["vYrotC"] , :] = -50
-    x_bounds[0].max[fancy_names_index["vYrotC"] , :] = 50
-    x_bounds[0].min[fancy_names_index["vYrotC"] , DEBUT] = 0
-    x_bounds[0].max[fancy_names_index["vYrotC"] , DEBUT] = 0
+    x_bounds[0].min[fancy_names_index["vYrotC"], :] = -50
+    x_bounds[0].max[fancy_names_index["vYrotC"], :] = 50
+    x_bounds[0].min[fancy_names_index["vYrotC"], DEBUT] = 0
+    x_bounds[0].max[fancy_names_index["vYrotC"], DEBUT] = 0
 
     #
     # Contraintes de position: PHASE 1 le salto carpe
@@ -417,11 +419,11 @@ def set_x_bounds(biorbd_models, fancy_names_index, final_time, mappings):
 
     # deplacement
     for i in range(nb_models) :
-        x_bounds[1].min[fancy_names_index["X"][i] , :] = -0.1
-        x_bounds[1].max[fancy_names_index["X"][i] , :] = 0.1
-        x_bounds[1].min[fancy_names_index["Y"][i] , :] = -1.0
-        x_bounds[1].max[fancy_names_index["Y"][i] , :] = 1.0
-        x_bounds[1].min[fancy_names_index["Z"][i] , :] = 0
+        x_bounds[1].min[fancy_names_index["X"][i], :] = -0.1
+        x_bounds[1].max[fancy_names_index["X"][i], :] = 0.1
+        x_bounds[1].min[fancy_names_index["Y"][i], :] = -1.0
+        x_bounds[1].max[fancy_names_index["Y"][i], :] = 1.0
+        x_bounds[1].min[fancy_names_index["Z"][i], :] = 0
         x_bounds[1].max[
             fancy_names_index["Z"][i] , :
         ] = zmax  # beaucoup plus que necessaire, juste pour que la parabole fonctionne
@@ -882,44 +884,40 @@ def prepare_ocp(
     """
 
     biorbd_models = [MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths), MultiBiorbdModel(model_paths)]
-    #biorbd_model_list = [BiorbdModel(model) for model in model_paths]
 
     #mapping partout sauf sur les racines
     nb_q = biorbd_models[0].nb_q
-    nb_qdot = biorbd_models[0].nb_qdot
     nb_qddot_joints = nb_q - biorbd_models[0].nb_root
 
     fancy_names_index = set_fancy_names_index(biorbd_models)
 
     nb_models = len(biorbd_models[0].models)
     nb_freedom = nb_q // len(biorbd_models[0].models)
+    nb_root = int(biorbd_models[0].nb_root/3)
+    nb_joints = int((biorbd_models[0].nb_q - biorbd_models[0].nb_root)/3)
     global q_to_first
     global q_to_second
-    q_to_first =list(range(nb_freedom))
+    q_to_first = list(range(nb_freedom))
     q_to_second = list(range(nb_freedom))
 
-
-    roots = list(range(biorbd_models[0].nb_root//len(biorbd_models[0].models)))
-    joints= list(range(roots[-1]+1, roots[-1]+nb_qddot_joints//len(biorbd_models[0].models)+1))
-
-    for degree_of_freedom in range(q_to_first[-1]+1,nb_q):
-        index = degree_of_freedom%nb_freedom
-        if index in roots:
-            q_to_first.append(degree_of_freedom)
-            q_to_second.append(degree_of_freedom)
-        if index in joints:
-            q_to_second.append(index)
+    q_to_first = []
+    q_to_second = []
+    current_index = 0
+    for i in range(nb_models):
+        q_to_first += list(range(current_index, current_index + nb_root))
+        q_to_second += list(range(current_index, current_index + nb_root))
+        current_index += nb_root
+        if i == 0:
+            q_to_first += list(range(current_index, current_index + nb_joints))
+            current_index += nb_joints
+        q_to_second += list(range(nb_root, nb_root+nb_joints))
 
     qdot_to_first = q_to_first
     qdot_to_second = q_to_second
-    qddot_to_first = joints
-    qddot_to_second = [i for i in range(len(qddot_to_first))]*nb_models # for j in range(nb_models)]
+    qddot_to_first = list(range(nb_joints))
+    qddot_to_second = list(range(nb_joints)) * nb_models
 
-    # qdot_to_first = [nb_q+i for i in q_to_first]
-    # qdot_to_second = [nb_q+i for i in qdot_to_first]
-
-    #
-    mappings= BiMappingList()
+    mappings = BiMappingList()
     mappings.add("q", to_first=q_to_first, to_second=q_to_second)
     mappings.add("qdot", to_first=qdot_to_first, to_second=qdot_to_second)
     mappings.add("qddot_joints", to_first=qddot_to_first, to_second=qddot_to_second)
@@ -927,7 +925,7 @@ def prepare_ocp(
     # Add objective functions
     objective_functions = ObjectiveList()
     # objective_functions.add(ObjectiveFcn.Mayer.MINIMIZE_MARKERS, marker_index=1, weight=-1)
-    ## AuJo
+
     objective_functions.add(
         ObjectiveFcn.Lagrange.MINIMIZE_CONTROL, key="qddot_joints", node=Node.ALL_SHOOTING, weight=1, phase=0
     )
@@ -947,20 +945,20 @@ def prepare_ocp(
 
 
     objective_functions.add(
-        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=100000, phase=0
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=1000000, phase=0
     )
     objective_functions.add(
-        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=100000, phase=1
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=1.0, weight=-100, phase=1  # 100000
     )
-    # objective_functions.add(
-    #     ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=2
-    # )
-    # objective_functions.add(
-    #     ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=3
-    # )
-    # objective_functions.add(
-    #     ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=100000, phase=4
-    # )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=1, phase=2
+    )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=1, phase=3
+    )
+    objective_functions.add(
+        ObjectiveFcn.Mayer.MINIMIZE_TIME, min_bound=0.0, max_bound=final_time, weight=1, phase=4
+    )
     # objective_functions.add(
     #     ObjectiveFcn.Mayer.MINIMIZE_STATE, key='q', index=fancy_names_index['Xrot'], node=Node.END, weight=1000, phase=4)
     # objective_functions.add(
@@ -971,15 +969,20 @@ def prepare_ocp(
 
     # Les hanches sont fixes a +-0.2 en bounds, mais les mains doivent quand meme être proches des jambes
     # for index_model, model in enumerate(biorbd_models[0].models):
-    model = biorbd_models[0].models
     objective_functions.add(
         superimpose_markers,
         custom_type=ObjectiveFcn.Mayer,
         node=Node.END,
-        # first_marker="MidMainG",
-        # second_marker="CibleMainG",
         weight=1000,
         phase=0,
+    )
+
+    objective_functions.add(
+        superimpose_markers,
+        custom_type=ObjectiveFcn.Mayer,
+        node=Node.ALL,
+        weight=1000,
+        phase=1,
     )
 
     # arrete de gigoter les bras
@@ -1104,34 +1107,15 @@ def prepare_ocp(
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
     u_init.add(mappings['qddot_joints'].to_first.map([qddot_joints_init] * nb_qddot_joints))
 
-
-
-    x_init = set_x_init(biorbd_models,fancy_names_index, mappings)
+    x_init = set_x_init(biorbd_models, fancy_names_index, mappings)
 
 
     constraints = ConstraintList()
-    # #    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=0, max_bound=final_time, phase=0)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=1)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=2)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=3)
-    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=final_time, phase=4)
-
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=1)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=1)
     # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=1.5, phase=2)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.7, phase=3)
-    constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.5, phase=4)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.7, phase=3)
+    # constraints.add(ConstraintFcn.TIME_CONSTRAINT, node=Node.END, min_bound=1e-4, max_bound=0.5, phase=4)
 
-
-
-    # phase_transitions = PhaseTransitionList()
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=0)  # 0-1
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=1)  # 1-2
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=2)  # 2-3
-    # phase_transitions.add(PhaseTransitionFcn.CONTINUOUS, phase_pre_idx=3)  # 3-4
-
-
-    # Constraints
-    constraints = ConstraintList()
     constraints.add(superimpose_markers_constraint, node=Node.ALL_SHOOTING, min_bound=0, max_bound=0.15**2, phase=1)
 
     return OptimalControlProgram(
@@ -1153,13 +1137,15 @@ def prepare_ocp(
 
 
 def main():
-    model_paths = ("Models/Models_Lisa/AdCh.bioMod","Models/Models_Lisa/AlAd.bioMod")
+    model_paths = ("Models/Models_Lisa/AdCh.bioMod",
+                   "Models/Models_Lisa/AlAd.bioMod",
+                   "Models/Models_Lisa/AuJo.bioMod")
 
     n_threads = 28
 
     print_ocp_FLAG = False  # True.
 
-    show_online_FLAG = False  # True
+    show_online_FLAG = False # True
     HSL_FLAG = True
     save_sol_FLAG = True
 
@@ -1200,10 +1186,18 @@ def main():
     dict_sol['sol'] = sol
 
     import pickle
-    # name = input('what is the name of the file ?')
-    name = 'test_test'
+    save_name = ''
+    for model_name in model_paths:
+        save_name += model_name[-11:-7]
+        save_name += '_'
+    if sol.status == 0:
+        save_name += 'CVG'
+    else:
+        save_name += 'DVG'
+    save_name += '.pkl'
+
     path = 'Solutions_MultiModel'
-    with open(f'{path}/{name}.pkl', 'wb') as f:
+    with open(f'{path}/{save_name}', 'wb') as f:
         pickle.dump(dict_sol, f)
 
 
