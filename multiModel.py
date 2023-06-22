@@ -1139,7 +1139,14 @@ def prepare_ocp(
 def main():
     model_paths = ("Models/Models_Lisa/AdCh.bioMod",
                    "Models/Models_Lisa/AlAd.bioMod",
-                   "Models/Models_Lisa/AuJo.bioMod")
+                   "Models/Models_Lisa/AuJo.bioMod",
+                   "Models/Models_Lisa/Benjamin.bioMod",
+                   "Models/Models_Lisa/ElMe.bioMod",
+                   "Models/Models_Lisa/EvZl.bioMod",
+                   "Models/Models_Lisa/FeBl.bioMod",
+                   "Models/Models_Lisa/JeCh.bioMod",
+                   "Models/Models_Lisa/KaFu.bioMod",
+                   )
 
     n_threads = 28
 
