@@ -985,7 +985,7 @@ def main():
     multi_start.solver.set_linear_solver('ma57')
     #else:
     #    print("Not using ma57")
-    multi_start.solver.set_maximum_iterations(3000)
+    multi_start.solver.set_maximum_iterations(5000)
     multi_start.solver.set_convergence_tolerance(1e-4)
     #multi_start.solver.set_print_level(0)
 
