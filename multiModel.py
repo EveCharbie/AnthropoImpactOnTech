@@ -23,8 +23,6 @@ from bioptim import (
     BoundsList,
     Bounds,
     InitialGuessList,
-
-
     InterpolationType,
     OdeSolver,
     Node,
@@ -33,7 +31,7 @@ from bioptim import (
     CostType,
     ConstraintList,
     ConstraintFcn,
-    PenaltyNodeList,
+    PenaltyController,
     NonLinearProgram,
     ConfigureProblem,
     DynamicsFunctions,
@@ -55,22 +53,20 @@ except ImportError:
 
 
 def superimpose_markers_constraint(
-        all_pn: PenaltyNodeList,
+        controller: PenaltyController,
 ):
     first_marker_D = 1
     second_marker_D = 5
     first_marker_G = 3
     second_marker_G = 6
 
-    nlp = all_pn.nlp
-
     total_diff = []
-    for index_model, biorbd_model in enumerate(nlp.model.models):
+    for index_model, biorbd_model in enumerate(controller.model.models):
 
-        q = nlp.states[0]["q"].mx[nlp.model.variable_index('q', index_model)]
-        diff_markers_D = nlp.model.models[index_model].marker(q, second_marker_D).to_mx() - nlp.model.models[
+        q = controller.states[0]["q"].mx[controller.model.variable_index('q', index_model)]
+        diff_markers_D = controller.model.models[index_model].marker(q, second_marker_D).to_mx() - controller.model.models[
             index_model].marker(q, first_marker_D).to_mx()
-        diff_markers_G = nlp.model.models[index_model].marker(q, second_marker_G).to_mx() - nlp.model.models[
+        diff_markers_G = controller.model.models[index_model].marker(q, second_marker_G).to_mx() - controller.model.models[
             index_model].marker(q, first_marker_G).to_mx()
         sum_diff_D = 0
         sum_diff_G = 0
@@ -78,46 +74,44 @@ def superimpose_markers_constraint(
             sum_diff_D += (diff_markers_D[i]) ** 2
             sum_diff_G += (diff_markers_G[i]) ** 2
         total_diff += [sum_diff_D, sum_diff_G]
-    return nlp.mx_to_cx(
+    return controller.mx_to_cx(
         f"diff_markers",
         cas.vertcat(*total_diff),
-        nlp.states[0]["q"],
+        controller.states[0]["q"],
     )
 
 def superimpose_markers(
-        all_pn: PenaltyNodeList,
+        controller: PenaltyController,
 ):
     first_marker_D = 1
     second_marker_D = 5
     first_marker_G = 3
     second_marker_G = 6
 
-    nlp = all_pn.nlp
-
     total_diff = 0
-    for index_model, biorbd_model in enumerate(nlp.model.models):
-        q = nlp.states[0]["q"].mx[nlp.model.variable_index('q', index_model) ]
-        diff_markers_D = nlp.model.models[index_model].marker(q, second_marker_D).to_mx() - nlp.model.models[index_model].marker(q, first_marker_D).to_mx()
-        diff_markers_G = nlp.model.models[index_model].marker(q, second_marker_G).to_mx() - nlp.model.models[index_model].marker(q, first_marker_G).to_mx()
+    for index_model, biorbd_model in enumerate(controller.model.models):
+        q = controller.states[0]["q"].mx[controller.model.variable_index('q', index_model) ]
+        diff_markers_D = controller.model.models[index_model].marker(q, second_marker_D).to_mx() - controller.model.models[index_model].marker(q, first_marker_D).to_mx()
+        diff_markers_G = controller.model.models[index_model].marker(q, second_marker_G).to_mx() - controller.model.models[index_model].marker(q, first_marker_G).to_mx()
         for i in range(3):
             total_diff += (diff_markers_D[i])**2
             total_diff += (diff_markers_G[i])**2
 
 
-    return nlp.mx_to_cx(
+    return controller.mx_to_cx(
         f"diff_markers",
         total_diff,
-        nlp.states[0]["q"],
+        controller.states[0]["q"],
     )
 
 
-def minimize_dofs(all_pn: PenaltyNodeList, dofs: list, targets: list) -> cas.MX:
+def minimize_dofs(controller: PenaltyController, dofs: list, targets: list) -> cas.MX:
     diff = 0
     if isinstance(dofs, int):
         dofs = [dofs]
     for i, dof in enumerate(dofs):
-        diff += (all_pn.nlp.states[0]["q"].mx[dof] - targets[i]) ** 2
-    return all_pn.nlp.mx_to_cx("minimize_dofs", diff, all_pn.nlp.states[0]["q"])
+        diff += (controller.states[0]["q"].mx[dof] - targets[i]) ** 2
+    return controller.mx_to_cx("minimize_dofs", diff, controller.states[0]["q"])
 
 def set_fancy_names_index(biorbd_models):
     """
