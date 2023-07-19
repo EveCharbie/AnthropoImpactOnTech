@@ -909,7 +909,7 @@ folder_per_athlete = {
     # "ElMe": "ElMe/",
     # "EvZl": "EvZl/",
     # "FeBl": "FeBl/",
-    "JeCh": "JeCh/",
+    # "JeCh": "JeCh/",
     # "KaFu": "KaFu/",
     # "KaMi": "KaMi/",
     # "LaDe": "LaDe/",
@@ -918,7 +918,7 @@ folder_per_athlete = {
     # "OlGa": "OlGa/",
     # "Sarah": "Sarah/",
     # "SoMe": "SoMe/",
-    # "WeEm": "WeEm/",
+    "WeEm": "WeEm/",
     # "ZoTs": "ZoTs/",
 }
 
