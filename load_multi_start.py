@@ -7,14 +7,14 @@ import os
 
 athletes_names_list = ["AdCh", "AlAd" ,"AuJo" ,"Benjamin","ElMe" ,"EvZl" ,"FeBl" ,"JeCh" ,"KaFu" ,"KaMi" ,"LaDe" ,"MaCu" ,"MaJa" ,"OlGa" ,"Sarah","SoMe" ,"WeEm" ,"ZoTs"]
 
-folder_per_twist_nb = {"5": "Multistart_double_vrille/"}  # {"3": "Solutions_vrille_et_demi/"}
+folder_per_twist_nb = {"5": "Solutions_double_vrille_et_demi/"}  # {"3": "Solutions_vrille_et_demi/"}
 
 results_path = "solutions_multi_start/"
 model_path = "Models"
 num_half_twist = "5"  # "3"
 athlete_done = []
 nb_iter = {name: [] for name in athletes_names_list}
-results_path_this_time = folder_per_twist_nb[num_half_twist]
+results_path_this_time = results_path + folder_per_twist_nb[num_half_twist]
 
 for athlete in athletes_names_list:
     nb_twists = int(num_half_twist)

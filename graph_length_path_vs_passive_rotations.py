@@ -25,7 +25,7 @@ def compute_normalized_trajectory_length(model, q, marker_name):
     return np.sum(norm_marker_diff)
 
 
-nb_twists = 1
+nb_twists = 2
 save_path = "overview_graphs/"
 models_path = "Models/Models_Lisa/"
 
