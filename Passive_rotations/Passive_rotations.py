@@ -3,6 +3,7 @@ import os
 import biorbd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import scipy.integrate
 import bioviz
 import pickle
@@ -153,7 +154,7 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
         pickle.dump(values[i], file)
         file.close()
 
-    fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2, sharex=True)
+    fig, ((axQG, axQD), (axQdG, axQdD), (axQddG, axQddD)) = plt.subplots(3, 2, figsize=(6, 10))
     axQD.plot(t, QbrasD)
     axQG.plot(t, QbrasG)
     axQG.set_ylabel("position (rad)")
@@ -175,12 +176,13 @@ def plot_Q_Qdot_bras(m, t, X_tous, Qddot, titre=""):
     fig.suptitle(suptitre)
 
     fig.tight_layout()
-    # fig.savefig(f'/passive rotations results/Graphs/{suptitre}.pdf')
-    # fig.show()
+    fig.savefig(f'passive rotations results/{suptitre[:-1]}.png', dpi=300)
+    fig.show()
 
 
 def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     nb_q = m.nbQ()
+    cmap = cm.get_cmap('viridis')
 
     # position
     QX = X_tous[:, 0]
@@ -253,22 +255,22 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
         pickle.dump(values[i], file)
         file.close()
 
-    fig, (axp, axv, axa) = plt.subplots(3, 1, sharex=True)
-    axp.plot(t, QX, label="X")
-    axp.plot(t, QY, label="Y")
-    axp.plot(t, QZ, label="Z")
+    fig, (axp, axv, axa) = plt.subplots(3, 1, figsize=(6, 10))
+    axp.plot(t, QX, label="X", color=cmap(3/3))
+    axp.plot(t, QY, label="Y", color=cmap(2/3))
+    axp.plot(t, QZ, label="Z", color=cmap(1/3))
     axp.set_ylabel("position (m)")
     axp.legend(loc="upper left", bbox_to_anchor=(1, 0.5))
 
-    axv.plot(t, QdotX, label="Xdot")
-    axv.plot(t, QdotY, label="Ydot")
-    axv.plot(t, QdotZ, label="Zdot")
+    axv.plot(t, QdotX, label="Xdot", color=cmap(3/3))
+    axv.plot(t, QdotY, label="Ydot", color=cmap(2/3))
+    axv.plot(t, QdotZ, label="Zdot", color=cmap(1/3))
     axv.set_ylabel("vitesse (m/s)")
     axv.legend(loc="upper left", bbox_to_anchor=(1, 0.5))
 
-    axa.plot(t, QddotX, label="Xddot")
-    axa.plot(t, QddotY, label="Yddot")
-    axa.plot(t, QddotZ, label="Zddot")
+    axa.plot(t, QddotX, label="Xddot", color=cmap(3/3))
+    axa.plot(t, QddotY, label="Yddot", color=cmap(2/3))
+    axa.plot(t, QddotZ, label="Zddot", color=cmap(1/3))
     axa.set_ylabel("acceleration (m/s$^2$)")
     axa.legend(loc="upper left", bbox_to_anchor=(1, 0.5))
 
@@ -278,31 +280,31 @@ def plot_Q_Qdot_bassin(m, t, X_tous, Qddot, titre=""):
     fig.tight_layout()
     # fig.show()
 
-    figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, sharex=True)
-    axprot.plot(t, QrotX, label="Rot X")
-    axprot.plot(t, QrotY, label="Rot Y")
-    axprot.plot(t, QrotZ, label="Rot Z")
-    axprot.set_ylabel("position (rad)")
-    axprot.legend(loc="upper left", bbox_to_anchor=(1, 0.5))
+    figrot, (axprot, axvrot, axarot) = plt.subplots(3, 1, figsize=(6, 10))
+    axprot.plot(t, QrotX * 180 / np.pi, label="Somersault", color=cmap(3/3))
+    axprot.plot(t, QrotY * 180 / np.pi, label="Tilt", color=cmap(2/3))
+    axprot.plot(t, QrotZ * 180 / np.pi, label="Twist", color=cmap(1/3))
+    axprot.set_ylabel("Joint angles [$^\circ$]")
+    axprot.legend(bbox_to_anchor=(0.4, 0.99))
 
-    axvrot.plot(t, QdotrotX, label="Rot Xdot")
-    axvrot.plot(t, QdotrotY, label="Rot Ydot")
-    axvrot.plot(t, QdotrotZ, label="Rot Zdot")
+    axvrot.plot(t, QdotrotX, label="Rot Xdot", color=cmap(3/3))
+    axvrot.plot(t, QdotrotY, label="Rot Ydot", color=cmap(2/3))
+    axvrot.plot(t, QdotrotZ, label="Rot Zdot", color=cmap(1/3))
     axvrot.set_ylabel("vitesse (rad/s)")
     axvrot.legend(loc="upper left", bbox_to_anchor=(1, 0.5))
 
-    axarot.plot(t, QddotrotX, label="Rot Xddot")
-    axarot.plot(t, QddotrotY, label="Rot Yddot")
-    axarot.plot(t, QddotrotZ, label="Rot Zddot")
+    axarot.plot(t, QddotrotX, label="Rot Xddot", color=cmap(3/3))
+    axarot.plot(t, QddotrotY, label="Rot Yddot", color=cmap(2/3))
+    axarot.plot(t, QddotrotZ, label="Rot Zddot", color=cmap(1/3))
     axarot.set_ylabel("acceleration (rad/s$^2$)")
     axarot.legend(loc="upper left", bbox_to_anchor=(1, 0.5))
 
-    axarot.set_xlabel("temps (s)")
+    axarot.set_xlabel("Time [s]")
     suptitre = "Rotation du bassin" + f" - {titre}" if titre != "" else ""
     figrot.suptitle(suptitre)
     figrot.tight_layout()
-    # figrot.savefig(f"passive rotations results/Graphs/{suptitre}.pdf")
-    # figrot.show()
+    figrot.savefig(f"passive rotations results/{suptitre[:-1]}.png", dpi=300)
+    figrot.show()
 
 
 workbook = xlsxwriter.Workbook("passive rotations results/degrees_of_liberty.xlsx")
@@ -359,9 +361,27 @@ def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row, column, sit
         plot_Q_Qdot_bras(model, t, X_tous, Qddot, titre=suptitre)
         plot_Q_Qdot_bassin(model, t, X_tous, Qddot, titre=suptitre)
 
-        b = bioviz.Viz(model_path, show_floor=False)
-        b.load_movement(X_tous[:, : model.nbQ()].T)
-        b.exec()
+        # b = bioviz.Viz(model_path, show_floor=False)
+        # b.load_movement(X_tous[:, : model.nbQ()].T)
+        # b.exec()
+
+        return X_tous
+
+def plot_spline_limb_movements(time, X_simulated_arms, X_simulated_hips):
+    cmap = cm.get_cmap('viridis')
+    global DROITE, YrotC
+    fig, ax = plt.subplots(1, 1, figsize=(4*1.11, 3.3*1.11))
+    ax.plot(time, X_simulated_arms[:, DROITE] * 180 / np.pi, label="Right arm elevation", color=cmap(3/3))
+    ax.plot(time, np.zeros(time.shape), label="Left arm elevation", color=cmap(2/3))
+    ax.plot(time, X_simulated_hips[:, YrotC] * 180 / np.pi, label="Hips lateral flexion", color=cmap(1/3))
+    ax.set_ylabel("Joint angles [$^\circ$]")
+    ax.set_xlabel("Time [s]")
+
+    fig.suptitle("Splines")
+    fig.legend(bbox_to_anchor=(0.95, 0.85))
+    fig.tight_layout()
+    fig.savefig(f'passive rotations results/Splines.png', dpi=300)
+    fig.show()
 
 
 N = 100
@@ -410,7 +430,7 @@ for model_name in os.listdir(models_path):
 
     row += 1
     situation = "debut bras en haut"
-    simuler(
+    X_simulated = simuler(
         f"{name} bras en haut",
         model,
         N,
@@ -428,7 +448,7 @@ for model_name in os.listdir(models_path):
         situation=situation,
     )
     row += 1
-    simuler(
+    X_simulated = simuler(
         f"{name} bras descendent",
         model,
         N,
@@ -447,7 +467,7 @@ for model_name in os.listdir(models_path):
     )
 
     row += 1
-    simuler(
+    X_simulated = simuler(
         f"{name} bras gauche descend",
         model,
         N,
@@ -482,7 +502,7 @@ for model_name in os.listdir(models_path):
         r, X0[model.nbQ() + 3 : model.nbQ() + 6]
     )  # correction pour la translation
     row += 1
-    simuler(
+    X_simulated_arm = simuler(
         f"{name} bras gauche bas, droit descend",
         model,
         N,
@@ -516,7 +536,7 @@ for model_name in os.listdir(models_path):
         r, X0[model.nbQ() + 3: model.nbQ() + 6]
     )  # correction pour la translation
     row += 1
-    simuler(
+    X_simulated = simuler(
         f"{name} bras droit bas, gauche descend",
         model,
         N,
@@ -551,7 +571,7 @@ for model_name in os.listdir(models_path):
         r, X0[model.nbQ() + 3: model.nbQ() + 6]
     )  # correction pour la translation
     row += 1
-    simuler(
+    X_simulated_hips = simuler(
         f"{name} bras en  bas, jambes tilt",
         model,
         N,
@@ -607,6 +627,9 @@ for model_name in os.listdir(models_path):
         column=column,
         situation=situation,
     )
+
+    time, _ = np.linspace(t0, tf, num=N + 1, retstep=True)
+    plot_spline_limb_movements(time, X_simulated_arm, X_simulated_hips)
 
 workbook.close()
 print('fin')
