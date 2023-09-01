@@ -161,3 +161,5 @@ Models_all_dofs/
 *.zip
 
 .~lock.degrees_of_liberty.xlsx#
+
+*.svg

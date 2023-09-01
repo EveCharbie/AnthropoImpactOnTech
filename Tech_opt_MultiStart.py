@@ -1,4 +1,6 @@
-"initiates TechOpt83 for all the athletes for different stunts"
+"""
+The goal of this program is to optimize the movement to achieve a rudi out pike (803<) for left twisters.
+"""
 import os
 import numpy as np
 import biorbd_casadi as biorbd
@@ -29,10 +31,6 @@ from bioptim import (
         )
 import time
 import pickle
-
-"""
-The goal of this program is to optimize the movement to achieve a rudi out pike (803<) for left twisters.
-"""
 
 
 class Model:
