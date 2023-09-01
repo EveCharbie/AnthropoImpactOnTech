@@ -279,6 +279,22 @@ for shooting_point in range(sum(n_shooting)+1):
     qdot_init[too_big_index, shooting_point] = qdot_bounds_max[too_big_index, shooting_point] - 0.1
 
 
+name_dof = ["Translation X",
+            "Translation Y",
+            "Translation Z",
+            "Somersault",
+            "Tilt",
+            "Twist",
+            "Right arm change plane",
+            "Right arm elevation",
+            "Right forearm pronation",
+            "Right forearm flexion",
+            "Left arm change plane",
+            "Left arm elevation",
+            "Left forearm pronation",
+            "Left forearm flexion",
+            "Hips flexion",
+            "Hips lateral flexion"]
 cmap = cm.get_cmap('viridis')
 time = np.linspace(0, final_time, sum(n_shooting)+1)
 
@@ -290,21 +306,21 @@ for i in range(nb_q):
     axs[i].plot(time, q_bounds_max[i, :] * 180 / np.pi, color='k')
     axs[i].fill_between(time, q_bounds_max[i, :] * 180 / np.pi, np.ones((sum(n_shooting)+1, )) * 1000, color='k', alpha=0.1)
     axs[i].plot(time, q_init[i, :] * 180 / np.pi, '.', color=cmap(1/3))
-    axs[i].set_title(model.nameDof()[i].to_string())
+    axs[i].set_title(name_dof[i], fontsize=18)
     axs[i].set_xlim([0, final_time])
     axs[i].set_ylim([np.min(q_bounds_min[i, :]) * 180 / np.pi - 10, np.max(q_bounds_max[i, :]) * 180 / np.pi + 10])
 
-axs[0].set_ylabel("Joint angles [$^\circ$]", fontsize=15)
-axs[4].set_ylabel("Joint angles [$^\circ$]", fontsize=15)
-axs[8].set_ylabel("Joint angles [$^\circ$]", fontsize=15)
-axs[12].set_ylabel("Joint angles [$^\circ$]", fontsize=15)
-axs[12].set_xlabel("Time [s]", fontsize=15)
-axs[13].set_xlabel("Time [s]", fontsize=15)
-axs[14].set_xlabel("Time [s]", fontsize=15)
-axs[15].set_xlabel("Time [s]", fontsize=15)
+axs[0].set_ylabel("Joint angles [$^\circ$]", fontsize=20)
+axs[4].set_ylabel("Joint angles [$^\circ$]", fontsize=20)
+axs[8].set_ylabel("Joint angles [$^\circ$]", fontsize=20)
+axs[12].set_ylabel("Joint angles [$^\circ$]", fontsize=20)
+axs[12].set_xlabel("Time [s]", fontsize=20)
+axs[13].set_xlabel("Time [s]", fontsize=20)
+axs[14].set_xlabel("Time [s]", fontsize=20)
+axs[15].set_xlabel("Time [s]", fontsize=20)
 
 fig.tight_layout()
-fig.savefig(f'q_bounds_init.svg', dpi=300)
+fig.savefig(f'q_bounds_init.png', dpi=300)
 # fig.show()
 
 
@@ -317,52 +333,52 @@ for i in range(nb_q):
     axs[i].plot(time, qdot_bounds_max[i, :] * 180 / np.pi, color='k')
     axs[i].fill_between(time, qdot_bounds_max[i, :] * 180 / np.pi, np.ones((sum(n_shooting)+1, )) * 10000, color='k', alpha=0.1)
     axs[i].plot(time, qdot_init[i, :] * 180 / np.pi, '.', color=cmap(2/3))
-    axs[i].set_title(model.nameDof()[i].to_string())
+    axs[i].set_title(name_dof[i], fontsize=18)
     axs[i].set_xlim([0, final_time])
     axs[i].set_ylim([np.min(qdot_bounds_min[i, :]) * 180 / np.pi - 100, np.max(qdot_bounds_max[i, :]) * 180 / np.pi + 100])
 
-axs[0].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=15)
-axs[4].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=15)
-axs[8].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=15)
-axs[12].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=15)
-axs[12].set_xlabel("Time [s]", fontsize=15)
-axs[13].set_xlabel("Time [s]", fontsize=15)
-axs[14].set_xlabel("Time [s]", fontsize=15)
-axs[15].set_xlabel("Time [s]", fontsize=15)
+axs[0].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=20)
+axs[4].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=20)
+axs[8].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=20)
+axs[12].set_ylabel("Joint velocities [$^\circ$/s]", fontsize=20)
+axs[12].set_xlabel("Time [s]", fontsize=20)
+axs[13].set_xlabel("Time [s]", fontsize=20)
+axs[14].set_xlabel("Time [s]", fontsize=20)
+axs[15].set_xlabel("Time [s]", fontsize=20)
 
 fig.tight_layout()
-fig.savefig(f'qdot_bounds_init.svg', dpi=300)
+fig.savefig(f'qdot_bounds_init.png', dpi=300)
 # fig.show()
 
 
-tau_max = 500
-tau_min = -500
-tau_init = (np.random.random((nb_q, sum(n_shooting)+1)) * 2 - 1) * 0.2
-tau_init *= tau_max - tau_min
+qddot_max = 500
+qddot_min = -500
+qddot_init = (np.random.random((nb_q, sum(n_shooting)+1)) * 2 - 1) * 0.2
+qddot_init *= qddot_max - qddot_min
 fig, axs = plt.subplots(4, 4, figsize=(15, 15))
 axs = axs.ravel()
 for i in range(nb_q):
     if i < 6:
         axs[i].axis('off')
     else:
-        axs[i].plot(time, np.ones((sum(n_shooting)+1, )) * tau_min, color='k')
-        axs[i].fill_between(time, np.ones((sum(n_shooting)+1, )) * -1000, np.ones((sum(n_shooting)+1, )) * tau_min, color='k', alpha=0.1)
-        axs[i].plot(time, np.ones((sum(n_shooting)+1, )) * tau_max, color='k')
-        axs[i].fill_between(time, np.ones((sum(n_shooting)+1, )) * tau_max, np.ones((sum(n_shooting)+1, )) * 1000, color='k', alpha=0.1)
-        axs[i].plot(time, tau_init[i, :], '.', color=cmap(3/3))
-        axs[i].set_title(model.nameDof()[i].to_string())
+        axs[i].plot(time, np.ones((sum(n_shooting)+1, )) * qddot_min * 180 / np.pi, color='k')
+        axs[i].fill_between(time, np.ones((sum(n_shooting)+1, )) * -10000, np.ones((sum(n_shooting)+1, )) * qddot_min * 180 / np.pi, color='k', alpha=0.1)
+        axs[i].plot(time, np.ones((sum(n_shooting)+1, )) * qddot_max * 180 / np.pi, color='k')
+        axs[i].fill_between(time, np.ones((sum(n_shooting)+1, )) * qddot_max * 180 / np.pi, np.ones((sum(n_shooting)+1, )) * 10000, color='k', alpha=0.1)
+        axs[i].plot(time, qddot_init[i, :], '.', color=cmap(3/3))
+        axs[i].set_title(name_dof[i], fontsize=18)
         axs[i].set_xlim([0, final_time])
-        axs[i].set_ylim([tau_min - 100, tau_max + 100])
+        axs[i].set_ylim([qddot_min - 100, qddot_max + 100])
 
-axs[0].set_ylabel("Joint torques [Nm]", fontsize=15)
-axs[4].set_ylabel("Joint torques [Nm]", fontsize=15)
-axs[8].set_ylabel("Joint torques [Nm]", fontsize=15)
-axs[12].set_ylabel("Joint torques [Nm]", fontsize=15)
-axs[12].set_xlabel("Time [s]", fontsize=15)
-axs[13].set_xlabel("Time [s]", fontsize=15)
-axs[14].set_xlabel("Time [s]", fontsize=15)
-axs[15].set_xlabel("Time [s]", fontsize=15)
+axs[0].set_ylabel(r"Joint accelerations [$^\circ/s^2$]", fontsize=19)
+axs[4].set_ylabel(r"Joint accelerations [$^\circ/s^2$]", fontsize=19)
+axs[8].set_ylabel(r"Joint accelerations [$^\circ/s^2$]", fontsize=19)
+axs[12].set_ylabel(r"Joint accelerations [$^\circ/s^2$]", fontsize=19)
+axs[12].set_xlabel("Time [s]", fontsize=20)
+axs[13].set_xlabel("Time [s]", fontsize=20)
+axs[14].set_xlabel("Time [s]", fontsize=20)
+axs[15].set_xlabel("Time [s]", fontsize=20)
 
 fig.tight_layout()
-fig.savefig(f'tau_bounds_init.svg', dpi=300)
+fig.savefig(f'qddot_bounds_init.png', dpi=300)
 fig.show()
