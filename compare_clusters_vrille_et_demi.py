@@ -4,6 +4,8 @@ import pickle
 import os
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from matplotlib.patches import Rectangle
+from matplotlib.collections import PatchCollection
 from IPython import embed
 
 import biorbd
@@ -371,7 +373,7 @@ for i_var in range(len(var_list)):
             axs[i].plot(var_list[i_var][key][DoF_index[i_var][i], :, :])
         plt.suptitle(key)
         plt.savefig(f'cluster_graphs/test_{var_name[i_var]}_{key}_graph_for_all_athletes_{nb_twists}.png', dpi=300)
-plt.show()
+# plt.show()
 
 
 # Generate animations of the movements in the clusters
@@ -383,17 +385,11 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     Q_to_animate[7, :] = mean_q_per_cluster_right_arm['q'][7, :, i_cluster]
     Q_to_animate[8, :] = mean_q_per_cluster_right_arm['q'][8, :, i_cluster]
     Q_to_animate[9, :] = mean_q_per_cluster_right_arm['q'][9, :, i_cluster]
-    b = bioviz.Viz(model_path)
-    b.set_camera_zoom(0.5)
-    b.load_movement(Q_to_animate)
-    b.exec()
-    # b.start_recording(f"videos_clusters/right_arm_{cluster_name}.ogv")
+
+    # b = bioviz.Viz(model_path)
+    # b.set_camera_zoom(0.5)
     # b.load_movement(Q_to_animate)
-    # for f in range(Q_to_animate.shape[1] + 1):
-    #     b.movement_slider[0].setValue(f)
-    # b.add_frame()
-    # b.stop_recording()
-    # b.quit()
+    # b.exec()
 
 for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     print(f"left_arm_{cluster_name}")
@@ -403,17 +399,12 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     Q_to_animate[11, :] = mean_q_per_cluster_left_arm['q'][11, :, i_cluster]
     Q_to_animate[12, :] = mean_q_per_cluster_left_arm['q'][12, :, i_cluster]
     Q_to_animate[13, :] = mean_q_per_cluster_left_arm['q'][13, :, i_cluster]
-    b = bioviz.Viz(model_path)
-    b.set_camera_zoom(0.5)
-    b.load_movement(Q_to_animate)
-    b.exec()
-    # b.start_recording(f"videos_clusters/left_arm_{cluster_name}.ogv")
+
+    # b = bioviz.Viz(model_path)
+    # b.set_camera_zoom(0.5)
     # b.load_movement(Q_to_animate)
-    # for f in range(Q_to_animate.shape[1] + 1):
-    #     b.movement_slider[0].setValue(f)
-    #     b.add_frame()
-    # b.stop_recording()
-    # b.quit()
+    # b.exec()
+
 
 for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     print(f"thighs_{cluster_name}")
@@ -421,15 +412,64 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     Q_to_animate[5, :] = np.pi/2
     Q_to_animate[14, :] = mean_q_per_cluster_thighs['q'][14, :, i_cluster]
     Q_to_animate[15, :] = mean_q_per_cluster_thighs['q'][15, :, i_cluster]
-    b = bioviz.Viz(model_path)
-    b.set_camera_zoom(0.5)
-    b.load_movement(Q_to_animate)
-    b.exec()
-    # b.start_recording(f"videos_clusters/thighs_{cluster_name}.ogv")
+
+    # b = bioviz.Viz(model_path)
+    # b.set_camera_zoom(0.5)
     # b.load_movement(Q_to_animate)
-    # for f in range(Q_to_animate.shape[1] + 1):
-    #     b.movement_slider[0].setValue(f)
-    #     b.add_frame()
-    # b.stop_recording()
-    # b.quit()
+    # b.exec()
+
+
+# Plot the proportion of solutions that are in each cluster
+num_clusters_thighs_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), ))
+num_clusters_left_arm_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys())))
+num_clusters_right_arm_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys()), len(cluster_right_arm['AlAd'].keys())))
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
+    for i_name, name in enumerate(cluster_thighs.keys()):
+        num_clusters_thighs_techniques[i_cluster_thighs] += len(cluster_thighs[name][cluster_thighs_name])
+
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
+        for i_name, name in enumerate(cluster_left_arm.keys()):
+            for idx_tech in cluster_left_arm[name][cluster_left_arm_name]:
+                if idx_tech in cluster_thighs[name][cluster_thighs_name]:
+                    num_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm] += 1
+
+        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['AlAd'].keys()):
+            for i_name, name in enumerate(cluster_right_arm.keys()):
+                for idx_tech in cluster_right_arm[name][cluster_right_arm_name]:
+                    if idx_tech in cluster_thighs[name][cluster_thighs_name] and idx_tech in cluster_left_arm[name][cluster_left_arm_name]:
+                        num_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] += 1
+
+pourcentage_clusters_thighs_techniques = num_clusters_thighs_techniques / np.sum(num_clusters_thighs_techniques) * 100
+pourcentage_clusters_left_arm_techniques = np.zeros(num_clusters_left_arm_techniques.shape)
+pourcentage_clusters_right_arm_techniques = np.zeros(num_clusters_right_arm_techniques.shape)
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
+    pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :] = num_clusters_left_arm_techniques[i_cluster_thighs, :] / np.sum(num_clusters_thighs_techniques[i_cluster_thighs]) * pourcentage_clusters_thighs_techniques[i_cluster_thighs]
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
+        pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :] = num_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :] / np.sum(num_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm]) * pourcentage_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm]
+
+offset_left_arm = 0
+offset_right_arm = 0
+fig, ax = plt.subplots(1, 1, figsize=(10, 5))
+for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
+    x_min_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs].sum()
+    x_max_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs + 1].sum()
+    ax.fill_between([x_min_thighs, x_max_thighs], [0, 0], [10, 10], color=cmap(i_cluster_thighs * 1/6), alpha=0.8)
+
+    for i_cluster_left_arm in range(len(cluster_left_arm['AlAd'].keys())):
+        x_min_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm].sum()
+        x_max_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm + 1].sum()
+        ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap(i_cluster_left_arm * 1/6), alpha=0.8)
+
+        for i_cluster_right_arm in range(len(cluster_right_arm['AlAd'].keys())):
+            x_min_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
+            x_max_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm + 1])
+            ax.fill_between([x_min_right_arm + offset_right_arm, x_max_right_arm + offset_right_arm], [40, 40], [50, 50], color=cmap(i_cluster_right_arm * 1/6), alpha=0.8)
+
+        offset_right_arm = x_max_left_arm + offset_left_arm
+    offset_left_arm = x_max_thighs
+
+ax.set_xlim([-10, 110])
+ax.set_ylim([-5, 55])
+plt.savefig(f'cluster_graphs/proportion_of_solutions_in_each_cluster_{nb_twists}.png', dpi=300)
+plt.show()
 
