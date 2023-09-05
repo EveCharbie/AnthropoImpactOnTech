@@ -82,10 +82,10 @@ qdot_bounds_min[8, :] = model.segments()[4].QDotRanges()[0].min()
 qdot_bounds_max[8, :] = model.segments()[4].QDotRanges()[0].max()
 qdot_bounds_min[9, :] = model.segments()[4].QDotRanges()[1].min()
 qdot_bounds_max[9, :] = model.segments()[4].QDotRanges()[1].max()
-qdot_bounds_min[10, :] = model.segments()[6].QDotRanges()[0].min()
-qdot_bounds_max[10, :] = model.segments()[6].QDotRanges()[0].max()
-qdot_bounds_min[11, :] = model.segments()[6].QDotRanges()[1].min()
-qdot_bounds_max[11, :] = model.segments()[6].QDotRanges()[1].max()
+# qdot_bounds_min[10, :] = model.segments()[6].QDotRanges()[0].min()
+# qdot_bounds_max[10, :] = model.segments()[6].QDotRanges()[0].max()
+# qdot_bounds_min[11, :] = model.segments()[6].QDotRanges()[1].min()
+# qdot_bounds_max[11, :] = model.segments()[6].QDotRanges()[1].max()
 qdot_bounds_min[12, :] = model.segments()[7].QDotRanges()[0].min()
 qdot_bounds_max[12, :] = model.segments()[7].QDotRanges()[0].max()
 qdot_bounds_min[13, :] = model.segments()[7].QDotRanges()[1].min()
@@ -161,14 +161,14 @@ q_bounds_max[9, 0] = 0
 q_bounds_min[9, -1] = -0.1
 q_bounds_max[9, -1] = 0.1
 
-q_bounds_min[10, 0] = -2.9
-q_bounds_max[10, 0] = -2.9
-q_bounds_min[10, -1] = -2.9 - 0.1
-q_bounds_max[10, -1] = -2.9 + 0.1
-q_bounds_min[11, 0] = 0
-q_bounds_max[11, 0] = 0
-q_bounds_min[11, -1] = -0.1
-q_bounds_max[11, -1] = 0.1
+# q_bounds_min[10, 0] = -2.9
+# q_bounds_max[10, 0] = -2.9
+# q_bounds_min[10, -1] = -2.9 - 0.1
+# q_bounds_max[10, -1] = -2.9 + 0.1
+# q_bounds_min[11, 0] = 0
+# q_bounds_max[11, 0] = 0
+# q_bounds_min[11, -1] = -0.1
+# q_bounds_max[11, -1] = 0.1
 
 q_bounds_min[12, 0] = 0
 q_bounds_max[12, 0] = 0
@@ -193,6 +193,8 @@ q_bounds_max[15, 1:41] = 0.1
 q_bounds_min[15, -1] = -0.1
 q_bounds_max[15, -1] = 0.1
 
+q_bounds_min[10:12, :] = q_bounds_min[6:8, :]
+q_bounds_max[10:12, :] = q_bounds_max[6:8, :]
 
 vzinit = 9.81 / (2 * final_time)
 
@@ -242,28 +244,29 @@ q_init[3, 340:] = np.linspace(2 * 3.14 + 3 / 2 * 3.14, 4 * 3.14, 41)
 q_init[5, 140:240] = 0.2
 q_init[5, 240:340] = np.linspace(0, 3 * 3.14, 100)
 q_init[5, 340:] = 3 * 3.14
-q_init[6, :140] = .75
+q_init[6, :140] = 0.75
 q_init[6, 140:240] = np.linspace(0.75, 0, 100)
 q_init[7, :40] = np.linspace(2.9, 1.35, 40)
-q_init[7, 40:140] = -1.35
-q_init[7, 140:240] = np.linspace(-1.35, 0, 100)
-q_init[10, :140] = -.75
-q_init[10, 140:240] = np.linspace(-0.75, 0, 100)
-q_init[11, :40] = np.linspace(-2.9, -1.35, 40)
-q_init[11, 40:140] = 1.35
-q_init[11, 140:240] = np.linspace(1.35, 0, 100)
+q_init[7, 40:140] = 1.35
+q_init[7, 140:240] = np.linspace(1.35, 0, 100)
+# q_init[10, :140] = -0.75
+# q_init[10, 140:240] = np.linspace(-0.75, 0, 100)
+# q_init[11, :40] = np.linspace(-2.9, -1.35, 40)
+# q_init[11, 40:140] = -1.35
+# q_init[11, 140:240] = np.linspace(-1.35, 0, 100)
 q_init[14, :40] = np.linspace(-0.5, -2.6, 40)
 q_init[14, 40:140] = -2.6
 q_init[14, 140:240] = np.linspace(-2.6, 0, 100)
 q_init[14, 340:] = np.linspace(0, -0.5, 41)
 
+q_init[10:12, :] = q_init[6:8, :]
 
 np.random.seed(1)
 
 q_noise_matrix = (np.random.random((nb_q, sum(n_shooting)+1)) * 2 - 1) * 0.2
 qdot_noise_matrix = (np.random.random((nb_q, sum(n_shooting)+1)) * 2 - 1) * 0.2
-q_noise_matrix *= q_bounds_max - q_bounds_min
-qdot_noise_matrix *= qdot_bounds_max - qdot_bounds_min
+q_noise_matrix = q_noise_matrix * (q_bounds_max - q_bounds_min)
+qdot_noise_matrix = qdot_noise_matrix * (qdot_bounds_max - qdot_bounds_min)
 q_init += q_noise_matrix
 qdot_init += qdot_noise_matrix
 
