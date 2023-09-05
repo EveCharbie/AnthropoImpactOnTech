@@ -26,7 +26,8 @@ nb_twists = 1
 chosen_clusters_dict = {}
 results_path = 'solutions_multi_start/'
 results_path_this_time = results_path + 'Solutions_vrille_et_demi/'
-cmap = cm.get_cmap('viridis')
+cmap_viridis = cm.get_cmap('viridis')
+cmap_magma = cm.get_cmap('magma')
 
 # Define the clusters of solutions per joint
 cluster_right_arm = {
@@ -152,7 +153,7 @@ for i_name, name in enumerate(names):
                 q_right_arm['q'][key] = np.concatenate((q_right_arm['q'][key], q[:, :, np.newaxis]), axis=2)
                 q_right_arm['normalized_time_vector'][key] = np.concatenate((q_right_arm['normalized_time_vector'][key], normalized_time_vector[:, np.newaxis]), axis=1)
                 i_cluster_right_arm = i_clust
-                rgba = cmap(i_cluster_right_arm * 1/6)
+                rgba = cmap_magma(i_cluster_right_arm * 1/6)
                 axs[0, 0].plot(normalized_time_vector, q[6, :], color=rgba)
                 axs[1, 0].plot(normalized_time_vector, q[7, :], color=rgba)
 
@@ -161,7 +162,7 @@ for i_name, name in enumerate(names):
                 q_left_arm['q'][key] = np.concatenate((q_left_arm['q'][key], q[:, :, np.newaxis]), axis=2)
                 q_left_arm['normalized_time_vector'][key] = np.concatenate((q_left_arm['normalized_time_vector'][key], normalized_time_vector[:, np.newaxis]), axis=1)
                 i_cluster_left_arm = i_clust
-                rgba = cmap(i_cluster_left_arm * 1/6)
+                rgba = cmap_viridis(i_cluster_left_arm * 1/6)
                 axs[0, 1].plot(normalized_time_vector, -q[10, :], color=rgba)
                 axs[1, 1].plot(normalized_time_vector, -q[11, :], color=rgba)
 
@@ -170,7 +171,7 @@ for i_name, name in enumerate(names):
                 q_thighs['q'][key] = np.concatenate((q_thighs['q'][key], q[:, :, np.newaxis]), axis=2)
                 q_thighs['normalized_time_vector'][key] = np.concatenate((q_thighs['normalized_time_vector'][key], normalized_time_vector[:, np.newaxis]), axis=1)
                 i_cluster_thighs = i_clust
-                rgba = cmap(i_cluster_thighs * 1/6)
+                rgba = cmap_viridis(1 - i_cluster_thighs * 1/6)
                 axs[0, 2].plot(normalized_time_vector, q[14, :], color=rgba)
                 axs[1, 2].plot(normalized_time_vector, q[15, :], color=rgba)
 
@@ -187,10 +188,21 @@ for i_name, name in enumerate(names):
             axs[1, 2].set_xlabel(f"Normalized time")
 
 for i_clust, key in enumerate(cluster_right_arm[name].keys()):
-    rgba = cmap(i_clust * 1/6)
+    rgba = cmap_magma(i_clust * 1/6)
     axs[1, 0].plot(normalized_time_vector[0], q[7, 0], color=rgba, label="Cluster #" + str(i_clust + 1))
-axs[1, 0].legend(ncol=6, bbox_to_anchor=(1.7, -0.2), loc='center')
+axs[1, 0].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
+for i_clust, key in enumerate(cluster_left_arm[name].keys()):
+    rgba = cmap_viridis(i_clust * 1/6)
+    axs[1, 1].plot(normalized_time_vector[0], q[7, 0], color=rgba, label="Cluster #" + str(i_clust + 1))
+axs[1, 1].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
+
+for i_clust, key in enumerate(cluster_thighs[name].keys()):
+    rgba = cmap_viridis(1 - i_clust * 1/6)
+    axs[1, 2].plot(normalized_time_vector[0], q[7, 0], color=rgba, label="Cluster #" + str(i_clust + 1))
+axs[1, 2].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
+
+plt.subplots_adjust(left=0.05, bottom=0.2, right=0.95, top=0.9)
 plt.suptitle(f"{nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 # plt.show()
@@ -282,7 +294,7 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     print(f"{cluster_name} has a right arm axial rotation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][6, :]) / (np.max(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][6, :]) - np.min(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][6, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a right arm elevation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][7, :]) / (np.max(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :]) - np.min(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :])) * 100}% of the average max amplitude")
 
-    rgba = cmap(i_cluster * 1/6)
+    rgba = cmap_magma(i_cluster * 1/6)
     axs[0, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][6, :, i_cluster] - std_q_per_cluster_right_arm[6, :, i_cluster],
                         mean_q_per_cluster_right_arm['q'][6, :, i_cluster] + std_q_per_cluster_right_arm[6, :,i_cluster], color=rgba, alpha=0.2)
     axs[0, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][6, :, i_cluster], color=rgba)
@@ -304,7 +316,7 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     print(f"{cluster_name} has a left arm axial rotation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][10, :]) / (np.max(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][10, :]) - np.min(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][10, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a left arm elevation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][11, :]) / (np.max(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :]) - np.min(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :])) * 100}% of the average max amplitude")
 
-    rgba = cmap(i_cluster * 1/6)
+    rgba = cmap_viridis(i_cluster * 1/6)
     axs[0, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] - std_q_per_cluster_left_arm[10, :, i_cluster],
                         -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] + std_q_per_cluster_left_arm[10, :,i_cluster], color=rgba, alpha=0.2)
     axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][10, :, i_cluster], color=rgba)
@@ -325,7 +337,7 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     print(f"{cluster_name} has a hip flexion range of {np.mean(range_q_per_cluster_thighs[:, :, i_cluster][14, :]) / (np.max(mean_q_per_cluster_thighs['q'][:, :, i_cluster][14, :]) - np.min(mean_q_per_cluster_thighs['q'][:, :, i_cluster][14, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a hip lateral flexion range of {np.mean(range_q_per_cluster_thighs[:, :, i_cluster][15, :]) / (np.max(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :]) - np.min(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :])) * 100}% of the average max amplitude")
 
-    rgba = cmap(i_cluster * 1/6)
+    rgba = cmap_viridis(1 - i_cluster * 1/6)
     axs[0, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster] - std_q_per_cluster_thighs[14, :, i_cluster],
                         mean_q_per_cluster_thighs['q'][14, :, i_cluster] + std_q_per_cluster_thighs[14, :, i_cluster], color=rgba, alpha=0.2)
     axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster], color=rgba)
@@ -453,23 +465,23 @@ fig, ax = plt.subplots(1, 1, figsize=(10, 5))
 for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
     x_min_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs].sum()
     x_max_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs + 1].sum()
-    ax.fill_between([x_min_thighs, x_max_thighs], [0, 0], [10, 10], color=cmap(i_cluster_thighs * 1/6), alpha=0.8)
+    ax.fill_between([x_min_thighs, x_max_thighs], [0, 0], [10, 10], color=cmap_viridis(1 - i_cluster_thighs * 1/6), alpha=0.8)
 
     for i_cluster_left_arm in range(len(cluster_left_arm['AlAd'].keys())):
         x_min_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm].sum()
         x_max_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm + 1].sum()
-        ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap(i_cluster_left_arm * 1/6), alpha=0.8)
+        ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/6), alpha=0.8)
 
         for i_cluster_right_arm in range(len(cluster_right_arm['AlAd'].keys())):
             x_min_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
             x_max_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm + 1])
-            ax.fill_between([x_min_right_arm + offset_right_arm, x_max_right_arm + offset_right_arm], [40, 40], [50, 50], color=cmap(i_cluster_right_arm * 1/6), alpha=0.8)
+            ax.fill_between([x_min_right_arm + offset_right_arm, x_max_right_arm + offset_right_arm], [40, 40], [50, 50], color=cmap_magma(i_cluster_right_arm * 1/6), alpha=0.8)
 
         offset_right_arm = x_max_left_arm + offset_left_arm
     offset_left_arm = x_max_thighs
 
 ax.set_xlim([-10, 110])
 ax.set_ylim([-5, 55])
-plt.savefig(f'cluster_graphs/proportion_of_solutions_in_each_cluster_{nb_twists}.png', dpi=300)
+plt.savefig(f'cluster_graphs/proportion_of_solutions_in_each_cluster_{nb_twists}.svg', dpi=300)
 plt.show()
 
