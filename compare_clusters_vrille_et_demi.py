@@ -285,11 +285,13 @@ std_q_per_cluster_thighs = std_q_per_cluster_thighs[:, :, 1:]
 range_q_per_cluster_thighs = range_q_per_cluster_thighs[:, :, 1:]
 mean_std_between_clusters_thighs = np.mean(np.std(mean_q_per_cluster_thighs['q'], axis=2), axis=1)
 
+total_number_of_strategies_identified = q_thighs['q']["cluster_1"].shape[2] + q_thighs['q']["cluster_2"].shape[2]
+
 print("Right arm clusters:")
 # Plot the clusters with different colors
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
 for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
-    print(f"{cluster_name} was used by {cluster_counter_right_arm[cluster_name]} / {len(cluster_right_arm)} athletes")
+    print(f"{cluster_name} was used by {cluster_counter_right_arm[cluster_name]} / {len(cluster_right_arm)} athletes and in {q_right_arm['q'][cluster_name].shape[2]/total_number_of_strategies_identified * 100}% of the cases")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_right_arm[cluster_name][3:])}")
     print(f"{cluster_name} has a right arm axial rotation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][6, :]) / (np.max(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][6, :]) - np.min(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][6, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a right arm elevation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][7, :]) / (np.max(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :]) - np.min(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :])) * 100}% of the average max amplitude")
@@ -307,11 +309,11 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     print('\n')
 print('\n')
 axs[1, 0].set_xlabel(f"Normalized time")
-axs[1, 0].legend(ncol=6, bbox_to_anchor=(1.7, -0.2), loc='center')
+axs[1, 0].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 print("Left arm clusters:")
 for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
-    print(f"{cluster_name} was used by {cluster_counter_left_arm[cluster_name]} / {len(cluster_left_arm)} athletes")
+    print(f"{cluster_name} was used by {cluster_counter_left_arm[cluster_name]} / {len(cluster_left_arm)} athletes and in {q_left_arm['q'][cluster_name].shape[2] / total_number_of_strategies_identified * 100}% of the cases")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_left_arm[cluster_name][3:])}")
     print(f"{cluster_name} has a left arm axial rotation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][10, :]) / (np.max(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][10, :]) - np.min(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][10, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a left arm elevation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][11, :]) / (np.max(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :]) - np.min(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :])) * 100}% of the average max amplitude")
@@ -322,35 +324,40 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][10, :, i_cluster], color=rgba)
     axs[1, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] - std_q_per_cluster_left_arm[11, :, i_cluster],
                         -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] + std_q_per_cluster_left_arm[11, :,i_cluster], color=rgba, alpha=0.2)
-    axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][11, :, i_cluster], color=rgba)
+    axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][11, :, i_cluster], color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 1].set_title(f"Change in elevation plane")  # Left arm
         axs[1, 1].set_title(f"Elevation")  # Left arm
     print('\n')
 print('\n')
 axs[1, 1].set_xlabel(f"Normalized time")
+axs[1, 1].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 print("Thigh clusters:")
 for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
-    print(f"{cluster_name} was used by {cluster_counter_thighs[cluster_name]} / {len(cluster_thighs)} athletes")
+    print(f"{cluster_name} was used by {cluster_counter_thighs[cluster_name]} / {len(cluster_thighs)} athletes  and in {q_thighs['q'][cluster_name].shape[2] / total_number_of_strategies_identified * 100}% of the cases")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_thighs[cluster_name][3:])}")
     print(f"{cluster_name} has a hip flexion range of {np.mean(range_q_per_cluster_thighs[:, :, i_cluster][14, :]) / (np.max(mean_q_per_cluster_thighs['q'][:, :, i_cluster][14, :]) - np.min(mean_q_per_cluster_thighs['q'][:, :, i_cluster][14, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a hip lateral flexion range of {np.mean(range_q_per_cluster_thighs[:, :, i_cluster][15, :]) / (np.max(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :]) - np.min(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :])) * 100}% of the average max amplitude")
-
+    print(np.min(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :]) * 180 / np.pi)
+    print(np.max(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :]) * 180 / np.pi)
+    print(np.mean(range_q_per_cluster_thighs[:, :, i_cluster][15, :]) * 180 / np.pi)
     rgba = cmap_viridis(1 - i_cluster * 1/6)
     axs[0, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster] - std_q_per_cluster_thighs[14, :, i_cluster],
                         mean_q_per_cluster_thighs['q'][14, :, i_cluster] + std_q_per_cluster_thighs[14, :, i_cluster], color=rgba, alpha=0.2)
     axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster], color=rgba)
     axs[1, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][15, :, i_cluster] - std_q_per_cluster_thighs[15, :, i_cluster],
                         mean_q_per_cluster_thighs['q'][15, :, i_cluster] + std_q_per_cluster_thighs[15, :, i_cluster], color=rgba, alpha=0.2)
-    axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][15, :, i_cluster], color=rgba)
+    axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][15, :, i_cluster], color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 2].set_title(f"Flexion")  # Hips
         axs[1, 2].set_title(f"Lateral flexion")  # Hips
     print('\n')
 print('\n')
 axs[1, 2].set_xlabel(f"Normalized time")
+axs[1, 2].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
+plt.subplots_adjust(left=0.05, bottom=0.2, right=0.95, top=0.9)
 plt.suptitle(f"mean kinematics per cluster for {nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 # plt.show()
@@ -465,17 +472,17 @@ fig, ax = plt.subplots(1, 1, figsize=(10, 5))
 for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
     x_min_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs].sum()
     x_max_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs + 1].sum()
-    ax.fill_between([x_min_thighs, x_max_thighs], [0, 0], [10, 10], color=cmap_viridis(1 - i_cluster_thighs * 1/6), alpha=0.8)
+    ax.fill_between([x_min_thighs, x_max_thighs], [40, 40], [50, 50], color=cmap_viridis(1 - i_cluster_thighs * 1/6), alpha=0.8, linewidth=0.0)
 
     for i_cluster_left_arm in range(len(cluster_left_arm['AlAd'].keys())):
         x_min_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm].sum()
         x_max_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm + 1].sum()
-        ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/6), alpha=0.8)
+        ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/6), alpha=0.8, linewidth=0.0)
 
         for i_cluster_right_arm in range(len(cluster_right_arm['AlAd'].keys())):
             x_min_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
             x_max_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm + 1])
-            ax.fill_between([x_min_right_arm + offset_right_arm, x_max_right_arm + offset_right_arm], [40, 40], [50, 50], color=cmap_magma(i_cluster_right_arm * 1/6), alpha=0.8)
+            ax.fill_between([x_min_right_arm + offset_right_arm, x_max_right_arm + offset_right_arm], [0, 0], [10, 10], color=cmap_magma(i_cluster_right_arm * 1/6), alpha=0.8, linewidth=0.0)
 
         offset_right_arm = x_max_left_arm + offset_left_arm
     offset_left_arm = x_max_thighs
