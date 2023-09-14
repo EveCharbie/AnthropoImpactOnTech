@@ -142,14 +142,14 @@ q_bounds_max[5, 240:340] = 5 * 3.14
 q_bounds_min[5, 340:] = 3 * 3.14 - 0.1
 q_bounds_max[5, 340:] = 3 * 3.14 + 0.1
 
-q_bounds_min[6, 0] = 2.9
-q_bounds_max[6, 0] = 2.9
-q_bounds_min[6, -1] = 2.9 - 0.1
-q_bounds_max[6, -1] = 2.9 + 0.1
-q_bounds_min[7, 0] = 0
-q_bounds_max[7, 0] = 0
-q_bounds_min[7, -1] = -0.1
-q_bounds_max[7, -1] = 0.1
+q_bounds_min[6, 0] = 0
+q_bounds_max[6, 0] = 0
+q_bounds_min[6, -1] = -0.1
+q_bounds_max[6, -1] = 0.1
+q_bounds_min[7, 0] = 2.9
+q_bounds_max[7, 0] = 2.9
+q_bounds_min[7, -1] = 2.9 - 0.1
+q_bounds_max[7, -1] = 2.9 + 0.1
 
 
 q_bounds_min[8, 0] = 0

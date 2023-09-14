@@ -119,22 +119,14 @@ with open("q_bounds.pkl", 'rb') as f:
 
 # print all the solutions at once
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
-# time_vector = np.linspace(0, 1, 381)
-# axs[0, 0].plot(time_vector, q_bounds_min[6, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[0, 0].plot(time_vector, q_bounds_max[6, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[1, 0].plot(time_vector, q_bounds_min[7, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[1, 0].plot(time_vector, q_bounds_max[7, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[0, 1].plot(time_vector, -q_bounds_min[10, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[0, 1].plot(time_vector, -q_bounds_max[10, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[1, 1].plot(time_vector, -q_bounds_min[11, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[1, 1].plot(time_vector, -q_bounds_max[11, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[0, 2].plot(time_vector, q_bounds_min[14, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[0, 2].plot(time_vector, q_bounds_max[14, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[1, 2].plot(time_vector, q_bounds_min[15, :] * 180/np.pi, color='black', linewidth=0.5)
-# axs[1, 2].plot(time_vector, q_bounds_max[15, :] * 180/np.pi, color='black', linewidth=0.5)
-q_right_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_right_arm['AdCh'].keys()}, "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_right_arm['AdCh'].keys()}}
-q_left_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_left_arm['AdCh'].keys()}, "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_left_arm['AdCh'].keys()}}
-q_thighs = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_thighs['AdCh'].keys()}, "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_thighs['AdCh'].keys()}}
+q_right_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_right_arm['AdCh'].keys()},
+               "normalized_time_vector": {key: np.zeros((381, 1)) for key in
+                                          cluster_right_arm['AdCh'].keys()}}
+q_left_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_left_arm['AdCh'].keys()},
+              "normalized_time_vector": {key: np.zeros((381, 1)) for key in
+                                         cluster_left_arm['AdCh'].keys()}}
+q_thighs = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_thighs['AdCh'].keys()},
+            "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_thighs['AdCh'].keys()}}
 names = cluster_right_arm.keys()
 for i_name, name in enumerate(names):
     for i_sol in range(9):
@@ -151,8 +143,21 @@ for i_name, name in enumerate(names):
         time_vector = np.hstack((time_vector, np.linspace(float(time_parameters[0]+time_parameters[1]), float(time_parameters[0]+time_parameters[1]+time_parameters[2]), 101)[:-1]))
         time_vector = np.hstack((time_vector, np.linspace(float(time_parameters[0]+time_parameters[1]+time_parameters[2]), float(time_parameters[0]+time_parameters[1]+time_parameters[2]+time_parameters[3]), 101)[:-1]))
         time_vector = np.hstack((time_vector, np.linspace(float(time_parameters[0]+time_parameters[1]+time_parameters[2]+time_parameters[3]), float(time_parameters[0]+time_parameters[1]+time_parameters[2]+time_parameters[3]+time_parameters[4]), 41)))
-
         normalized_time_vector = time_vector / time_vector[-1]
+
+        if i_name == 0 and i_sol == 0:
+            axs[0, 0].plot(normalized_time_vector, q_bounds_min[6, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[0, 0].plot(normalized_time_vector, q_bounds_max[6, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[1, 0].plot(normalized_time_vector, q_bounds_min[7, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[1, 0].plot(normalized_time_vector, q_bounds_max[7, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[0, 1].plot(normalized_time_vector, q_bounds_min[10, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[0, 1].plot(normalized_time_vector, q_bounds_max[10, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[1, 1].plot(normalized_time_vector, q_bounds_min[11, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[1, 1].plot(normalized_time_vector, q_bounds_max[11, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[0, 2].plot(normalized_time_vector, q_bounds_min[14, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[0, 2].plot(normalized_time_vector, q_bounds_max[14, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[1, 2].plot(normalized_time_vector, q_bounds_min[15, :] * 180 / np.pi, color='black', linewidth=0.5)
+            axs[1, 2].plot(normalized_time_vector, q_bounds_max[15, :] * 180 / np.pi, color='black', linewidth=0.5)
 
         q = np.zeros(np.shape(Q[0][:, :-1]))
         q[:, :] = Q[0][:, :-1]
@@ -193,7 +198,7 @@ for i_name, name in enumerate(names):
             axs[0, 0].set_title(f"Change in elevation plane")  # Right arm
             axs[1, 0].set_title(f"Elevation")  # Right arm
             axs[0, 1].set_title(f"Change in elevation plane")  # Left arm
-            axs[1, 1].set_title(f"Left arm elevation")  # Left arm
+            axs[1, 1].set_title(f"Elevation")  # Left arm
             axs[0, 2].set_title(f"Flexion")  # Hips
             axs[1, 2].set_title(f"Lateral flexion")  # Hips
 
@@ -219,7 +224,7 @@ axs[1, 2].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 plt.subplots_adjust(left=0.05, bottom=0.2, right=0.95, top=0.9)
 plt.suptitle(f"{nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
-plt.show()
+# plt.show()
 
 print("\n\n")
 
@@ -310,13 +315,19 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     print(f"{cluster_name} has a right arm axial rotation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][6, :]) / (np.max(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][6, :]) - np.min(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][6, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a right arm elevation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][7, :]) / (np.max(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :]) - np.min(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :])) * 100}% of the average max amplitude")
 
+    if i_cluster == 0:
+        axs[0, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_min[6, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[0, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_max[6, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[1, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_min[7, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[1, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_max[7, :] * 180 / np.pi, color='black', linewidth=0.5)
+
     rgba = cmap_magma(i_cluster * 1/6)
-    axs[0, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi - std_q_per_cluster_right_arm[6, :, i_cluster] * 180/np.pi,
+    axs[0, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi - std_q_per_cluster_right_arm[6, :, i_cluster] * 180/np.pi,
                         mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi + std_q_per_cluster_right_arm[6, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
-    axs[0, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi, color=rgba)
-    axs[1, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi - std_q_per_cluster_right_arm[7, :, i_cluster] * 180/np.pi,
+    axs[0, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi, color=rgba)
+    axs[1, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi - std_q_per_cluster_right_arm[7, :, i_cluster] * 180/np.pi,
                         mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi + std_q_per_cluster_right_arm[7, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
-    axs[1, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
+    axs[1, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 0].set_title(f"Change in elevation plane")  # Right arm
         axs[1, 0].set_title(f"Elevation")  # Right arm
@@ -332,13 +343,19 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     print(f"{cluster_name} has a left arm axial rotation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][10, :]) / (np.max(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][10, :]) - np.min(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][10, :])) * 100}% of the average movement amplitude")
     print(f"{cluster_name} has a left arm elevation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][11, :]) / (np.max(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :]) - np.min(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :])) * 100}% of the average max amplitude")
 
+    if i_cluster == 0:
+        axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_min[10, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_max[10, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_min[11, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_max[11, :] * 180 / np.pi, color='black', linewidth=0.5)
+
     rgba = cmap_viridis(i_cluster * 1/6)
-    axs[0, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi - std_q_per_cluster_left_arm[10, :, i_cluster] * 180/np.pi,
+    axs[0, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi - std_q_per_cluster_left_arm[10, :, i_cluster] * 180/np.pi,
                         -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi + std_q_per_cluster_left_arm[10, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
-    axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi, color=rgba)
-    axs[1, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi - std_q_per_cluster_left_arm[11, :, i_cluster] * 180/np.pi,
+    axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi, color=rgba)
+    axs[1, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi - std_q_per_cluster_left_arm[11, :, i_cluster] * 180/np.pi,
                         -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi + std_q_per_cluster_left_arm[11, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
-    axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
+    axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 1].set_title(f"Change in elevation plane")  # Left arm
         axs[1, 1].set_title(f"Elevation")  # Left arm
@@ -356,13 +373,20 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     print(np.min(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :]) * 180 / np.pi)
     print(np.max(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :]) * 180 / np.pi)
     print(np.mean(range_q_per_cluster_thighs[:, :, i_cluster][15, :]) * 180 / np.pi)
+
+    if i_cluster == 0:
+        axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_min[14, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_max[14, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_min[15, :] * 180 / np.pi, color='black', linewidth=0.5)
+        axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], q_bounds_max[15, :] * 180 / np.pi, color='black', linewidth=0.5)
+
     rgba = cmap_viridis(1 - i_cluster * 1/6)
-    axs[0, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi - std_q_per_cluster_thighs[14, :, i_cluster] * 180/np.pi,
+    axs[0, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi - std_q_per_cluster_thighs[14, :, i_cluster] * 180/np.pi,
                         mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi + std_q_per_cluster_thighs[14, :, i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
-    axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi, color=rgba)
-    axs[1, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi - std_q_per_cluster_thighs[15, :, i_cluster] * 180/np.pi,
+    axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi, color=rgba)
+    axs[1, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi - std_q_per_cluster_thighs[15, :, i_cluster] * 180/np.pi,
                         mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi + std_q_per_cluster_thighs[15, :, i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
-    axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
+    axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 2].set_title(f"Flexion")  # Hips
         axs[1, 2].set_title(f"Lateral flexion")  # Hips
@@ -505,5 +529,3 @@ ax.set_xlim([-10, 110])
 ax.set_ylim([-5, 55])
 plt.savefig(f'cluster_graphs/proportion_of_solutions_in_each_cluster_{nb_twists}.svg', dpi=300)
 plt.show()
-
-# add q bounds on the kinematic graphs
