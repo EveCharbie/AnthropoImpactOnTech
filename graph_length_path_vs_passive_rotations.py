@@ -107,7 +107,7 @@ for name in athletes_number.keys():
     hips_twist_potential = abs(excel[index_hips, 4]) * 360
 
     best_cost = np.min(cost)
-    noise_index_to_keep = np.where(cost <= 1.01*best_cost)[0]  # 1.05
+    noise_index_to_keep = np.where(cost <= 1.01*best_cost)[0]
 
     color = cmap(i_athlete / 18)
     for i, idx in enumerate(noise_index_to_keep):
@@ -254,9 +254,7 @@ def plot_length_path_for_all_solutions_all_joints(data_to_graph, graph_type="arm
         # ax.set_ylim(15.45, 29.15)
         ax.set_xlim(525, 900)
         ax.set_ylim(10, 20)
-        print('ici')
     else:
-        print('ici')
         ax.set_xlim(400, 800)
         ax.set_ylim(4, 11)
 
@@ -281,7 +279,7 @@ y_lin_regress = slope*x_lin_regress + intercept
 plt.plot(x_lin_regress, y_lin_regress, '-k', linewidth=0.5)
 plt.text(860, 19.5, "S=" + str(round(correlation, 2)), fontsize=10)
 plt.savefig(save_path + "length_path_for_all_solutions_all_joints_with_correlation.png", dpi=300)
-plt.show()
+# plt.show()
 
 """
 Spearman associsation:
@@ -353,6 +351,123 @@ cbar = fig.colorbar(color_bar_handle, cax=cbar_ax)
 cbar.ax.set_title('Combined\ntwist potential [$\circ$]')
 plt.savefig("overview_graphs/musculature_height_twist_potential.png", dpi=300)
 # plt.show()
+
+# Create a figure showing the length of the trajectory for all clusters of solutions with STD and min-max range
+right_arm_trajectory_per_cluster = {key: [] for key in cluster_right_arm[name].keys()}
+left_arm_trajectory_per_cluster = {key: [] for key in cluster_left_arm[name].keys()}
+legs_trajectory_per_cluster = {key: [] for key in cluster_thighs[name].keys()}
+for i_athlete, name in enumerate(athletes_number.keys()):
+    for key in cluster_right_arm[name].keys():
+        idx_this_time = []
+        for idx in cluster_right_arm[name][key]:
+            idx_this_time += [data_to_graph[name]["noise_idx"].index(str(idx))]
+        trajectory_cluster_to_add = data_to_graph[name]["right_arm_trajectory"][idx_this_time]
+        right_arm_trajectory_per_cluster[key] += list(trajectory_cluster_to_add)
+
+    for key in cluster_left_arm[name].keys():
+        idx_this_time = []
+        for idx in cluster_left_arm[name][key]:
+            idx_this_time += [data_to_graph[name]["noise_idx"].index(str(idx))]
+        trajectory_cluster_to_add = data_to_graph[name]["left_arm_trajectory"][idx_this_time]
+        left_arm_trajectory_per_cluster[key] += list(trajectory_cluster_to_add)
+
+    for key in cluster_thighs[name].keys():
+        idx_this_time = []
+        for idx in cluster_thighs[name][key]:
+            idx_this_time += [data_to_graph[name]["noise_idx"].index(str(idx))]
+        trajectory_cluster_to_add = data_to_graph[name]["legs_trajectory"][idx_this_time]
+        legs_trajectory_per_cluster[key] += list(trajectory_cluster_to_add)
+
+cmap_viridis = cm.get_cmap('viridis')
+cmap_magma = cm.get_cmap('magma')
+fig, axs = plt.subplots(1, 3, figsize=(18, 6))
+for i_cluster, key in enumerate(cluster_right_arm[name].keys()):
+    rgba = cmap_magma(i_cluster * 1 / 6)
+    axs[0].plot(i_cluster + 0.25,
+                np.mean(right_arm_trajectory_per_cluster[key]),
+                "s",
+                color=rgba)
+    axs[0].fill_between(np.array([i_cluster, i_cluster + 0.5]),
+                        np.array([np.mean(right_arm_trajectory_per_cluster[key]) - np.std(right_arm_trajectory_per_cluster[key]),
+                                  np.mean(right_arm_trajectory_per_cluster[key]) - np.std(right_arm_trajectory_per_cluster[key])]),
+                        np.array([np.mean(right_arm_trajectory_per_cluster[key]) + np.std(right_arm_trajectory_per_cluster[key]),
+                                    np.mean(right_arm_trajectory_per_cluster[key]) + np.std(right_arm_trajectory_per_cluster[key])]),
+                        color=rgba,
+                        alpha=0.2)
+    axs[0].plot(np.array([i_cluster, i_cluster + 0.5]),
+                np.array([np.min(right_arm_trajectory_per_cluster[key]), np.min(right_arm_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+    axs[0].plot(np.array([i_cluster, i_cluster + 0.5]),
+                np.array([np.max(right_arm_trajectory_per_cluster[key]), np.max(right_arm_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+    axs[0].plot(np.array([i_cluster + 0.25, i_cluster + 0.25]),
+                np.array([np.min(right_arm_trajectory_per_cluster[key]), np.max(right_arm_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+
+for i_cluster, key in enumerate(cluster_left_arm[name].keys()):
+    rgba = cmap_viridis(i_cluster * 1/6)
+    axs[1].plot(i_cluster + 0.25,
+                np.mean(left_arm_trajectory_per_cluster[key]),
+                "s",
+                color=rgba)
+    axs[1].fill_between(np.array([i_cluster, i_cluster + 0.5]),
+                        np.array([np.mean(left_arm_trajectory_per_cluster[key]) - np.std(left_arm_trajectory_per_cluster[key]),
+                                  np.mean(left_arm_trajectory_per_cluster[key]) - np.std(left_arm_trajectory_per_cluster[key])]),
+                        np.array([np.mean(left_arm_trajectory_per_cluster[key]) + np.std(left_arm_trajectory_per_cluster[key]),
+                                    np.mean(left_arm_trajectory_per_cluster[key]) + np.std(left_arm_trajectory_per_cluster[key])]),
+                        color=rgba,
+                        alpha=0.2)
+    axs[1].plot(np.array([i_cluster, i_cluster + 0.5]),
+                np.array([np.min(left_arm_trajectory_per_cluster[key]), np.min(left_arm_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+    axs[1].plot(np.array([i_cluster, i_cluster + 0.5]),
+                np.array([np.max(left_arm_trajectory_per_cluster[key]), np.max(left_arm_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+    axs[1].plot(np.array([i_cluster + 0.25, i_cluster + 0.25]),
+                np.array([np.min(left_arm_trajectory_per_cluster[key]), np.max(left_arm_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+
+for i_cluster, key in enumerate(cluster_thighs[name].keys()):
+    rgba = cmap_viridis(1 - i_cluster * 1/6)
+    axs[2].plot(i_cluster + 0.25,
+                np.mean(legs_trajectory_per_cluster[key]),
+                "s",
+                color=rgba)
+    axs[2].fill_between(np.array([i_cluster, i_cluster + 0.5]),
+                        np.array([np.mean(legs_trajectory_per_cluster[key]) - np.std(legs_trajectory_per_cluster[key]),
+                                  np.mean(legs_trajectory_per_cluster[key]) - np.std(legs_trajectory_per_cluster[key])]),
+                        np.array([np.mean(legs_trajectory_per_cluster[key]) + np.std(legs_trajectory_per_cluster[key]),
+                                    np.mean(legs_trajectory_per_cluster[key]) + np.std(legs_trajectory_per_cluster[key])]),
+                        color=rgba,
+                        alpha=0.2)
+    axs[2].plot(np.array([i_cluster, i_cluster + 0.5]),
+                np.array([np.min(legs_trajectory_per_cluster[key]), np.min(legs_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+    axs[2].plot(np.array([i_cluster, i_cluster + 0.5]),
+                np.array([np.max(legs_trajectory_per_cluster[key]), np.max(legs_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+    axs[2].plot(np.array([i_cluster + 0.25, i_cluster + 0.25]),
+                np.array([np.min(legs_trajectory_per_cluster[key]), np.max(legs_trajectory_per_cluster[key])]),
+                "-",
+                color=rgba)
+
+axs[0].set_xlim(-0.5, 6)
+axs[1].set_xlim(-0.5, 6)
+axs[2].set_xlim(-0.5, 6)
+plt.savefig("cluster_graphs/mean_length_path_for_clusters.svg")
+plt.show()
+
+
+
+
 
 
 # 2.5 Twists -----------------------------------------------------------------------------------------------------------

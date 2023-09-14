@@ -385,3 +385,6 @@ axs[15].set_xlabel("Time [s]", fontsize=20)
 fig.tight_layout()
 fig.savefig(f'qddot_bounds_init.png', dpi=300)
 fig.show()
+
+with open('q_bounds.pkl', 'wb') as f:
+    pickle.dump([q_bounds_min, q_bounds_max], f)

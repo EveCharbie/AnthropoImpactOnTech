@@ -40,8 +40,8 @@ cluster_right_arm = {
     "FeBl":     {"cluster_1": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [],           "cluster_4": [5],       "cluster_5": [],                          "cluster_6": []},
     "JeCh":     {"cluster_1": [6],                            "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": [0, 1, 2, 3, 4, 5, 7, 8, 9]},
     "KaFu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 3, 8],    "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 2, 4, 5, 6, 9]},
-    "KaMi":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 7],                   "cluster_3": [4, 9],       "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 5, 6, 8]},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [2],          "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 3, 4, 5, 6, 7, 8, 9]},
+    "KaMi":     {"cluster_1": [],                             "cluster_2": [2, 3, 7],                      "cluster_3": [4, 9],       "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 5, 6, 8]},
+    "LaDe":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [2],          "cluster_4": [],        "cluster_5": [],                          "cluster_6": [1, 3, 4, 6, 7, 8, 9]},
     "MaCu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [1, 3],       "cluster_4": [],        "cluster_5": [],                          "cluster_6": [2, 4, 6, 7, 8, 9]},
     "MaJa":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "cluster_6": []},
     "OlGa":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [1],          "cluster_4": [],        "cluster_5": [],                          "cluster_6": []},
@@ -61,8 +61,8 @@ cluster_left_arm = {
     "FeBl":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                       "cluster_3": [],                             "cluster_4": []},
     "JeCh":     {"cluster_1": [0, 1, 2, 3, 4, 5, 7, 8, 9],    "cluster_2": [],                       "cluster_3": [6],                            "cluster_4": []},
     "KaFu":     {"cluster_1": [],                             "cluster_2": [],                       "cluster_3": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_4": [0]},
-    "KaMi":     {"cluster_1": [0, 1, 4, 5, 6, 8, 9],          "cluster_2": [],                       "cluster_3": [2, 3, 7],                      "cluster_4": []},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [1, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],                             "cluster_4": [2]},
+    "KaMi":     {"cluster_1": [1, 4, 5, 6, 8, 9],             "cluster_2": [],                       "cluster_3": [2, 3, 7],                      "cluster_4": []},
+    "LaDe":     {"cluster_1": [],                             "cluster_2": [1, 3, 4, 6, 7, 8, 9],    "cluster_3": [],                             "cluster_4": [2]},
     "MaCu":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 6, 7, 8, 9], "cluster_3": [],                             "cluster_4": []},
     "MaJa":     {"cluster_1": [0, 2, 4, 5, 6, 9],             "cluster_2": [],                       "cluster_3": [1, 3, 7, 8],                   "cluster_4": []},
     "OlGa":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                       "cluster_3": [],                             "cluster_4": []},
@@ -82,8 +82,8 @@ cluster_thighs = {
     "FeBl":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "JeCh":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "KaFu":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "KaMi":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 5, 6, 7, 8, 9]},
+    "KaMi":     {"cluster_1": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_2": []},
+    "LaDe":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 6, 7, 8, 9]},
     "MaCu":     {"cluster_1": [1, 2, 3, 4, 6, 7, 8, 9],       "cluster_2": []},
     "MaJa":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "OlGa":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
@@ -114,10 +114,24 @@ cluster_thighs = {
 #     "ZoTs":     {"cluster_1": [], "cluster_2": [], "cluster_3": [], "cluster_4": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]},
 # }
 
+with open("q_bounds.pkl", 'rb') as f:
+    q_bounds_min, q_bounds_max = pickle.load(f)
 
 # print all the solutions at once
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
-
+# time_vector = np.linspace(0, 1, 381)
+# axs[0, 0].plot(time_vector, q_bounds_min[6, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[0, 0].plot(time_vector, q_bounds_max[6, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[1, 0].plot(time_vector, q_bounds_min[7, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[1, 0].plot(time_vector, q_bounds_max[7, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[0, 1].plot(time_vector, -q_bounds_min[10, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[0, 1].plot(time_vector, -q_bounds_max[10, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[1, 1].plot(time_vector, -q_bounds_min[11, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[1, 1].plot(time_vector, -q_bounds_max[11, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[0, 2].plot(time_vector, q_bounds_min[14, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[0, 2].plot(time_vector, q_bounds_max[14, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[1, 2].plot(time_vector, q_bounds_min[15, :] * 180/np.pi, color='black', linewidth=0.5)
+# axs[1, 2].plot(time_vector, q_bounds_max[15, :] * 180/np.pi, color='black', linewidth=0.5)
 q_right_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_right_arm['AdCh'].keys()}, "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_right_arm['AdCh'].keys()}}
 q_left_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_left_arm['AdCh'].keys()}, "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_left_arm['AdCh'].keys()}}
 q_thighs = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_thighs['AdCh'].keys()}, "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_thighs['AdCh'].keys()}}
@@ -154,8 +168,8 @@ for i_name, name in enumerate(names):
                 q_right_arm['normalized_time_vector'][key] = np.concatenate((q_right_arm['normalized_time_vector'][key], normalized_time_vector[:, np.newaxis]), axis=1)
                 i_cluster_right_arm = i_clust
                 rgba = cmap_magma(i_cluster_right_arm * 1/6)
-                axs[0, 0].plot(normalized_time_vector, q[6, :], color=rgba)
-                axs[1, 0].plot(normalized_time_vector, q[7, :], color=rgba)
+                axs[0, 0].plot(normalized_time_vector, q[6, :] * 180/np.pi, color=rgba)
+                axs[1, 0].plot(normalized_time_vector, q[7, :] * 180/np.pi, color=rgba)
 
         for i_clust, key in enumerate(cluster_left_arm[name].keys()):
             if i_sol in cluster_left_arm[name][key]:
@@ -163,8 +177,8 @@ for i_name, name in enumerate(names):
                 q_left_arm['normalized_time_vector'][key] = np.concatenate((q_left_arm['normalized_time_vector'][key], normalized_time_vector[:, np.newaxis]), axis=1)
                 i_cluster_left_arm = i_clust
                 rgba = cmap_viridis(i_cluster_left_arm * 1/6)
-                axs[0, 1].plot(normalized_time_vector, -q[10, :], color=rgba)
-                axs[1, 1].plot(normalized_time_vector, -q[11, :], color=rgba)
+                axs[0, 1].plot(normalized_time_vector, -q[10, :] * 180/np.pi, color=rgba)
+                axs[1, 1].plot(normalized_time_vector, -q[11, :] * 180/np.pi, color=rgba)
 
         for i_clust, key in enumerate(cluster_thighs[name].keys()):
             if i_sol in cluster_thighs[name][key]:
@@ -172,8 +186,8 @@ for i_name, name in enumerate(names):
                 q_thighs['normalized_time_vector'][key] = np.concatenate((q_thighs['normalized_time_vector'][key], normalized_time_vector[:, np.newaxis]), axis=1)
                 i_cluster_thighs = i_clust
                 rgba = cmap_viridis(1 - i_cluster_thighs * 1/6)
-                axs[0, 2].plot(normalized_time_vector, q[14, :], color=rgba)
-                axs[1, 2].plot(normalized_time_vector, q[15, :], color=rgba)
+                axs[0, 2].plot(normalized_time_vector, q[14, :] * 180/np.pi, color=rgba)
+                axs[1, 2].plot(normalized_time_vector, q[15, :] * 180/np.pi, color=rgba)
 
         if i_sol == 0:
             axs[0, 0].set_title(f"Change in elevation plane")  # Right arm
@@ -189,23 +203,23 @@ for i_name, name in enumerate(names):
 
 for i_clust, key in enumerate(cluster_right_arm[name].keys()):
     rgba = cmap_magma(i_clust * 1/6)
-    axs[1, 0].plot(normalized_time_vector[0], q[7, 0], color=rgba, label="Cluster #" + str(i_clust + 1))
+    axs[1, 0].plot(normalized_time_vector[0], q[7, 0] * 180/np.pi, color=rgba, label="Cluster #" + str(i_clust + 1))
 axs[1, 0].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 for i_clust, key in enumerate(cluster_left_arm[name].keys()):
     rgba = cmap_viridis(i_clust * 1/6)
-    axs[1, 1].plot(normalized_time_vector[0], q[7, 0], color=rgba, label="Cluster #" + str(i_clust + 1))
+    axs[1, 1].plot(normalized_time_vector[0], q[7, 0] * 180/np.pi, color=rgba, label="Cluster #" + str(i_clust + 1))
 axs[1, 1].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 for i_clust, key in enumerate(cluster_thighs[name].keys()):
     rgba = cmap_viridis(1 - i_clust * 1/6)
-    axs[1, 2].plot(normalized_time_vector[0], q[7, 0], color=rgba, label="Cluster #" + str(i_clust + 1))
+    axs[1, 2].plot(normalized_time_vector[0], q[7, 0] * 180/np.pi, color=rgba, label="Cluster #" + str(i_clust + 1))
 axs[1, 2].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 plt.subplots_adjust(left=0.05, bottom=0.2, right=0.95, top=0.9)
 plt.suptitle(f"{nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
-# plt.show()
+plt.show()
 
 print("\n\n")
 
@@ -297,12 +311,12 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
     print(f"{cluster_name} has a right arm elevation range of {np.mean(range_q_per_cluster_right_arm[:, :, i_cluster][7, :]) / (np.max(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :]) - np.min(mean_q_per_cluster_right_arm['q'][:, :, i_cluster][7, :])) * 100}% of the average max amplitude")
 
     rgba = cmap_magma(i_cluster * 1/6)
-    axs[0, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][6, :, i_cluster] - std_q_per_cluster_right_arm[6, :, i_cluster],
-                        mean_q_per_cluster_right_arm['q'][6, :, i_cluster] + std_q_per_cluster_right_arm[6, :,i_cluster], color=rgba, alpha=0.2)
-    axs[0, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][6, :, i_cluster], color=rgba)
-    axs[1, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][7, :, i_cluster] - std_q_per_cluster_right_arm[7, :, i_cluster],
-                        mean_q_per_cluster_right_arm['q'][7, :, i_cluster] + std_q_per_cluster_right_arm[7, :,i_cluster], color=rgba, alpha=0.2)
-    axs[1, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster], mean_q_per_cluster_right_arm['q'][7, :, i_cluster], color=rgba, label="Cluster #" + str(i_cluster + 1))
+    axs[0, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi - std_q_per_cluster_right_arm[6, :, i_cluster] * 180/np.pi,
+                        mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi + std_q_per_cluster_right_arm[6, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
+    axs[0, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][6, :, i_cluster] * 180/np.pi, color=rgba)
+    axs[1, 0].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi - std_q_per_cluster_right_arm[7, :, i_cluster] * 180/np.pi,
+                        mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi + std_q_per_cluster_right_arm[7, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
+    axs[1, 0].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, i_cluster] * 180/np.pi, mean_q_per_cluster_right_arm['q'][7, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 0].set_title(f"Change in elevation plane")  # Right arm
         axs[1, 0].set_title(f"Elevation")  # Right arm
@@ -319,12 +333,12 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     print(f"{cluster_name} has a left arm elevation range of {np.mean(range_q_per_cluster_left_arm[:, :, i_cluster][11, :]) / (np.max(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :]) - np.min(mean_q_per_cluster_left_arm['q'][:, :, i_cluster][11, :])) * 100}% of the average max amplitude")
 
     rgba = cmap_viridis(i_cluster * 1/6)
-    axs[0, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] - std_q_per_cluster_left_arm[10, :, i_cluster],
-                        -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] + std_q_per_cluster_left_arm[10, :,i_cluster], color=rgba, alpha=0.2)
-    axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][10, :, i_cluster], color=rgba)
-    axs[1, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] - std_q_per_cluster_left_arm[11, :, i_cluster],
-                        -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] + std_q_per_cluster_left_arm[11, :,i_cluster], color=rgba, alpha=0.2)
-    axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], -mean_q_per_cluster_left_arm['q'][11, :, i_cluster], color=rgba, label="Cluster #" + str(i_cluster + 1))
+    axs[0, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi - std_q_per_cluster_left_arm[10, :, i_cluster] * 180/np.pi,
+                        -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi + std_q_per_cluster_left_arm[10, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
+    axs[0, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][10, :, i_cluster] * 180/np.pi, color=rgba)
+    axs[1, 1].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi - std_q_per_cluster_left_arm[11, :, i_cluster] * 180/np.pi,
+                        -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi + std_q_per_cluster_left_arm[11, :,i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
+    axs[1, 1].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, -mean_q_per_cluster_left_arm['q'][11, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 1].set_title(f"Change in elevation plane")  # Left arm
         axs[1, 1].set_title(f"Elevation")  # Left arm
@@ -343,12 +357,12 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     print(np.max(mean_q_per_cluster_thighs['q'][:, :, i_cluster][15, :]) * 180 / np.pi)
     print(np.mean(range_q_per_cluster_thighs[:, :, i_cluster][15, :]) * 180 / np.pi)
     rgba = cmap_viridis(1 - i_cluster * 1/6)
-    axs[0, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster] - std_q_per_cluster_thighs[14, :, i_cluster],
-                        mean_q_per_cluster_thighs['q'][14, :, i_cluster] + std_q_per_cluster_thighs[14, :, i_cluster], color=rgba, alpha=0.2)
-    axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][14, :, i_cluster], color=rgba)
-    axs[1, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][15, :, i_cluster] - std_q_per_cluster_thighs[15, :, i_cluster],
-                        mean_q_per_cluster_thighs['q'][15, :, i_cluster] + std_q_per_cluster_thighs[15, :, i_cluster], color=rgba, alpha=0.2)
-    axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0], mean_q_per_cluster_thighs['q'][15, :, i_cluster], color=rgba, label="Cluster #" + str(i_cluster + 1))
+    axs[0, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi - std_q_per_cluster_thighs[14, :, i_cluster] * 180/np.pi,
+                        mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi + std_q_per_cluster_thighs[14, :, i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
+    axs[0, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][14, :, i_cluster] * 180/np.pi, color=rgba)
+    axs[1, 2].fill_between(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi - std_q_per_cluster_thighs[15, :, i_cluster] * 180/np.pi,
+                        mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi + std_q_per_cluster_thighs[15, :, i_cluster] * 180/np.pi, color=rgba, alpha=0.2)
+    axs[1, 2].plot(mean_q_per_cluster_right_arm['normalized_time_vector'][:, 0] * 180/np.pi, mean_q_per_cluster_thighs['q'][15, :, i_cluster] * 180/np.pi, color=rgba, label="Cluster #" + str(i_cluster + 1))
     if i_cluster == 0:
         axs[0, 2].set_title(f"Flexion")  # Hips
         axs[1, 2].set_title(f"Lateral flexion")  # Hips
@@ -492,3 +506,4 @@ ax.set_ylim([-5, 55])
 plt.savefig(f'cluster_graphs/proportion_of_solutions_in_each_cluster_{nb_twists}.svg', dpi=300)
 plt.show()
 
+# add q bounds on the kinematic graphs
