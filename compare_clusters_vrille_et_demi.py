@@ -202,6 +202,7 @@ for i_name, name in enumerate(names):
             axs[0, 2].set_title(f"Flexion")  # Hips
             axs[1, 2].set_title(f"Lateral flexion")  # Hips
 
+            axs[1, 2].set_ylim(-25, 25)
             axs[1, 0].set_xlabel(f"Normalized time")
             axs[1, 1].set_xlabel(f"Normalized time")
             axs[1, 2].set_xlabel(f"Normalized time")
@@ -392,6 +393,7 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
         axs[1, 2].set_title(f"Lateral flexion")  # Hips
     print('\n')
 print('\n')
+axs[1, 2].set_ylim(-25, 25)
 axs[1, 2].set_xlabel(f"Normalized time")
 axs[1, 2].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
