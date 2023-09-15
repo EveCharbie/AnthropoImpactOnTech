@@ -1535,13 +1535,13 @@ def parse_biomod_options(filename):
 if __name__ == "__main__":
     # import argparse
 
-    DEBUG_FLAG = False
+    DEBUG_FLAG = True
 
     if DEBUG_FLAG:
 
         class Arguments:
             def __init__(self):
-                self.meas = "/home/lim/Documents/Stage_Lisa/AnthropoImpactOnTech/Models/KaFu.txt"
+                self.meas = "/home/charbie/Documents/Programmation/AnthropoImpactOnTech/Models/text_files/Sarah.txt"
                 self.bioModOptions = ["tech_opt.yml"]
 
         args = Arguments()
@@ -1554,9 +1554,9 @@ if __name__ == "__main__":
         parser.add_argument("--bioModOptions", nargs=1, help="option file for the bioMod")
         args = parser.parse_args()
 
-    model_path = ''
-    for index_model, model in os.listdir(model_path): # folder
-        if model.enswith('.txt'):
+    model_path = '/home/charbie/Documents/Programmation/AnthropoImpactOnTech/Models/text_files'
+    for index_model, model in enumerate(os.listdir(model_path)):  # folder
+        if model[-4:] == '.txt':
 
             bioModOptions = args.bioModOptions[0] if args.bioModOptions else None
 
