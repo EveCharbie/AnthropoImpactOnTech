@@ -523,6 +523,7 @@ for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
             x_min_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
             x_max_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm + 1])
             ax.fill_between([x_min_right_arm + offset_right_arm, x_max_right_arm + offset_right_arm], [0, 0], [10, 10], color=cmap_magma(i_cluster_right_arm * 1/6), alpha=0.8, linewidth=0.0)
+            print(f"{pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm]}% hip_{i_cluster_thighs+1} / left_arm_{i_cluster_left_arm+1} / right_arm_{i_cluster_right_arm+1}")
 
         offset_right_arm = x_max_left_arm + offset_left_arm
     offset_left_arm = x_max_thighs
@@ -531,3 +532,11 @@ ax.set_xlim([-10, 110])
 ax.set_ylim([-5, 55])
 plt.savefig(f'cluster_graphs/proportion_of_solutions_in_each_cluster_{nb_twists}.svg', dpi=300)
 plt.show()
+
+# Count number of combinaition of strategies were used
+num_combinations = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys()), len(cluster_right_arm['AlAd'].keys())))
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
+        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['AlAd'].keys()):
+            if pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] > 0:
+                num_combinations[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] = 1

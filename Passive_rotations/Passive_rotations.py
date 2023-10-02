@@ -109,6 +109,22 @@ def bras_gauche_descend_root_YZ_fixe(m, x0, t, T0, Tf, Q0, Qf):
     x = dynamics_root(m, x0, Qddot_J)
     return x
 
+def tuck_root_YZ_fixe(m, x0, t, T0, Tf, Q0, Qf, Q0_HIPS, Qf_HIPS, Q0_KNEE, Qf_KNEE):
+    global HIPS, KNEE
+    Kp = 10.0
+    Kv = 3.0
+    Qddot_J = np.zeros(m.nbQ() - m.nbRoot())
+    p, v, a = Quintic(t, T0, Tf, Q0, Qf)
+    Qddot_J[GAUCHE-2 - m.nbRoot()] = a + Kp * (p - x0[GAUCHE-2]) + Kv * (v - x0[m.nbQ() + GAUCHE-2])
+    Qddot_J[DROITE-2 - m.nbRoot()] = -a + Kp * (-p - x0[DROITE-2]) + Kv * (-v - x0[m.nbQ() + DROITE-2])
+    p, v, a = Quintic(t, T0, Tf, Q0_HIPS, Qf_HIPS)
+    Qddot_J[HIPS-2 - m.nbRoot()] = a + Kp * (p - x0[HIPS-2]) + Kv * (v - x0[m.nbQ() + HIPS-2])
+    p, v, a = Quintic(t, T0, Tf, Q0_KNEE, Qf_KNEE)
+    Qddot_J[KNEE-2 - m.nbRoot()] = a + Kp * (p - x0[KNEE-2]) + Kv * (v - x0[m.nbQ() + KNEE-2])
+
+    x = dynamics_root(m, x0, Qddot_J)
+    return x
+
 def bras_droit_descend(m, x0, t, T0, Tf, Q0, Qf):
     global DROITE
     Kp = 10.0
@@ -318,12 +334,12 @@ worksheet.write("E1", "Twist")
 
 # Simulation
 #
-def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row, column, situation, viz=True):
+def simuler(nom, m, N, t0, tf, T0, Tf, Q0, Qf, X0, action_bras, row, column, situation, viz=True, **kwargs):
     m.setGravity(np.array((0, 0, 0)))
     t, dt = np.linspace(t0, tf, num=N + 1, retstep=True)
     situation += "," + nom.partition("bioMod")[2]
     nom = nom.partition(".bioMod")[0].removeprefix("Models/")
-    func = lambda t, y: action_bras(m, y, t, T0, Tf, Q0, Qf)
+    func = lambda t, y: action_bras(m, y, t, T0, Tf, Q0, Qf, **kwargs)
 
     r = scipy.integrate.ode(func).set_integrator("dop853").set_initial_value(X0, t0)
     X_tous = X0
@@ -388,7 +404,9 @@ N = 100
 
 GAUCHE = 11  #32 -> 6 # 42 -> 24; 10 -> 9
 DROITE = 7  # 32->10  # 42 -> 15; 10 -> 7
+HIPS = 14
 YrotC = 15
+KNEE = 16
 
 t0 = 0.0
 tf = 1.0
@@ -398,6 +416,10 @@ Q0 = -2.9
 Qf = 0
 Q0_tilt = 0
 Qf_tilt = 3.14/16
+Q0_HIPS = 0
+Qf_HIPS = -2.7
+Q0_KNEE = 0
+Qf_KNEE = 2.7
 
 models_path = '../Models/Models_Lisa/'
 row = 0
@@ -628,8 +650,51 @@ for model_name in os.listdir(models_path):
         situation=situation,
     )
 
-    time, _ = np.linspace(t0, tf, num=N + 1, retstep=True)
-    plot_spline_limb_movements(time, X_simulated_arm, X_simulated_hips)
+
+    # debut bras en haut
+    nb_root = model_fixe.nbRoot()
+    X0 = np.zeros(model_fixe.nbQ() * 2)
+    X0[DROITE-2] = -Q0
+    X0[GAUCHE-2] = Q0
+
+    CoM_func = model_fixe.CoM(X0[: model_fixe.nbQ()]).to_array()
+    bassin = model_fixe.globalJCS(0).to_array()
+    QCoM = CoM_func.reshape(1, 3)
+    Qbassin = bassin[-1, :3]
+    r = QCoM - Qbassin
+
+    X0[model_fixe.nbQ() + 3] = 2 * np.pi  # Salto rot
+    pelvis_angular_velocity = np.array([X0[model.nbQ() + 3], 0, 0])
+    Correction = X0[model_fixe.nbQ(): model_fixe.nbQ() + 3] + np.cross(
+        r, pelvis_angular_velocity
+    )  # correction pour la translation
+    X0[model_fixe.nbQ() : model_fixe.nbQ() + 3] = Correction[0]
+
+    row += 1
+    simuler(
+        f"{name} tucking, YZ fixe",
+        model_fixe,
+        N,
+        t0,
+        tf,
+        T0,
+        Tf,
+        Q0,
+        Qf,
+        X0,
+        action_bras=tuck_root_YZ_fixe,
+        viz=False,
+        row=row,
+        column=column,
+        situation=situation,
+        Q0_HIPS=Q0_HIPS,
+        Qf_HIPS=Qf_HIPS,
+        Q0_KNEE=Q0_KNEE,
+        Qf_KNEE=Qf_KNEE,
+    )
+
+    # time, _ = np.linspace(t0, tf, num=N + 1, retstep=True)
+    # plot_spline_limb_movements(time, X_simulated_arm, X_simulated_hips)
 
 workbook.close()
 print('fin')

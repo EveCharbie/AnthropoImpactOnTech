@@ -105,6 +105,8 @@ for name in athletes_number.keys():
     arms_twist_potential = abs(excel[index_arms, 4]) * 360
     index_hips = np.where(excel[:, 0] == name + " bras en  bas, jambes tilt")[0][0]
     hips_twist_potential = abs(excel[index_hips, 4]) * 360
+    index_somersault = np.where(excel[:, 0] == name + " tucking, YZ fixe")[0][0]
+    somersault_potential = abs(excel[index_somersault, 2]) * 360
 
     best_cost = np.min(cost)
     noise_index_to_keep = np.where(cost <= 1.01*best_cost)[0]
@@ -128,6 +130,8 @@ for name in athletes_number.keys():
     data_to_graph[name]["right_arm_trajectory"] = right_arm_trajectory
     data_to_graph[name]["left_arm_trajectory"] = left_arm_trajectory
     data_to_graph[name]["legs_trajectory"] = legs_trajectory
+    data_to_graph[name]["somersault_potential"] = somersault_potential
+
 
 
     i_athlete += 1
@@ -291,7 +295,7 @@ Spearman associsation:
 """
 
 
-# plot the correlation between the twist potential and the anthropometry
+# plot the correlation between the arm and hip twist potentials
 athletes_reduced_anthropo = {name: None for name in athletes_number.keys()}
 fig, ax = plt.subplots(1, 1, figsize=(7, 7))
 for i, name in enumerate(athletes_number.keys()):
@@ -302,8 +306,27 @@ ax.set_ylabel("Hips twist potential [$\circ$]")
 plt.savefig("overview_graphs/arm_vs_hips_twist_potential.png", dpi=300)
 # plt.show()
 
+# print range of twist potential
+arms_twist_potential_all = []
+hip_twist_potential_all = []
+for name in athletes_number.keys():
+    arms_twist_potential_all += [data_to_graph[name]["arms_twist_potential"]]
+    hip_twist_potential_all += [data_to_graph[name]["hips_twist_potential"]]
+print("Arm twist potential ranged from " + str(np.min(arms_twist_potential_all)) + " to " + str(np.max(arms_twist_potential_all)))
+print("Hips twist potential ranged from " + str(np.min(hip_twist_potential_all)) + " to " + str(np.max(hip_twist_potential_all)))
 
-# plot the correlation between the arm twist potential and hip twist potential
+# plot the correlation between the twist potential and somersault potential
+athletes_reduced_anthropo = {name: None for name in athletes_number.keys()}
+fig, ax = plt.subplots(1, 1, figsize=(7, 7))
+for i, name in enumerate(athletes_number.keys()):
+    ax.plot(data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"], data_to_graph[name]["somersault_potential"], '.k')
+    ax.text(data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"] + 1, data_to_graph[name]["somersault_potential"] + 1, str(athletes_number[name]), fontsize=10)
+ax.set_xlabel("Combined twist potential [$\circ$]")
+ax.set_ylabel("Somersault potential [$\circ$]")
+plt.savefig("overview_graphs/twist_vs_somersault_potential.png", dpi=300)
+# plt.show()
+
+# plot the correlation between the twist potential and anthropometry
 fig, ax = plt.subplots(1, 1, figsize=(10, 5))
 for i, name in enumerate(athletes_number.keys()):
     model_anthropo_file_name = f'Models/text_files/{name}.txt'

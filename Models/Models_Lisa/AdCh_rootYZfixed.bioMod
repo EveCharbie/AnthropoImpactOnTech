@@ -187,6 +187,7 @@ endsegment
 segment Shanks
 	parent Thighs
 	rt 0.0 0.0 0.0 xyz 0.0 0.0 -0.43599999999999994
+	rotations x
 	com 0.0 0.0 -0.2071416133573164
 	mass 7.529050828245287
 	inertia
