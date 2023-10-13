@@ -95,7 +95,11 @@ def minimize_dofs(controller: PenaltyController, dofs: list, targets: list):
 
 
 def prepare_ocp(
-        biorbd_model_path: str, nb_twist: int, seed : int,
+        biorbd_model_path: str,
+        nb_twist: int,
+        seed : int,
+        athlete_to_copy = None,
+        save_folder = None,
         ode_solver: OdeSolver = OdeSolver.RK4(),
 ) -> OptimalControlProgram:
 
@@ -117,8 +121,7 @@ def prepare_ocp(
     n_shooting = (40, 100, 100, 100, 40)
 
     biomodel = (BiorbdModel(biorbd_model_path))
-    biorbd_model = (biomodel,biomodel, biomodel, biomodel,biomodel)
-
+    biorbd_model = (biomodel, biomodel, biomodel, biomodel, biomodel)
 
     nb_q = biorbd_model[0].nb_q
     nb_qdot = biorbd_model[0].nb_qdot
@@ -219,15 +222,11 @@ def prepare_ocp(
         u_bounds.add("qddot_joints", min_bound=[qddot_joints_min] * nb_qddot_joints, max_bound=[qddot_joints_max] * nb_qddot_joints, phase=i)
         
     u_init = InitialGuessList()
-    for i in range(5):
-        u_init.add("qddot_joints", [qddot_joints_init] * nb_qddot_joints, phase=i)
-        u_init[i]["qddot_joints"].add_noise(
-            bounds=u_bounds[i]["qddot_joints"],
-            magnitude=0.2,
-            magnitude_type=MagnitudeType.RELATIVE,
-            n_shooting=n_shooting[i],
-            seed=seed,
-        )
+    u0 = np.ones((nb_qddot_joints, n_shooting[0])) * qddot_joints_init
+    u1 = np.ones((nb_qddot_joints, n_shooting[1])) * qddot_joints_init
+    u2 = np.ones((nb_qddot_joints, n_shooting[2])) * qddot_joints_init
+    u3 = np.ones((nb_qddot_joints, n_shooting[3])) * qddot_joints_init
+    u4 = np.ones((nb_qddot_joints, n_shooting[4])) * qddot_joints_init
 
     # Path constraint
     x_bounds = BoundsList()
@@ -744,31 +743,77 @@ def prepare_ocp(
     x4[XrotC, 1] = -.5
 
     x_init = InitialGuessList()
-    x_init.add("q", initial_guess=x0[:nb_q, :], interpolation=InterpolationType.LINEAR, phase=0)
-    x_init.add("qdot", initial_guess=x0[nb_q:, :], interpolation=InterpolationType.LINEAR, phase=0)
-    x_init.add("q", initial_guess=x1[:nb_q, :], interpolation=InterpolationType.LINEAR, phase=1)
-    x_init.add("qdot", initial_guess=x1[nb_q:, :], interpolation=InterpolationType.LINEAR, phase=1)
-    x_init.add("q", initial_guess=x2[:nb_q, :], interpolation=InterpolationType.LINEAR, phase=2)
-    x_init.add("qdot", initial_guess=x2[nb_q:, :], interpolation=InterpolationType.LINEAR, phase=2)
-    x_init.add("q", initial_guess=x3[:nb_q, :], interpolation=InterpolationType.LINEAR, phase=3)
-    x_init.add("qdot", initial_guess=x3[nb_q:, :], interpolation=InterpolationType.LINEAR, phase=3)
-    x_init.add("q", initial_guess=x4[:nb_q, :], interpolation=InterpolationType.LINEAR, phase=4)
-    x_init.add("qdot", initial_guess=x4[nb_q:, :], interpolation=InterpolationType.LINEAR, phase=4)
+    interpolation = InterpolationType.LINEAR
+    t_init = [final_time / len(biorbd_model)] * len(biorbd_model)
 
-    for i in range(5):
-        x_init[i]["q"].add_noise(
-            bounds=x_bounds[i]["q"],
-            n_shooting=np.array(n_shooting[i])+1,
-            magnitude=0.2,
-            magnitude_type=MagnitudeType.RELATIVE,
-            seed=seed,
-            )
-        x_init[i]["qdot"].add_noise(
-            bounds=x_bounds[i]["qdot"],
-            n_shooting=np.array(n_shooting[i])+1,
-            magnitude=0.2,
-            magnitude_type=MagnitudeType.RELATIVE,
-            seed=seed,
+    name = biorbd_model_path[-11:-7]
+    if name in athlete_to_copy.keys():
+        if save_folder == "Multistart_double_vrille":
+            save_prename = "_double_vrille_et_demi_"
+        elif save_folder == "Multistart_vrille_et_demi":
+            save_prename = "_vrille_et_demi_"
+        else:
+            raise RuntimeError("Wrong type of OCP, see l.756.")
+        save_name_to_copy = (save_folder + '/' + athlete_to_copy[name] + save_prename + str(seed) + '_' + "CVG.pkl")
+        if os.path.isfile(save_name_to_copy):
+            with open(save_name_to_copy, 'rb') as f:
+                data = pickle.load(f)
+                interpolation = InterpolationType.EACH_FRAME
+                x0 = np.vstack((data["q"][0], data["qdot"][0]))
+                x1 = np.vstack((data["q"][1], data["qdot"][1]))
+                x2 = np.vstack((data["q"][2], data["qdot"][2]))
+                x3 = np.vstack((data["q"][3], data["qdot"][3]))
+                x4 = np.vstack((data["q"][4], data["qdot"][4]))
+
+                u0 = data["tau"][0][:, :-1]
+                u1 = data["tau"][1][:, :-1]
+                u2 = data["tau"][2][:, :-1]
+                u3 = data["tau"][3][:, :-1]
+                u4 = data["tau"][4][:, :-1]
+
+                t_init = [data["sol"].parameters["time"][i][0] for i in range(5)]
+
+
+    x_init.add("q", initial_guess=x0[:nb_q, :], interpolation=interpolation, phase=0)
+    x_init.add("qdot", initial_guess=x0[nb_q:, :], interpolation=interpolation, phase=0)
+    x_init.add("q", initial_guess=x1[:nb_q, :], interpolation=interpolation, phase=1)
+    x_init.add("qdot", initial_guess=x1[nb_q:, :], interpolation=interpolation, phase=1)
+    x_init.add("q", initial_guess=x2[:nb_q, :], interpolation=interpolation, phase=2)
+    x_init.add("qdot", initial_guess=x2[nb_q:, :], interpolation=interpolation, phase=2)
+    x_init.add("q", initial_guess=x3[:nb_q, :], interpolation=interpolation, phase=3)
+    x_init.add("qdot", initial_guess=x3[nb_q:, :], interpolation=interpolation, phase=3)
+    x_init.add("q", initial_guess=x4[:nb_q, :], interpolation=interpolation, phase=4)
+    x_init.add("qdot", initial_guess=x4[nb_q:, :], interpolation=interpolation, phase=4)
+
+    u_init.add("qddot_joints", initial_guess=u0, interpolation=InterpolationType.EACH_FRAME, phase=0)
+    u_init.add("qddot_joints", initial_guess=u1, interpolation=InterpolationType.EACH_FRAME, phase=1)
+    u_init.add("qddot_joints", initial_guess=u2, interpolation=InterpolationType.EACH_FRAME, phase=2)
+    u_init.add("qddot_joints", initial_guess=u3, interpolation=InterpolationType.EACH_FRAME, phase=3)
+    u_init.add("qddot_joints", initial_guess=u4, interpolation=InterpolationType.EACH_FRAME, phase=4)
+
+    if interpolation == InterpolationType.LINEAR:
+        for i in range(5):
+            x_init[i]["q"].add_noise(
+                bounds=x_bounds[i]["q"],
+                n_shooting=np.array(n_shooting[i])+1,
+                magnitude=0.2,
+                magnitude_type=MagnitudeType.RELATIVE,
+                seed=seed,
+                )
+            x_init[i]["qdot"].add_noise(
+                bounds=x_bounds[i]["qdot"],
+                n_shooting=np.array(n_shooting[i])+1,
+                magnitude=0.2,
+                magnitude_type=MagnitudeType.RELATIVE,
+                seed=seed,
+                )
+
+            u_init[i]["qddot_joints"].add_noise(
+                bounds=u_bounds[i]["qddot_joints"],
+                magnitude=0.2,
+                magnitude_type=MagnitudeType.RELATIVE,
+                n_shooting=n_shooting[i],
+                seed=seed,
             )
 
     constraints = ConstraintList()
@@ -784,7 +829,7 @@ def prepare_ocp(
         biorbd_model,
         dynamics,
         n_shooting,
-        [final_time / len(biorbd_model)] * len(biorbd_model),
+        t_init,
         x_init=x_init,
         u_init=u_init,
         x_bounds=x_bounds,
@@ -814,6 +859,9 @@ def save_results(sol: Solution,
         The solution to the ocp at the current pool
     """
 
+    biorbd_model_path, nb_twist, seed = combinatorial_parameters
+    save_folder = extra_parameter["save_folder"]
+
     title_before_solve = construct_filepath(biorbd_model_path, nb_twist, seed)
 
     convergence = sol.status
@@ -835,10 +883,10 @@ def save_results(sol: Solution,
 
     if convergence == 0 :
         convergence = 'CVG'
-        print(f'{athlete}  doing' + f' {stunt}' + ' converge')
+        print(f'{biorbd_model_path}  doing' + f' {nb_twist}' + ' converge')
     else:
         convergence = 'DVG'
-        print(f'{athlete} doing ' + f'{stunt}' + ' doesn t converge')
+        print(f'{biorbd_model_path} doing ' + f'{nb_twist}' + ' doesn t converge')
         
     if save_folder:
         with open(f'{save_folder}/{title_before_solve}_{convergence}.pkl', "wb") as file:
@@ -851,7 +899,7 @@ def should_solve(*combinatorial_parameters, **extra_parameters):
     """
     Check if the filename already appears in the folder where files are saved, if not ocp must be solved
     """
-    biorbd_model_path, nb_twist, seed = combinatorial_parameters
+    biorbd_model_path, nb_twist, seed, _, _ = combinatorial_parameters
     save_folder = extra_parameters["save_folder"]
     file_path = construct_filepath(biorbd_model_path, nb_twist, seed)
     already_done_filenames = os.listdir(f"{save_folder}")
@@ -865,6 +913,7 @@ def should_solve(*combinatorial_parameters, **extra_parameters):
 def prepare_multi_start(
     combinatorial_parameters: dict[tuple,...],
     save_folder: str = None,
+    athlete_to_copy = None,
     n_pools: int = 6
 ) -> MultiStart:
 
@@ -886,11 +935,11 @@ def main():
     """
 
     seed = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    nb_twist = [3, 5]
+    nb_twist = [5]
     athletes = [
         # "AdCh",
         # "AlAd",
-        # "AuJo",
+        "AuJo",
         # "Benjamin",
         # "ElMe",
         # "EvZl",
@@ -899,14 +948,17 @@ def main():
         # "KaFu",
         # "KaMi",
         # "LaDe",
-        # "MaCu",
+        "MaCu",
         # "MaJa",
         # "OlGa",
-        "Sarah",
+        # "Sarah",
         # "SoMe",
         # "WeEm",
         # "ZoTs"
         ]
+
+    athlete_to_copy = {"AuJo": "ElMe",
+                       "MaCu": "Sarah"}
 
     all_paths = []
     for athlete in athletes :
@@ -914,26 +966,24 @@ def main():
         biorbd_model_path = "Models/Models_Lisa/" + f'{path}'
         all_paths.append(biorbd_model_path)
 
+    save_folder = "Multistart_double_vrille"
+    # save_folder = "Multistart_vrille_et_demi"
+
     combinatorial_parameters = {'bio_model_path': all_paths,
                                 'nb_twist': nb_twist,
-                                'seed': seed}
-    save_folder = "Multistart_double_vrille"
+                                'seed': seed,
+                                'athlete_to_copy': [athlete_to_copy],
+                                'save_folder': [save_folder]}
 
     multi_start = prepare_multi_start(combinatorial_parameters=combinatorial_parameters, save_folder=save_folder, n_pools=6)
 
-
     multi_start.solver = Solver.IPOPT(show_online_optim=False, show_options=dict(show_bounds=False))
-        #if Mod.with_hsl:
     multi_start.solver.set_linear_solver('ma57')
-    #else:
-    #    print("Not using ma57")
     multi_start.solver.set_maximum_iterations(3000)
     multi_start.solver.set_convergence_tolerance(1e-4)
     #multi_start.solver.set_print_level(0)
 
     multi_start.solve()
-
-    #sol.graphs(show_bounds=True, show_now=False, save_path=f'{folder}/{athlete}')
 
 
 if __name__ == "__main__":
