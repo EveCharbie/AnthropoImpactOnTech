@@ -64,6 +64,7 @@ with open(save_path + "clusters_sol.pkl", "rb") as f:
     cluster_right_arm = data["cluster_right_arm"]
     cluster_left_arm = data["cluster_left_arm"]
     cluster_thighs = data["cluster_thighs"]
+    best_solution_per_athlete = data["best_solution_per_athlete"]
 
     path_to_degree_of_liberty = "Passive_rotations/passive rotations results/"
     excel = pd.read_excel(f"{path_to_degree_of_liberty}degrees_of_liberty.xlsx", index_col=None, header=None).to_numpy()
@@ -73,16 +74,38 @@ markers = ['o', 'x', '^', '*', 's', 'p']
 i_athlete = 0
 fig, axs = plt.subplots(1, 3, figsize=(18, 6))
 for name in athletes_number.keys():
+
+    q_opt = best_solution_per_athlete[name]["q"]
+    noise_idx_opt = best_solution_per_athlete[name]["random_number"]
+    right_arm_cluster = best_solution_per_athlete[name]["right_arm_cluster"]
+    left_arm_cluster = best_solution_per_athlete[name]["left_arm_cluster"]
+    thighs_cluster = best_solution_per_athlete[name]["thighs_cluster"]
+
+    model = biorbd.Model(models_path + name + ".bioMod")
+    q_opt[:6, :] = 0
+    right_arm_trajectory_opt = compute_normalized_trajectory_length(model, q_opt, "RightArmNormalized")
+    left_arm_trajectory_opt = compute_normalized_trajectory_length(model, q_opt, "LeftArmNormalized")
+    legs_trajectory_opt = compute_normalized_trajectory_length(model, q_opt, "LegsNormalized")
+
+    index_arms = np.where(excel[:, 0] == name + " bras gauche bas, droit descend")[0][0]
+    arms_twist_potential = abs(excel[index_arms, 4]) * 360
+    index_hips = np.where(excel[:, 0] == name + " bras en  bas, jambes tilt")[0][0]
+    hips_twist_potential = abs(excel[index_hips, 4]) * 360
+    index_somersault = np.where(excel[:, 0] == name + " tucking, YZ fixe")[0][0]
+    somersault_potential = abs(excel[index_somersault, 2]) * 360
+
+    color = cmap(i_athlete / 18)
+    axs[0].plot(arms_twist_potential, right_arm_trajectory_opt, marker=markers[right_arm_cluster], color=color)
+    axs[1].plot(arms_twist_potential, left_arm_trajectory_opt, marker=markers[left_arm_cluster], color=color)
+    axs[2].plot(hips_twist_potential, legs_trajectory_opt, marker=markers[thighs_cluster], color=color)
+
     filename = name + ".pkl"
     with open(saved_data_path + filename, "rb") as f:
         data = pickle.load(f)
         cost = data['cost']
         q = data['q']
-        q_integrated = data['q_integrated']
-        reintegration_error = data['reintegration_error']
         noise_idx = data['noise']
 
-    model = biorbd.Model(models_path + name + ".bioMod")
     right_arm_trajectory = np.zeros(len(noise_idx))
     left_arm_trajectory = np.zeros(len(noise_idx))
     legs_trajectory = np.zeros(len(noise_idx))
@@ -101,38 +124,16 @@ for name in athletes_number.keys():
         legs_trajectory[noise_index_this_time] = compute_normalized_trajectory_length(model, q_joined, "LegsNormalized")
 
 
-    index_arms = np.where(excel[:, 0] == name + " bras gauche bas, droit descend")[0][0]
-    arms_twist_potential = abs(excel[index_arms, 4]) * 360
-    index_hips = np.where(excel[:, 0] == name + " bras en  bas, jambes tilt")[0][0]
-    hips_twist_potential = abs(excel[index_hips, 4]) * 360
-    index_somersault = np.where(excel[:, 0] == name + " tucking, YZ fixe")[0][0]
-    somersault_potential = abs(excel[index_somersault, 2]) * 360
-
-    best_cost = np.min(cost)
-    noise_index_to_keep = np.where(cost <= 1.01*best_cost)[0]
-
-    color = cmap(i_athlete / 18)
-    for i, idx in enumerate(noise_index_to_keep):
-        for j, key in enumerate(cluster_right_arm[name].keys()):
-            if int(noise_idx[idx]) in cluster_right_arm[name][key]:
-                axs[0].plot(arms_twist_potential, right_arm_trajectory[idx], marker=markers[j], color=color)
-        for j, key in enumerate(cluster_left_arm[name].keys()):
-            if int(noise_idx[idx]) in cluster_left_arm[name][key]:
-                axs[1].plot(arms_twist_potential, left_arm_trajectory[idx], marker=markers[j], color=color)
-        for j, key in enumerate(cluster_thighs[name].keys()):
-            if int(noise_idx[idx]) in cluster_thighs[name][key]:
-                axs[2].plot(hips_twist_potential, legs_trajectory[idx], marker=markers[j], color=color)
-
     data_to_graph[name]["noise_idx"] = noise_idx
-    data_to_graph[name]["noise_index_to_keep"] = noise_index_to_keep
     data_to_graph[name]["arms_twist_potential"] = arms_twist_potential
     data_to_graph[name]["hips_twist_potential"] = hips_twist_potential
+    data_to_graph[name]["somersault_potential"] = somersault_potential
+    data_to_graph[name]["right_arm_trajectory_opt"] = right_arm_trajectory_opt
+    data_to_graph[name]["left_arm_trajectory_opt"] = left_arm_trajectory_opt
+    data_to_graph[name]["legs_trajectory_opt"] = legs_trajectory_opt
     data_to_graph[name]["right_arm_trajectory"] = right_arm_trajectory
     data_to_graph[name]["left_arm_trajectory"] = left_arm_trajectory
     data_to_graph[name]["legs_trajectory"] = legs_trajectory
-    data_to_graph[name]["somersault_potential"] = somersault_potential
-
-
 
     i_athlete += 1
     axs[0].plot(0, 0, '-', color=color, label="Athlete #" + str(athletes_number[name]))
@@ -159,64 +160,6 @@ axs[2].set_ylim(3.8, 10.15)
 plt.savefig(save_path + "clusters_length_path_for_all_athletes.png", dpi=300)
 
 
-
-
-fig, axs = plt.subplots(6, 3, figsize=(15, 15))
-for j, key in enumerate(cluster_right_arm[name].keys()):
-    i_athlete = 0
-    for name in athletes_number.keys():
-
-        color = cmap(i_athlete / 18)
-        for i, idx in enumerate(data_to_graph[name]["noise_index_to_keep"]):
-            if key in cluster_right_arm[name].keys():
-                if int(noise_idx[idx]) in cluster_right_arm[name][key]:
-                    axs[j, 0].plot(data_to_graph[name]["arms_twist_potential"], data_to_graph[name]["right_arm_trajectory"][idx], marker=markers[j], color=color)
-            if key in cluster_left_arm[name].keys():
-                if int(noise_idx[idx]) in cluster_left_arm[name][key]:
-                    axs[j, 1].plot(data_to_graph[name]["arms_twist_potential"], data_to_graph[name]["left_arm_trajectory"][idx], marker=markers[j], color=color)
-            if key in cluster_thighs[name].keys():
-                if int(noise_idx[idx]) in cluster_thighs[name][key]:
-                    axs[j, 2].plot(data_to_graph[name]["hips_twist_potential"], data_to_graph[name]["legs_trajectory"][idx], marker=markers[j], color=color)
-
-        i_athlete += 1
-        if j == 0:
-            axs[0, 0].plot(0, 0, '-', color=color, label="Athlete #" + str(athletes_number[name]))
-
-for j, key in enumerate(cluster_right_arm[name].keys()):
-    axs[0, 1].plot(0, 0, marker=markers[j], linestyle='None', color='black', label="Cluster #" + key[-1])
-
-fig.subplots_adjust(left=0.05, right=0.95, bottom=0.05, top=0.95, wspace=0.1, hspace=0.2)
-# axs[0, 0].legend(loc='center left', bbox_to_anchor=(3.2, -3))  # Athlete number
-# axs[0, 1].legend(loc='center left', bbox_to_anchor=(2.1, 0.5))  # Cluster marker shape
-for i in range(6):
-    if "cluster_" + str(i+1) not in cluster_right_arm[name].keys():
-        axs[i, 0].set_axis_off()
-    if "cluster_" + str(i+1) not in cluster_left_arm[name].keys():
-        axs[i, 1].set_axis_off()
-    if "cluster_" + str(i+1) not in cluster_thighs[name].keys():
-        axs[i, 2].set_axis_off()
-    axs[i, 0].set_ylabel("Cluster #" + str(i + 1))
-    # axs[i, 0].set_xlabel("Arm twist potential [$^\circ$]")
-    # axs[i, 0].set_ylabel("Normalized right arm trajectory length [m]")
-    # axs[i, 1].set_xlabel("Arm twist potential [$^\circ$]")
-    # axs[i, 1].set_ylabel("Normalized left arm trajectory length [m]")
-    # axs[i, 2].set_xlabel("Hips twist potential [$^\circ$]")
-    # axs[i, 2].set_ylabel("Normalized legs trajectory length [m]")
-    axs[i, 0].set_xlim(425, 775)
-    axs[i, 0].set_ylim(3, 10.5)
-    axs[i, 1].set_xlim(425, 775)
-    axs[i, 1].set_ylim(3, 10.5)
-    # axs[i, 2].set_xlim(0.27*360, 0.42*360)
-    # axs[i, 2].set_ylim(6.1, 8.1)
-
-axs[0, 0].set_title("Right Arm")
-axs[0, 1].set_title("Left Arm")
-axs[0, 2].set_title("Hips")
-
-# plt.show()
-plt.savefig(save_path + "length_path_for_all_athletes_per_clusters.png", dpi=300)
-
-
 def plot_length_path_for_all_solutions_all_joints(data_to_graph, graph_type="arm_arm_hips"):
     fig, ax = plt.subplots(1, 1, figsize=(10, 5))
     i_athlete = 0
@@ -226,18 +169,17 @@ def plot_length_path_for_all_solutions_all_joints(data_to_graph, graph_type="arm
     twist_potential_per_athlete = {}
     for name in athletes_number.keys():
         color = cmap(i_athlete / 18)
-        for i, idx in enumerate(data_to_graph[name]["noise_index_to_keep"]):
-            if graph_type == "arm_arm_hips":
-                twist_potential += [data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"]]
-                joints_trajectories += [(data_to_graph[name]["right_arm_trajectory"][idx] + data_to_graph[name]["left_arm_trajectory"][idx])/2 + data_to_graph[name]["legs_trajectory"][idx]]
-            elif graph_type == "arm_arm":
-                twist_potential += [data_to_graph[name]["arms_twist_potential"]]
-                joints_trajectories += [(data_to_graph[name]["right_arm_trajectory"][idx] + data_to_graph[name]["left_arm_trajectory"][idx])/2]
-            else:
-                raise ValueError("graph_type must be either 'arm_arm_hips' or 'arm_arm'")
+        if graph_type == "arm_arm_hips":
+            twist_potential += [data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"]]
+            joints_trajectories += [(data_to_graph[name]["right_arm_trajectory_opt"] + data_to_graph[name]["left_arm_trajectory_opt"])/2 + data_to_graph[name]["legs_trajectory_opt"]]
+        elif graph_type == "arm_arm":
+            twist_potential += [data_to_graph[name]["arms_twist_potential"]]
+            joints_trajectories += [(data_to_graph[name]["right_arm_trajectory_opt"] + data_to_graph[name]["left_arm_trajectory_opt"])/2]
+        else:
+            raise ValueError("graph_type must be either 'arm_arm_hips' or 'arm_arm'")
 
-            ax.plot(twist_potential[i_trajectory], joints_trajectories[i_trajectory], 'o', color=color)
-            i_trajectory += 1
+        ax.plot(twist_potential[i_trajectory], joints_trajectories[i_trajectory], 'o', color=color)
+        i_trajectory += 1
         if graph_type == "arm_arm_hips":
             twist_potential_per_athlete[name] = data_to_graph[name]["arms_twist_potential"] + data_to_graph[name]["hips_twist_potential"]
         else:
@@ -381,6 +323,8 @@ left_arm_trajectory_per_cluster = {key: [] for key in cluster_left_arm[name].key
 legs_trajectory_per_cluster = {key: [] for key in cluster_thighs[name].keys()}
 for i_athlete, name in enumerate(athletes_number.keys()):
     for key in cluster_right_arm[name].keys():
+        if key == "others":
+            continue
         idx_this_time = []
         for idx in cluster_right_arm[name][key]:
             idx_this_time += [data_to_graph[name]["noise_idx"].index(str(idx))]
@@ -405,33 +349,34 @@ cmap_viridis = cm.get_cmap('viridis')
 cmap_magma = cm.get_cmap('magma')
 fig, axs = plt.subplots(1, 3, figsize=(18, 6))
 for i_cluster, key in enumerate(cluster_right_arm[name].keys()):
-    rgba = cmap_magma(i_cluster * 1 / 6)
-    axs[0].plot(i_cluster + 0.25,
-                np.mean(right_arm_trajectory_per_cluster[key]),
-                "s",
-                color=rgba)
-    axs[0].fill_between(np.array([i_cluster, i_cluster + 0.5]),
-                        np.array([np.mean(right_arm_trajectory_per_cluster[key]) - np.std(right_arm_trajectory_per_cluster[key]),
-                                  np.mean(right_arm_trajectory_per_cluster[key]) - np.std(right_arm_trajectory_per_cluster[key])]),
-                        np.array([np.mean(right_arm_trajectory_per_cluster[key]) + np.std(right_arm_trajectory_per_cluster[key]),
-                                    np.mean(right_arm_trajectory_per_cluster[key]) + np.std(right_arm_trajectory_per_cluster[key])]),
-                        color=rgba,
-                        alpha=0.2)
-    axs[0].plot(np.array([i_cluster, i_cluster + 0.5]),
-                np.array([np.min(right_arm_trajectory_per_cluster[key]), np.min(right_arm_trajectory_per_cluster[key])]),
-                "-",
-                color=rgba)
-    axs[0].plot(np.array([i_cluster, i_cluster + 0.5]),
-                np.array([np.max(right_arm_trajectory_per_cluster[key]), np.max(right_arm_trajectory_per_cluster[key])]),
-                "-",
-                color=rgba)
-    axs[0].plot(np.array([i_cluster + 0.25, i_cluster + 0.25]),
-                np.array([np.min(right_arm_trajectory_per_cluster[key]), np.max(right_arm_trajectory_per_cluster[key])]),
-                "-",
-                color=rgba)
+    if i_cluster < 5:
+        rgba = cmap_magma(1 - i_cluster * 1/6 - 1/6)
+        axs[0].plot(i_cluster + 0.25,
+                    np.mean(right_arm_trajectory_per_cluster[key]),
+                    "s",
+                    color=rgba)
+        axs[0].fill_between(np.array([i_cluster, i_cluster + 0.5]),
+                            np.array([np.mean(right_arm_trajectory_per_cluster[key]) - np.std(right_arm_trajectory_per_cluster[key]),
+                                      np.mean(right_arm_trajectory_per_cluster[key]) - np.std(right_arm_trajectory_per_cluster[key])]),
+                            np.array([np.mean(right_arm_trajectory_per_cluster[key]) + np.std(right_arm_trajectory_per_cluster[key]),
+                                        np.mean(right_arm_trajectory_per_cluster[key]) + np.std(right_arm_trajectory_per_cluster[key])]),
+                            color=rgba,
+                            alpha=0.2)
+        axs[0].plot(np.array([i_cluster, i_cluster + 0.5]),
+                    np.array([np.min(right_arm_trajectory_per_cluster[key]), np.min(right_arm_trajectory_per_cluster[key])]),
+                    "-",
+                    color=rgba)
+        axs[0].plot(np.array([i_cluster, i_cluster + 0.5]),
+                    np.array([np.max(right_arm_trajectory_per_cluster[key]), np.max(right_arm_trajectory_per_cluster[key])]),
+                    "-",
+                    color=rgba)
+        axs[0].plot(np.array([i_cluster + 0.25, i_cluster + 0.25]),
+                    np.array([np.min(right_arm_trajectory_per_cluster[key]), np.max(right_arm_trajectory_per_cluster[key])]),
+                    "-",
+                    color=rgba)
 
 for i_cluster, key in enumerate(cluster_left_arm[name].keys()):
-    rgba = cmap_viridis(i_cluster * 1/6)
+    rgba = cmap_viridis(i_cluster * 1/3)
     axs[1].plot(i_cluster + 0.25,
                 np.mean(left_arm_trajectory_per_cluster[key]),
                 "s",
@@ -482,9 +427,14 @@ for i_cluster, key in enumerate(cluster_thighs[name].keys()):
                 "-",
                 color=rgba)
 
-axs[0].set_xlim(-0.5, 6)
-axs[1].set_xlim(-0.5, 6)
-axs[2].set_xlim(-0.5, 6)
+axs[0].set_xlim(-0.5, 5)
+axs[0].set_ylim(3.8, 11)
+axs[0].tick_params(axis='y', labelsize=15)
+axs[1].set_xlim(-0.5, 5)
+axs[1].set_ylim(3.8, 11)
+axs[1].tick_params(axis='y', labelsize=15)
+axs[2].set_xlim(-0.5, 5)
+axs[2].tick_params(axis='y', labelsize=15)
 plt.savefig("cluster_graphs/mean_length_path_for_clusters.svg")
 plt.show()
 

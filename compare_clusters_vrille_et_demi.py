@@ -118,11 +118,18 @@ for i_name, name in enumerate(names):
         print(file_name)
         with open(file_name, 'rb') as f:
             data = pickle.load(f)
-        Q = data['q']
+
+        q = data['q'][0][:, :-1]
+        for i in range(4):
+            if i == 3:
+                q = np.hstack((q, data['q'][i + 1]))
+            else:
+                q = np.hstack((q, data['q'][i + 1][:, :-1]))
+
         if data['sol'].cost < best_solution_per_athlete[name]["cost"]:
             best_solution_per_athlete[name]["random_number"] = i_sol
             best_solution_per_athlete[name]["cost"] = data['sol'].cost
-            best_solution_per_athlete[name]["q"] = Q
+            best_solution_per_athlete[name]["q"] = q
             for i_clust, key in enumerate(cluster_right_arm[name].keys()):
                 if i_sol in cluster_right_arm[name][key]:
                     best_solution_per_athlete[name]["right_arm_cluster"] = i_clust
@@ -155,14 +162,6 @@ for i_name, name in enumerate(names):
             axs[1, 2].plot(normalized_time_vector, q_bounds_min[15, :] * 180 / np.pi, color='black', linewidth=0.5)
             axs[1, 2].plot(normalized_time_vector, q_bounds_max[15, :] * 180 / np.pi, color='black', linewidth=0.5)
 
-        q = np.zeros(np.shape(Q[0][:, :-1]))
-        q[:, :] = Q[0][:, :-1]
-        for i in range(1, len(Q)):
-            if i == len(Q) - 1:
-                q = np.hstack((q, Q[i]))
-            else:
-                q = np.hstack((q, Q[i][:, :-1]))
-
         for i_clust, key in enumerate(cluster_right_arm[name].keys()):
             if i_sol in cluster_right_arm[name][key]:
                 q_right_arm['q'][key] = np.concatenate((q_right_arm['q'][key], q[:, :, np.newaxis]), axis=2)
@@ -177,7 +176,7 @@ for i_name, name in enumerate(names):
                 q_left_arm['q'][key] = np.concatenate((q_left_arm['q'][key], q[:, :, np.newaxis]), axis=2)
                 q_left_arm['normalized_time_vector'][key] = np.concatenate((q_left_arm['normalized_time_vector'][key], normalized_time_vector[:, np.newaxis]), axis=1)
                 i_cluster_left_arm = i_clust
-                rgba = cmap_viridis(i_cluster_left_arm * 1/6)
+                rgba = cmap_viridis(i_cluster_left_arm * 1/3)
                 axs[0, 1].plot(normalized_time_vector, -q[10, :] * 180/np.pi, color=rgba)
                 axs[1, 1].plot(normalized_time_vector, -q[11, :] * 180/np.pi, color=rgba)
 
@@ -209,7 +208,7 @@ for i_clust, key in enumerate(cluster_right_arm[name].keys()):
 axs[1, 0].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 for i_clust, key in enumerate(cluster_left_arm[name].keys()):
-    rgba = cmap_viridis(i_clust * 1/6)
+    rgba = cmap_viridis(i_clust * 1/3)
     axs[1, 1].plot(normalized_time_vector[0], q[7, 0] * 180/np.pi, color=rgba, label="Cluster #" + str(i_clust + 1))
 axs[1, 1].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
@@ -528,7 +527,7 @@ for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
     for i_cluster_left_arm in range(len(cluster_left_arm['AlAd'].keys())):
         x_min_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm].sum()
         x_max_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm + 1].sum()
-        ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/6), alpha=0.8, linewidth=0.0)
+        ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/3), alpha=0.8, linewidth=0.0)
 
         for i_cluster_right_arm in range(len(cluster_right_arm['AlAd'].keys())):
             x_min_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
@@ -591,7 +590,7 @@ for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
         x_min_left_arm = pourcentage_clusters_opt_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm].sum()
         x_max_left_arm = pourcentage_clusters_opt_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm + 1].sum()
         if x_max_left_arm - x_min_left_arm > 1e-8:
-            ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/6), alpha=0.8, linewidth=0.0)
+            ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/3), alpha=0.8, linewidth=0.0)
 
         for i_cluster_right_arm in range(len(cluster_right_arm['AlAd'].keys())):
             x_min_right_arm = np.nansum(pourcentage_clusters_opt_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
