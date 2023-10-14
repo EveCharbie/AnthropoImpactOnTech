@@ -859,7 +859,7 @@ def save_results(sol: Solution,
         The solution to the ocp at the current pool
     """
 
-    biorbd_model_path, nb_twist, seed = combinatorial_parameters
+    biorbd_model_path, nb_twist, seed, _, _ = combinatorial_parameters
     save_folder = extra_parameter["save_folder"]
 
     title_before_solve = construct_filepath(biorbd_model_path, nb_twist, seed)
