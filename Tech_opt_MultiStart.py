@@ -771,7 +771,7 @@ def prepare_ocp(
                 u3 = data["tau"][3][:, :-1]
                 u4 = data["tau"][4][:, :-1]
 
-                t_init = [data["sol"].parameters["time"][i][0] for i in range(5)]
+                t_init = [float(data["sol"].parameters["time"][i][0]) for i in range(5)]
 
 
     x_init.add("q", initial_guess=x0[:nb_q, :], interpolation=interpolation, phase=0)
@@ -935,26 +935,26 @@ def main():
     """
 
     seed = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    nb_twist = [5]
+    nb_twist = [3, 5]
     athletes = [
-        # "AdCh",
-        # "AlAd",
+        "AdCh",
+        "AlAd",
         "AuJo",
-        # "Benjamin",
-        # "ElMe",
-        # "EvZl",
-        # "FeBl",
-        # "JeCh",
-        # "KaFu",
-        # "KaMi",
-        # "LaDe",
+        "Benjamin",
+        "ElMe",
+        "EvZl",
+        "FeBl",
+        "JeCh",
+        "KaFu",
+        "KaMi",
+        "LaDe",
         "MaCu",
-        # "MaJa",
-        # "OlGa",
-        # "Sarah",
-        # "SoMe",
-        # "WeEm",
-        # "ZoTs"
+        "MaJa",
+        "OlGa",
+        "Sarah",
+        "SoMe",
+        "WeEm",
+        "ZoTs"
         ]
 
     athlete_to_copy = {"AuJo": "ElMe",
