@@ -21,6 +21,9 @@ import bioptim
 
 
 model_path = "Models/JeCh_TechOpt83.bioMod"
+model_path_right_arm = "Models/JeCh_TechOpt83_right_arm.bioMod"
+model_path_left_arm = "Models/JeCh_TechOpt83_left_arm.bioMod"
+model_path_hips = "Models/JeCh_TechOpt83_hips.bioMod"
 model = biorbd.Model(model_path)
 nb_twists = 1
 chosen_clusters_dict = {}
@@ -455,7 +458,17 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
         Q_to_animate[8, :] = mean_q_per_cluster_right_arm['q'][8, :, i_cluster]
         Q_to_animate[9, :] = mean_q_per_cluster_right_arm['q'][9, :, i_cluster]
 
-        # b = bioviz.Viz(model_path)
+        # print(f"Animating right arm Cluster #{i_cluster+1}")
+        # b = bioviz.Viz(model_path_right_arm,
+        #                mesh_opacity=1,
+        #                show_global_center_of_mass=False,
+        #                show_gravity_vector=False,
+        #                show_segments_center_of_mass=False,
+        #                show_global_ref_frame=False,
+        #                show_local_ref_frame=False,
+        #                show_markers=False,
+        #                background_color=(1.0, 1.0, 1.0)
+        #                )
         # b.set_camera_zoom(0.5)
         # b.load_movement(Q_to_animate)
         # b.exec()
@@ -469,10 +482,20 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     Q_to_animate[12, :] = mean_q_per_cluster_left_arm['q'][12, :, i_cluster]
     Q_to_animate[13, :] = mean_q_per_cluster_left_arm['q'][13, :, i_cluster]
 
-    # b = bioviz.Viz(model_path)
-    # b.set_camera_zoom(0.5)
-    # b.load_movement(Q_to_animate)
-    # b.exec()
+    print(f"Animating left arm Cluster #{i_cluster + 1}")
+    b = bioviz.Viz(model_path_left_arm,
+                   mesh_opacity=1,
+                   show_global_center_of_mass=False,
+                   show_gravity_vector=False,
+                   show_segments_center_of_mass=False,
+                   show_global_ref_frame=False,
+                   show_local_ref_frame=False,
+                   show_markers=False,
+                   background_color=(1.0, 1.0, 1.0)
+                   )
+    b.set_camera_zoom(0.5)
+    b.load_movement(Q_to_animate)
+    b.exec()
 
 
 for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
@@ -482,10 +505,20 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
     Q_to_animate[14, :] = mean_q_per_cluster_thighs['q'][14, :, i_cluster]
     Q_to_animate[15, :] = mean_q_per_cluster_thighs['q'][15, :, i_cluster]
 
-    # b = bioviz.Viz(model_path)
-    # b.set_camera_zoom(0.5)
-    # b.load_movement(Q_to_animate)
-    # b.exec()
+    print(f"Animating hips Cluster #{i_cluster + 1}")
+    b = bioviz.Viz(model_path_hips,
+                   mesh_opacity=1,
+                   show_global_center_of_mass=False,
+                   show_gravity_vector=False,
+                   show_segments_center_of_mass=False,
+                   show_global_ref_frame=False,
+                   show_local_ref_frame=False,
+                   show_markers=False,
+                   background_color=(1.0, 1.0, 1.0)
+                   )
+    b.set_camera_zoom(0.5)
+    b.load_movement(Q_to_animate)
+    b.exec()
 
 
 # Plot the proportion of solutions that are in each cluster
