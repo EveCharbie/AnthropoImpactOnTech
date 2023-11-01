@@ -1111,15 +1111,15 @@ def prepare_ocp(
 
 
 def main():
-    model_paths = ("Models/Models_Lisa/AdCh.bioMod",
-                   "Models/Models_Lisa/AlAd.bioMod",
-                   "Models/Models_Lisa/AuJo.bioMod",
-                   "Models/Models_Lisa/Benjamin.bioMod",
-                   # "Models/Models_Lisa/ElMe.bioMod",
-                   # "Models/Models_Lisa/EvZl.bioMod",
-                   # "Models/Models_Lisa/FeBl.bioMod",
-                   # "Models/Models_Lisa/JeCh.bioMod",
-                   # "Models/Models_Lisa/KaFu.bioMod",
+    model_paths = ("Models/Models_Lisa/Athlete_03.bioMod",
+                   "Models/Models_Lisa/Athlete_05.bioMod",
+                   "Models/Models_Lisa/Athlete_18.bioMod",
+                   "Models/Models_Lisa/Athlete_07.bioMod",
+                   # "Models/Models_Lisa/Athlete_14.bioMod",
+                   # "Models/Models_Lisa/Athlete_17.bioMod",
+                   # "Models/Models_Lisa/Athlete_02.bioMod",
+                   # "Models/Models_Lisa/Athlete_06.bioMod",
+                   # "Models/Models_Lisa/Athlete_11.bioMod",
                    )
 
     n_threads = 28

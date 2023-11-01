@@ -781,7 +781,7 @@ def main():
     Prepares and solves an ocp for a 803<. Animates the results
     """
 
-    biorbd_model_path = 'Models/ElMe.bioMod'
+    biorbd_model_path = 'Models/Athlete_14.bioMod'
     Mod = Model(model = biorbd_model_path)
     n_shooting = (40, 100, 100, 100, 40)
 

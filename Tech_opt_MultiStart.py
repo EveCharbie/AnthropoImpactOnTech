@@ -935,30 +935,31 @@ def main():
     """
 
     seed = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    nb_twist = [5]
+    nb_twist = [3, 5]
     athletes = [
-        # "AdCh",
-        # "AlAd",
-        "AuJo",
-        # "Benjamin",
-        # "ElMe",
-        # "EvZl",
-        # "FeBl",
-        # "JeCh",
-        # "KaFu",
-        # "KaMi",
-        # "LaDe",
-        "MaCu",
-        # "MaJa",
-        # "OlGa",
-        # "Sarah",
-        # "SoMe",
-        # "WeEm",
-        # "ZoTs"
+        "Athlete_03",
+        "Athlete_05",
+        "Athlete_18",
+        "Athlete_07",
+        "Athlete_14",
+        "Athlete_17",
+        "Athlete_02",
+        "Athlete_06",
+        "Athlete_11",
+        "Athlete_13",
+        "Athlete_16",
+        "Athlete_12",
+        "Athlete_04",
+        "Athlete_10",
+        "Athlete_08",
+        "Athlete_09",
+        "Athlete_01",
+        "Athlete_15"
         ]
 
-    athlete_to_copy = {"AuJo": "ElMe",
-                       "MaCu": "Sarah"}
+    athlete_to_copy = {"Athlete_18": "Athlete_14",
+                       # "Athlete_12": "Athlete_08",
+                       "Athlete_12": "Athlete_01"}
 
     all_paths = []
     for athlete in athletes :
