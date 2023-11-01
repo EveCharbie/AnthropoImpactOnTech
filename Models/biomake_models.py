@@ -1541,7 +1541,7 @@ if __name__ == "__main__":
 
         class Arguments:
             def __init__(self):
-                self.meas = "/home/charbie/Documents/Programmation/AnthropoImpactOnTech/Models/text_files/Sarah.txt"
+                self.meas = "/home/charbie/Documents/Programmation/AnthropoImpactOnTech/Models/text_files/Athlete_08.txt"
                 self.bioModOptions = ["tech_opt.yml"]
 
         args = Arguments()

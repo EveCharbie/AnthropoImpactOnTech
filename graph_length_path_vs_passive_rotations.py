@@ -31,24 +31,24 @@ models_path = "Models/Models_Lisa/"
 saved_data_path = "kinematics_graphs/vrille_et_demi/data_pickled/"
 
 cmap = cm.get_cmap('viridis')
-athletes_number = {"WeEm": 1,
-                   "FeBl": 2,
-                   "AdCh": 3,
-                   "MaJa": 4,
-                   "AlAd": 5,
-                   "JeCh": 6,
-                   "Benjamin": 7,
-                   "Sarah": 8,
-                   "SoMe": 9,
-                   "OlGa": 10,
-                   "KaFu": 11,
-                   "MaCu": 12,
-                   "KaMi": 13,
-                   "ElMe": 14,
-                   "ZoTs": 15,
-                   "LaDe": 16,
-                   "EvZl": 17,
-                   "AuJo": 18}
+athletes_number = {"Athlete_01": 1,
+                   "Athlete_02": 2,
+                   "Athlete_03": 3,
+                   "Athlete_04": 4,
+                   "Athlete_05": 5,
+                   "Athlete_06": 6,
+                   "Athlete_07": 7,
+                   "Athlete_08": 8,
+                   "Athlete_09": 9,
+                   "Athlete_10": 10,
+                   "Athlete_11": 11,
+                   "Athlete_12": 12,
+                   "Athlete_13": 13,
+                   "Athlete_14": 14,
+                   "Athlete_15": 15,
+                   "Athlete_16": 16,
+                   "Athlete_17": 17,
+                   "Athlete_18": 18}
 
 with open(save_path + "clusters_sol.pkl", "rb") as f:
     data = pickle.load(f)
@@ -284,28 +284,28 @@ for i, name in enumerate(athletes_number.keys()):
 min_twist_potential = np.min(twist_potential)
 max_twist_potential = np.max(twist_potential)
 
-ax.scatter(athletes_reduced_anthropo["WeEm"]["arm_perimeter"], athletes_reduced_anthropo["WeEm"]["height"], c=twist_potential_per_athlete["WeEm"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #1 (MAG)")
-ax.scatter(athletes_reduced_anthropo["FeBl"]["arm_perimeter"], athletes_reduced_anthropo["FeBl"]["height"], c=twist_potential_per_athlete["FeBl"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #2 (MAG)")
-ax.scatter(athletes_reduced_anthropo["AdCh"]["arm_perimeter"], athletes_reduced_anthropo["AdCh"]["height"], c=twist_potential_per_athlete["AdCh"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #3 (MAG)")
-ax.scatter(athletes_reduced_anthropo["MaJa"]["arm_perimeter"], athletes_reduced_anthropo["MaJa"]["height"], c=twist_potential_per_athlete["MaJa"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #4 (MAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_01"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_01"]["height"], c=twist_potential_per_athlete["Athlete_01"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #1 (MAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_02"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_02"]["height"], c=twist_potential_per_athlete["Athlete_02"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #2 (MAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_03"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_03"]["height"], c=twist_potential_per_athlete["Athlete_03"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #3 (MAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_04"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_04"]["height"], c=twist_potential_per_athlete["Athlete_04"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[0], label="Athlete #4 (MAG)")
 
-ax.scatter(athletes_reduced_anthropo["AlAd"]["arm_perimeter"], athletes_reduced_anthropo["AlAd"]["height"], c=twist_potential_per_athlete["AlAd"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #5 (MT)")
-ax.scatter(athletes_reduced_anthropo["JeCh"]["arm_perimeter"], athletes_reduced_anthropo["JeCh"]["height"], c=twist_potential_per_athlete["JeCh"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #6 (MT)")
-ax.scatter(athletes_reduced_anthropo["Benjamin"]["arm_perimeter"], athletes_reduced_anthropo["Benjamin"]["height"], c=twist_potential_per_athlete["Benjamin"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #7 (MT)")
-ax.scatter(athletes_reduced_anthropo["Sarah"]["arm_perimeter"], athletes_reduced_anthropo["Sarah"]["height"], c=twist_potential_per_athlete["Sarah"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #8 (WT)")
-ax.scatter(athletes_reduced_anthropo["SoMe"]["arm_perimeter"], athletes_reduced_anthropo["SoMe"]["height"], c=twist_potential_per_athlete["SoMe"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #9 (WT)")
+ax.scatter(athletes_reduced_anthropo["Athlete_05"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_05"]["height"], c=twist_potential_per_athlete["Athlete_05"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #5 (MT)")
+ax.scatter(athletes_reduced_anthropo["Athlete_06"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_06"]["height"], c=twist_potential_per_athlete["Athlete_06"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #6 (MT)")
+ax.scatter(athletes_reduced_anthropo["Athlete_07"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_07"]["height"], c=twist_potential_per_athlete["Athlete_07"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #7 (MT)")
+ax.scatter(athletes_reduced_anthropo["Athlete_08"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_08"]["height"], c=twist_potential_per_athlete["Athlete_08"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #8 (WT)")
+ax.scatter(athletes_reduced_anthropo["Athlete_09"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_09"]["height"], c=twist_potential_per_athlete["Athlete_09"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[1], label="Athlete #9 (WT)")
 
-ax.scatter(athletes_reduced_anthropo["OlGa"]["arm_perimeter"], athletes_reduced_anthropo["OlGa"]["height"], c=twist_potential_per_athlete["OlGa"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #10 (MD)")
-ax.scatter(athletes_reduced_anthropo["KaFu"]["arm_perimeter"], athletes_reduced_anthropo["KaFu"]["height"], c=twist_potential_per_athlete["KaFu"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #11 (WD)")
-ax.scatter(athletes_reduced_anthropo["MaCu"]["arm_perimeter"], athletes_reduced_anthropo["MaCu"]["height"], c=twist_potential_per_athlete["MaCu"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #12 (MD)")
-ax.scatter(athletes_reduced_anthropo["KaMi"]["arm_perimeter"], athletes_reduced_anthropo["KaMi"]["height"], c=twist_potential_per_athlete["KaMi"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #13 (WD)")
+ax.scatter(athletes_reduced_anthropo["Athlete_10"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_10"]["height"], c=twist_potential_per_athlete["Athlete_10"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #10 (MD)")
+ax.scatter(athletes_reduced_anthropo["Athlete_11"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_11"]["height"], c=twist_potential_per_athlete["Athlete_11"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #11 (WD)")
+ax.scatter(athletes_reduced_anthropo["Athlete_12"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_12"]["height"], c=twist_potential_per_athlete["Athlete_12"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #12 (MD)")
+ax.scatter(athletes_reduced_anthropo["Athlete_13"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_13"]["height"], c=twist_potential_per_athlete["Athlete_13"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[2], label="Athlete #13 (WD)")
 
-ax.scatter(athletes_reduced_anthropo["ElMe"]["arm_perimeter"], athletes_reduced_anthropo["ElMe"]["height"], c=twist_potential_per_athlete["ElMe"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #14 (WAG)")
-ax.scatter(athletes_reduced_anthropo["ZoTs"]["arm_perimeter"], athletes_reduced_anthropo["ZoTs"]["height"], c=twist_potential_per_athlete["ZoTs"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #15 (WAG)")
-ax.scatter(athletes_reduced_anthropo["LaDe"]["arm_perimeter"], athletes_reduced_anthropo["LaDe"]["height"], c=twist_potential_per_athlete["LaDe"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #16 (WAG)")
-ax.scatter(athletes_reduced_anthropo["EvZl"]["arm_perimeter"], athletes_reduced_anthropo["EvZl"]["height"], c=twist_potential_per_athlete["EvZl"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #17 (WAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_14"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_14"]["height"], c=twist_potential_per_athlete["Athlete_14"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #14 (WAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_15"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_15"]["height"], c=twist_potential_per_athlete["Athlete_15"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #15 (WAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_16"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_16"]["height"], c=twist_potential_per_athlete["Athlete_16"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #16 (WAG)")
+ax.scatter(athletes_reduced_anthropo["Athlete_17"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_17"]["height"], c=twist_potential_per_athlete["Athlete_17"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[3], label="Athlete #17 (WAG)")
 
-color_bar_handle = ax.scatter(athletes_reduced_anthropo["AuJo"]["arm_perimeter"], athletes_reduced_anthropo["AuJo"]["height"], c=twist_potential_per_athlete["AuJo"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[4], label="Athlete #18 (WAS)")
+color_bar_handle = ax.scatter(athletes_reduced_anthropo["Athlete_18"]["arm_perimeter"], athletes_reduced_anthropo["Athlete_18"]["height"], c=twist_potential_per_athlete["Athlete_18"], vmin=min_twist_potential, vmax=max_twist_potential, marker=markers[4], label="Athlete #18 (WAS)")
 
 fig.subplots_adjust(left=0.07, right=0.74, bottom=0.1, top=0.9)
 ax.set_xlabel("Biceps perimeter [cm]")

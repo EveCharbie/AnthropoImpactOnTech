@@ -34,66 +34,66 @@ cmap_magma = cm.get_cmap('magma')
 
 # Define the clusters of solutions per joint
 cluster_right_arm = {
-    "AdCh":     {"cluster_1": [1, 2, 5, 6, 7, 8],             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [0, 4, 9], "cluster_5": [],                          "others": []},
-    "AlAd":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
-    "AuJo":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 7],                   "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 4, 5, 6, 8, 9],          "others": []},
-    "Benjamin": {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": [0, 1, 2, 3, 4, 5, 6, 7, 9, 8]},  # 8 different from the others
-    "ElMe":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
-    "EvZl":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
-    "FeBl":     {"cluster_1": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [],           "cluster_4": [5],       "cluster_5": [],                          "others": []},
-    "JeCh":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 1, 2, 3, 4, 5, 7, 8, 9], "others": [6]},  # 6 is between cluster 1 and 2
-    "KaFu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 3, 8],    "cluster_4": [],        "cluster_5": [1, 2, 4, 5, 6, 7, 9],       "others": []},
-    "KaMi":     {"cluster_1": [],                             "cluster_2": [2, 3, 7],                      "cluster_3": [4, 9],       "cluster_4": [],        "cluster_5": [1, 5, 6, 8],                "others": []},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [2],          "cluster_4": [],        "cluster_5": [1, 3, 4, 6, 7, 8, 9],       "others": []},
-    "MaCu":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [1, 3],       "cluster_4": [],        "cluster_5": [2, 4, 5, 6, 7, 8, 9],       "others": []},
-    "MaJa":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
-    "OlGa":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [1],          "cluster_4": [],        "cluster_5": [],                          "others": []},
-    "Sarah":    {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [3, 4, 8],    "cluster_4": [],        "cluster_5": [0, 1, 2, 5, 6, 7, 9],       "others": []},
-    "SoMe":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 1, 2, 8], "cluster_4": [],        "cluster_5": [3, 4, 5, 6, 7, 9],          "others": []},
-    "WeEm":     {"cluster_1": [],                             "cluster_2": [2, 3],                         "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 1, 4, 5, 6, 7, 8, 9],    "others": []},
-    "ZoTs":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [3],          "cluster_4": [],        "cluster_5": [0, 1, 2, 4, 5, 6, 7, 8, 9], "others": []},
+    "Athlete_03":     {"cluster_1": [1, 2, 5, 6, 7, 8],             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [0, 4, 9], "cluster_5": [],                          "others": []},
+    "Athlete_05":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
+    "Athlete_18":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 7],                   "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 4, 5, 6, 8, 9],          "others": []},
+    "Athlete_07": {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": [0, 1, 2, 3, 4, 5, 6, 7, 9, 8]},  # 8 different from the others
+    "Athlete_14":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
+    "Athlete_17":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
+    "Athlete_02":     {"cluster_1": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [],           "cluster_4": [5],       "cluster_5": [],                          "others": []},
+    "Athlete_06":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 1, 2, 3, 4, 5, 7, 8, 9], "others": [6]},  # 6 is between cluster 1 and 2
+    "Athlete_11":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 3, 8],    "cluster_4": [],        "cluster_5": [1, 2, 4, 5, 6, 7, 9],       "others": []},
+    "Athlete_13":     {"cluster_1": [],                             "cluster_2": [2, 3, 7],                      "cluster_3": [4, 9],       "cluster_4": [],        "cluster_5": [1, 5, 6, 8],                "others": []},
+    "Athlete_16":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [2],          "cluster_4": [],        "cluster_5": [1, 3, 4, 6, 7, 8, 9],       "others": []},
+    "Athlete_12":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [1, 3],       "cluster_4": [],        "cluster_5": [2, 4, 5, 6, 7, 8, 9],       "others": []},
+    "Athlete_04":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
+    "Athlete_10":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [1],          "cluster_4": [],        "cluster_5": [],                          "others": []},
+    "Athlete_08":    {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [3, 4, 8],    "cluster_4": [],        "cluster_5": [0, 1, 2, 5, 6, 7, 9],       "others": []},
+    "Athlete_09":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 1, 2, 8], "cluster_4": [],        "cluster_5": [3, 4, 5, 6, 7, 9],          "others": []},
+    "Athlete_01":     {"cluster_1": [],                             "cluster_2": [2, 3],                         "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 1, 4, 5, 6, 7, 8, 9],    "others": []},
+    "Athlete_15":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [3],          "cluster_4": [],        "cluster_5": [0, 1, 2, 4, 5, 6, 7, 8, 9], "others": []},
 }
 
 cluster_left_arm = {
-    "AdCh":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": []},
-    "AlAd":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
-    "AuJo":     {"cluster_1": [4, 5, 6, 8, 9],                "cluster_2": [0, 2, 3, 7],                   "cluster_3": [1]},
-    "Benjamin": {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
-    "ElMe":     {"cluster_1": [5],                            "cluster_2": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_3": []},
-    "EvZl":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [3]},
-    "FeBl":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
-    "JeCh":     {"cluster_1": [0, 1, 2, 3, 4, 5, 7, 8, 9],    "cluster_2": [6],                            "cluster_3": []},
-    "KaFu":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [0]},
-    "KaMi":     {"cluster_1": [1, 4, 5, 6, 8, 9],             "cluster_2": [2, 3, 7],                      "cluster_3": []},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [1, 3, 4, 6, 7, 8, 9],          "cluster_3": [2]},
-    "MaCu":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 6, 7, 8, 9],       "cluster_3": []},
-    "MaJa":     {"cluster_1": [0, 2, 4, 5, 6, 9],             "cluster_2": [1, 3, 7, 8],                   "cluster_3": []},
-    "OlGa":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
-    "Sarah":    {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 5, 6, 7, 8, 9],    "cluster_3": [4]},
-    "SoMe":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [0]},
-    "WeEm":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
-    "ZoTs":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
+    "Athlete_03":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": []},
+    "Athlete_05":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
+    "Athlete_18":     {"cluster_1": [4, 5, 6, 8, 9],                "cluster_2": [0, 2, 3, 7],                   "cluster_3": [1]},
+    "Athlete_07": {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
+    "Athlete_14":     {"cluster_1": [5],                            "cluster_2": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_3": []},
+    "Athlete_17":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [3]},
+    "Athlete_02":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
+    "Athlete_06":     {"cluster_1": [0, 1, 2, 3, 4, 5, 7, 8, 9],    "cluster_2": [6],                            "cluster_3": []},
+    "Athlete_11":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [0]},
+    "Athlete_13":     {"cluster_1": [1, 4, 5, 6, 8, 9],             "cluster_2": [2, 3, 7],                      "cluster_3": []},
+    "Athlete_16":     {"cluster_1": [],                             "cluster_2": [1, 3, 4, 6, 7, 8, 9],          "cluster_3": [2]},
+    "Athlete_12":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 6, 7, 8, 9],       "cluster_3": []},
+    "Athlete_04":     {"cluster_1": [0, 2, 4, 5, 6, 9],             "cluster_2": [1, 3, 7, 8],                   "cluster_3": []},
+    "Athlete_10":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
+    "Athlete_08":    {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 5, 6, 7, 8, 9],    "cluster_3": [4]},
+    "Athlete_09":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [0]},
+    "Athlete_01":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
+    "Athlete_15":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
 }
 
 cluster_thighs = {
-    "AdCh":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": []},
-    "AlAd":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "AuJo":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "Benjamin": {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "ElMe":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "EvZl":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "FeBl":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "JeCh":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "KaFu":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "KaMi":     {"cluster_1": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_2": []},
-    "LaDe":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 6, 7, 8, 9]},
-    "MaCu":     {"cluster_1": [1, 2, 3, 4, 6, 7, 8, 9],       "cluster_2": []},
-    "MaJa":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "OlGa":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "Sarah":    {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [3]},
-    "SoMe":     {"cluster_1": [0, 3, 4, 5, 6, 7, 9],          "cluster_2": [1, 2, 8]},
-    "WeEm":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "ZoTs":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [3]},
+    "Athlete_03":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": []},
+    "Athlete_05":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_18":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_07": {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_14":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_17":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_02":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_06":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_11":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_13":     {"cluster_1": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_2": []},
+    "Athlete_16":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 6, 7, 8, 9]},
+    "Athlete_12":     {"cluster_1": [1, 2, 3, 4, 6, 7, 8, 9],       "cluster_2": []},
+    "Athlete_04":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_10":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_08":    {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [3]},
+    "Athlete_09":     {"cluster_1": [0, 3, 4, 5, 6, 7, 9],          "cluster_2": [1, 2, 8]},
+    "Athlete_01":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_15":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [3]},
 }
 
 with open("q_bounds.pkl", 'rb') as f:
@@ -101,14 +101,14 @@ with open("q_bounds.pkl", 'rb') as f:
 
 # print all the solutions at once
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
-q_right_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_right_arm['AdCh'].keys()},
+q_right_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_right_arm['Athlete_03'].keys()},
                "normalized_time_vector": {key: np.zeros((381, 1)) for key in
-                                          cluster_right_arm['AdCh'].keys()}}
-q_left_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_left_arm['AdCh'].keys()},
+                                          cluster_right_arm['Athlete_03'].keys()}}
+q_left_arm = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_left_arm['Athlete_03'].keys()},
               "normalized_time_vector": {key: np.zeros((381, 1)) for key in
-                                         cluster_left_arm['AdCh'].keys()}}
-q_thighs = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_thighs['AdCh'].keys()},
-            "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_thighs['AdCh'].keys()}}
+                                         cluster_left_arm['Athlete_03'].keys()}}
+q_thighs = {"q": {key: np.zeros((16, 381, 1)) for key in cluster_thighs['Athlete_03'].keys()},
+            "normalized_time_vector": {key: np.zeros((381, 1)) for key in cluster_thighs['Athlete_03'].keys()}}
 names = cluster_right_arm.keys()
 
 best_solution_per_athlete = {}
@@ -228,13 +228,13 @@ plt.savefig(f'cluster_graphs/clusters_graph_for_all_athletes_{nb_twists}.png', d
 print("\n\n")
 
 # Find the mean and std of each cluster
-cluster_counter_right_arm = {key: 0 for key in cluster_right_arm["AlAd"].keys()}
-optimal_counter_right_arm = {key: 0 for key in cluster_right_arm["AlAd"].keys()}
-mean_std_per_cluster_right_arm = {key: np.zeros((16, )) for key in cluster_right_arm["AlAd"].keys()}
+cluster_counter_right_arm = {key: 0 for key in cluster_right_arm["Athlete_05"].keys()}
+optimal_counter_right_arm = {key: 0 for key in cluster_right_arm["Athlete_05"].keys()}
+mean_std_per_cluster_right_arm = {key: np.zeros((16, )) for key in cluster_right_arm["Athlete_05"].keys()}
 mean_q_per_cluster_right_arm = {'q': np.zeros((16, 381, 1)), 'normalized_time_vector': np.zeros((381, 1))}
 std_q_per_cluster_right_arm = np.zeros((16, 381, 1))
 range_q_per_cluster_right_arm = np.zeros((16, 381, 1))
-for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_right_arm['Athlete_05'].keys()):
     q_right_arm['q'][cluster_name] = q_right_arm['q'][cluster_name][:, :, 1:]
     q_right_arm['normalized_time_vector'][cluster_name] = q_right_arm['normalized_time_vector'][cluster_name][:, 1:]
     for i_name, name in enumerate(cluster_right_arm):
@@ -257,13 +257,13 @@ range_q_per_cluster_right_arm = range_q_per_cluster_right_arm[:, :, 1:]
 mean_std_between_clusters_right_arm = np.mean(np.std(mean_q_per_cluster_right_arm['q'], axis=2), axis=1)
 
 
-cluster_counter_left_arm = {key: 0 for key in cluster_left_arm['AlAd'].keys()}
-optimal_counter_left_arm = {key: 0 for key in cluster_left_arm['AlAd'].keys()}
-mean_std_per_cluster_left_arm = {key: np.zeros((16, )) for key in cluster_left_arm['AlAd'].keys()}
+cluster_counter_left_arm = {key: 0 for key in cluster_left_arm['Athlete_05'].keys()}
+optimal_counter_left_arm = {key: 0 for key in cluster_left_arm['Athlete_05'].keys()}
+mean_std_per_cluster_left_arm = {key: np.zeros((16, )) for key in cluster_left_arm['Athlete_05'].keys()}
 mean_q_per_cluster_left_arm = {'q': np.zeros((16, 381, 1)), 'normalized_time_vector': np.zeros((381, 1))}
 std_q_per_cluster_left_arm = np.zeros((16, 381, 1))
 range_q_per_cluster_left_arm = np.zeros((16, 381, 1))
-for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
     q_left_arm['q'][cluster_name] = q_left_arm['q'][cluster_name][:, :, 1:]
     for i_name, name in enumerate(cluster_left_arm):
         if len(cluster_left_arm[name][cluster_name]) > 0:
@@ -285,13 +285,13 @@ range_q_per_cluster_left_arm = range_q_per_cluster_left_arm[:, :, 1:]
 mean_std_between_clusters_left_arm = np.mean(np.std(mean_q_per_cluster_left_arm['q'], axis=2), axis=1)
 
 
-cluster_counter_thighs = {key: 0 for key in cluster_thighs['AlAd'].keys()}
-optimal_counter_thighs = {key: 0 for key in cluster_thighs['AlAd'].keys()}
-mean_std_per_cluster_thighs = {key: np.zeros((16, )) for key in cluster_thighs['AlAd'].keys()}
+cluster_counter_thighs = {key: 0 for key in cluster_thighs['Athlete_05'].keys()}
+optimal_counter_thighs = {key: 0 for key in cluster_thighs['Athlete_05'].keys()}
+mean_std_per_cluster_thighs = {key: np.zeros((16, )) for key in cluster_thighs['Athlete_05'].keys()}
 mean_q_per_cluster_thighs = {'q': np.zeros((16, 381, 1)), 'normalized_time_vector': np.zeros((381, 1))}
 std_q_per_cluster_thighs = np.zeros((16, 381, 1))
 range_q_per_cluster_thighs = np.zeros((16, 381, 1))
-for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_thighs['Athlete_05'].keys()):
     q_thighs['q'][cluster_name] = q_thighs['q'][cluster_name][:, :, 1:]
     for i_name, name in enumerate(cluster_thighs):
         if len(cluster_thighs[name][cluster_name]) > 0:
@@ -317,7 +317,7 @@ total_number_of_strategies_identified = q_thighs['q']["cluster_1"].shape[2] + q_
 print("Right arm clusters:")
 # Plot the clusters with different colors
 fig, axs = plt.subplots(2, 3, figsize=(18, 9))
-for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_right_arm['Athlete_05'].keys()):
     print(f"{cluster_name} was used by {cluster_counter_right_arm[cluster_name]} / {len(cluster_right_arm)} athletes and in {q_right_arm['q'][cluster_name].shape[2]/total_number_of_strategies_identified * 100}% of the cases")
     print(f"{cluster_name} was optimal for {optimal_counter_right_arm[cluster_name]} / 18 athletes = {optimal_counter_right_arm[cluster_name]/18 * 100}%")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_right_arm[cluster_name][3:])}")
@@ -347,7 +347,7 @@ axs[1, 0].set_xlabel(f"Normalized time")
 axs[1, 0].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 print("Left arm clusters:")
-for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
     print(f"{cluster_name} was used by {cluster_counter_left_arm[cluster_name]} / {len(cluster_left_arm)} athletes and in {q_left_arm['q'][cluster_name].shape[2] / total_number_of_strategies_identified * 100}% of the cases")
     print(f"{cluster_name} was optimal for {optimal_counter_left_arm[cluster_name]} / 18 athletes = {optimal_counter_left_arm[cluster_name] / 18 * 100}%")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_left_arm[cluster_name][3:])}")
@@ -376,7 +376,7 @@ axs[1, 1].set_xlabel(f"Normalized time")
 axs[1, 1].legend(bbox_to_anchor=(0.5, -0.17), loc='upper center')
 
 print("Thigh clusters:")
-for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_thighs['Athlete_05'].keys()):
     print(f"{cluster_name} was used by {cluster_counter_thighs[cluster_name]} / {len(cluster_thighs)} athletes  and in {q_thighs['q'][cluster_name].shape[2] / total_number_of_strategies_identified * 100}% of the cases")
     print(f"{cluster_name} was optimal for {optimal_counter_thighs[cluster_name]} / 18 athletes = {optimal_counter_thighs[cluster_name] / 18 * 100}%")
     print(f"Sum of mean std on cluster {cluster_name} was {np.sum(mean_std_per_cluster_thighs[cluster_name][3:])}")
@@ -448,7 +448,7 @@ for i_var in range(len(var_list)):
 
 
 # Generate animations of the movements in the clusters
-for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_right_arm['Athlete_05'].keys()):
     if i_cluster < 5:
         print(f"right_arm_{cluster_name}")
         Q_to_animate = np.zeros((model.nbQ(), 381))
@@ -473,7 +473,7 @@ for i_cluster, cluster_name in enumerate(cluster_right_arm['AlAd'].keys()):
         # b.load_movement(Q_to_animate)
         # b.exec()
 
-for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
     print(f"left_arm_{cluster_name}")
     Q_to_animate = np.zeros((model.nbQ(), 381))
     Q_to_animate[5, :] = np.pi/2
@@ -498,7 +498,7 @@ for i_cluster, cluster_name in enumerate(cluster_left_arm['AlAd'].keys()):
     b.exec()
 
 
-for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
+for i_cluster, cluster_name in enumerate(cluster_thighs['Athlete_05'].keys()):
     print(f"thighs_{cluster_name}")
     Q_to_animate = np.zeros((model.nbQ(), 381))
     Q_to_animate[5, :] = np.pi/2
@@ -522,20 +522,20 @@ for i_cluster, cluster_name in enumerate(cluster_thighs['AlAd'].keys()):
 
 
 # Plot the proportion of solutions that are in each cluster
-num_clusters_thighs_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), ))
-num_clusters_left_arm_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys())))
-num_clusters_right_arm_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys()), len(cluster_right_arm['AlAd'].keys())))
-for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
+num_clusters_thighs_techniques = np.zeros((len(cluster_thighs['Athlete_05'].keys()), ))
+num_clusters_left_arm_techniques = np.zeros((len(cluster_thighs['Athlete_05'].keys()), len(cluster_left_arm['Athlete_05'].keys())))
+num_clusters_right_arm_techniques = np.zeros((len(cluster_thighs['Athlete_05'].keys()), len(cluster_left_arm['Athlete_05'].keys()), len(cluster_right_arm['Athlete_05'].keys())))
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['Athlete_05'].keys()):
     for i_name, name in enumerate(cluster_thighs.keys()):
         num_clusters_thighs_techniques[i_cluster_thighs] += len(cluster_thighs[name][cluster_thighs_name])
 
-    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
         for i_name, name in enumerate(cluster_left_arm.keys()):
             for idx_tech in cluster_left_arm[name][cluster_left_arm_name]:
                 if idx_tech in cluster_thighs[name][cluster_thighs_name]:
                     num_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm] += 1
 
-        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['AlAd'].keys()):
+        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['Athlete_05'].keys()):
             for i_name, name in enumerate(cluster_right_arm.keys()):
                 for idx_tech in cluster_right_arm[name][cluster_right_arm_name]:
                     if idx_tech in cluster_thighs[name][cluster_thighs_name] and idx_tech in cluster_left_arm[name][cluster_left_arm_name]:
@@ -544,25 +544,25 @@ for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].ke
 pourcentage_clusters_thighs_techniques = num_clusters_thighs_techniques / np.sum(num_clusters_thighs_techniques) * 100
 pourcentage_clusters_left_arm_techniques = np.zeros(num_clusters_left_arm_techniques.shape)
 pourcentage_clusters_right_arm_techniques = np.zeros(num_clusters_right_arm_techniques.shape)
-for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['Athlete_05'].keys()):
     pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :] = num_clusters_left_arm_techniques[i_cluster_thighs, :] / np.sum(num_clusters_thighs_techniques[i_cluster_thighs]) * pourcentage_clusters_thighs_techniques[i_cluster_thighs]
-    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
         pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :] = num_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :] / np.sum(num_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm]) * pourcentage_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm]
 
 offset_left_arm = 0
 offset_right_arm = 0
 fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
+for i_cluster_thighs in range(len(cluster_thighs['Athlete_05'].keys())):
     x_min_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs].sum()
     x_max_thighs = pourcentage_clusters_thighs_techniques[:i_cluster_thighs + 1].sum()
     ax.fill_between([x_min_thighs, x_max_thighs], [40, 40], [50, 50], color=cmap_viridis(1 - i_cluster_thighs * 1/6), alpha=0.8, linewidth=0.0)
 
-    for i_cluster_left_arm in range(len(cluster_left_arm['AlAd'].keys())):
+    for i_cluster_left_arm in range(len(cluster_left_arm['Athlete_05'].keys())):
         x_min_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm].sum()
         x_max_left_arm = pourcentage_clusters_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm + 1].sum()
         ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/3), alpha=0.8, linewidth=0.0)
 
-        for i_cluster_right_arm in range(len(cluster_right_arm['AlAd'].keys())):
+        for i_cluster_right_arm in range(len(cluster_right_arm['Athlete_05'].keys())):
             x_min_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
             x_max_right_arm = np.nansum(pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm + 1])
             ax.fill_between([x_min_right_arm + offset_right_arm, x_max_right_arm + offset_right_arm], [0, 0], [10, 10], color=cmap_magma(1 - i_cluster_right_arm * 1/6 - 1/6), alpha=0.8, linewidth=0.0)
@@ -577,55 +577,55 @@ plt.savefig(f'cluster_graphs/proportion_of_solutions_in_each_cluster_{nb_twists}
 # plt.show()
 
 # Count number of combinaition of strategies were used
-num_combinations = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys()), len(cluster_right_arm['AlAd'].keys())))
-for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
-    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
-        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['AlAd'].keys()):
+num_combinations = np.zeros((len(cluster_thighs['Athlete_05'].keys()), len(cluster_left_arm['Athlete_05'].keys()), len(cluster_right_arm['Athlete_05'].keys())))
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['Athlete_05'].keys()):
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
+        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['Athlete_05'].keys()):
             if pourcentage_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] > 0:
                 num_combinations[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] = 1
 
 
 # Plot the proportion of solutions that are optimal in each cluster
-num_opt_clusters_thighs_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), ))
-num_opt_clusters_left_arm_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys())))
-num_opt_clusters_right_arm_techniques = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys()), len(cluster_right_arm['AlAd'].keys())))
+num_opt_clusters_thighs_techniques = np.zeros((len(cluster_thighs['Athlete_05'].keys()), ))
+num_opt_clusters_left_arm_techniques = np.zeros((len(cluster_thighs['Athlete_05'].keys()), len(cluster_left_arm['Athlete_05'].keys())))
+num_opt_clusters_right_arm_techniques = np.zeros((len(cluster_thighs['Athlete_05'].keys()), len(cluster_left_arm['Athlete_05'].keys()), len(cluster_right_arm['Athlete_05'].keys())))
 for i_name, name in enumerate(cluster_thighs.keys()):
-    for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
+    for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['Athlete_05'].keys()):
         if i_cluster_thighs == best_solution_per_athlete[name]["thighs_cluster"]:
             num_opt_clusters_thighs_techniques[i_cluster_thighs] += 1
 
-            for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
+            for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
                 if i_cluster_left_arm == best_solution_per_athlete[name]["left_arm_cluster"]:
                     num_opt_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm] += 1
 
-                    for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['AlAd'].keys()):
+                    for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['Athlete_05'].keys()):
                         if i_cluster_right_arm == best_solution_per_athlete[name]["right_arm_cluster"]:
                             num_opt_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] += 1
 
 pourcentage_clusters_opt_thighs_techniques = num_opt_clusters_thighs_techniques / np.sum(num_opt_clusters_thighs_techniques) * 100
 pourcentage_clusters_opt_left_arm_techniques = np.zeros(num_opt_clusters_left_arm_techniques.shape)
 pourcentage_clusters_opt_right_arm_techniques = np.zeros(num_opt_clusters_right_arm_techniques.shape)
-for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['Athlete_05'].keys()):
     pourcentage_clusters_opt_left_arm_techniques[i_cluster_thighs, :] = num_opt_clusters_left_arm_techniques[i_cluster_thighs, :] / np.sum(num_opt_clusters_thighs_techniques[i_cluster_thighs]) * pourcentage_clusters_opt_thighs_techniques[i_cluster_thighs]
-    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
         pourcentage_clusters_opt_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :] = num_opt_clusters_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :] / np.sum(num_opt_clusters_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm]) * pourcentage_clusters_opt_left_arm_techniques[i_cluster_thighs, i_cluster_left_arm]
 
 offset_left_arm = 0
 offset_right_arm = 0
 fig, ax = plt.subplots(1, 1, figsize=(10, 5))
-for i_cluster_thighs in range(len(cluster_thighs['AlAd'].keys())):
+for i_cluster_thighs in range(len(cluster_thighs['Athlete_05'].keys())):
     x_min_thighs = pourcentage_clusters_opt_thighs_techniques[:i_cluster_thighs].sum()
     x_max_thighs = pourcentage_clusters_opt_thighs_techniques[:i_cluster_thighs + 1].sum()
     if x_max_thighs - x_min_thighs > 1e-8:
         ax.fill_between([x_min_thighs, x_max_thighs], [40, 40], [50, 50], color=cmap_viridis(1 - i_cluster_thighs * 1/6), alpha=0.8, linewidth=0.0)
 
-    for i_cluster_left_arm in range(len(cluster_left_arm['AlAd'].keys())):
+    for i_cluster_left_arm in range(len(cluster_left_arm['Athlete_05'].keys())):
         x_min_left_arm = pourcentage_clusters_opt_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm].sum()
         x_max_left_arm = pourcentage_clusters_opt_left_arm_techniques[i_cluster_thighs, :i_cluster_left_arm + 1].sum()
         if x_max_left_arm - x_min_left_arm > 1e-8:
             ax.fill_between([x_min_left_arm + offset_left_arm, x_max_left_arm + offset_left_arm], [20, 20], [30, 30], color=cmap_viridis(i_cluster_left_arm * 1/3), alpha=0.8, linewidth=0.0)
 
-        for i_cluster_right_arm in range(len(cluster_right_arm['AlAd'].keys())):
+        for i_cluster_right_arm in range(len(cluster_right_arm['Athlete_05'].keys())):
             x_min_right_arm = np.nansum(pourcentage_clusters_opt_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm])
             x_max_right_arm = np.nansum(pourcentage_clusters_opt_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, :i_cluster_right_arm + 1])
             if x_max_right_arm - x_min_right_arm > 1e-8:
@@ -641,10 +641,10 @@ plt.savefig(f'cluster_graphs/proportion_of_solutions_optimal_for_each_cluster_{n
 plt.show()
 
 # Count number of combinaition of strategies were used
-num_combinations_opt = np.zeros((len(cluster_thighs['AlAd'].keys()), len(cluster_left_arm['AlAd'].keys()), len(cluster_right_arm['AlAd'].keys())))
-for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['AlAd'].keys()):
-    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['AlAd'].keys()):
-        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['AlAd'].keys()):
+num_combinations_opt = np.zeros((len(cluster_thighs['Athlete_05'].keys()), len(cluster_left_arm['Athlete_05'].keys()), len(cluster_right_arm['Athlete_05'].keys())))
+for i_cluster_thighs, cluster_thighs_name in enumerate(cluster_thighs['Athlete_05'].keys()):
+    for i_cluster_left_arm, cluster_left_arm_name in enumerate(cluster_left_arm['Athlete_05'].keys()):
+        for i_cluster_right_arm, cluster_right_arm_name in enumerate(cluster_right_arm['Athlete_05'].keys()):
             if pourcentage_clusters_opt_right_arm_techniques[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] > 0:
                 num_combinations_opt[i_cluster_thighs, i_cluster_left_arm, i_cluster_right_arm] = 1
 

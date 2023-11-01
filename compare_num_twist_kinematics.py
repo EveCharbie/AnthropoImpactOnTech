@@ -15,24 +15,24 @@ import sys
 model_path = "Models/JeCh_TechOpt83.bioMod"
 model = biorbd.Model(model_path)
 
-athletes_number = {"WeEm": 1,
-                   "FeBl": 2,
-                   "AdCh": 3,
-                   "MaJa": 4,
-                   "AlAd": 5,
-                   "JeCh": 6,
-                   "Benjamin": 7,
-                   "Sarah": 8,
-                   "SoMe": 9,
-                   "OlGa": 10,
-                   "KaFu": 11,
-                   "MaCu": 12,
-                   "KaMi": 13,
-                   "ElMe": 14,
-                   "ZoTs": 15,
-                   "LaDe": 16,
-                   "EvZl": 17,
-                   "AuJo": 18}
+athletes_number = {"Athlete_01": 1,
+                   "Athlete_02": 2,
+                   "Athlete_03": 3,
+                   "Athlete_04": 4,
+                   "Athlete_05": 5,
+                   "Athlete_06": 6,
+                   "Athlete_07": 7,
+                   "Athlete_08": 8,
+                   "Athlete_09": 9,
+                   "Athlete_10": 10,
+                   "Athlete_11": 11,
+                   "Athlete_12": 12,
+                   "Athlete_13": 13,
+                   "Athlete_14": 14,
+                   "Athlete_15": 15,
+                   "Athlete_16": 16,
+                   "Athlete_17": 17,
+                   "Athlete_18": 18}
 
 nb_twists = {"2": 'double_vrille_et_demi'}
 chosen_clusters_dict = {}

@@ -5,7 +5,7 @@ import pickle
 import os
 
 
-athletes_names_list = ["AdCh", "AlAd" ,"AuJo" ,"Benjamin","ElMe" ,"EvZl" ,"FeBl" ,"JeCh" ,"KaFu" ,"KaMi" ,"LaDe" ,"MaCu" ,"MaJa" ,"OlGa" ,"Sarah","SoMe" ,"WeEm" ,"ZoTs"]
+athletes_names_list = ["Athlete_03", "Athlete_05" ,"Athlete_18" ,"Athlete_07","Athlete_14" ,"Athlete_17" ,"Athlete_02" ,"Athlete_06" ,"Athlete_11" ,"Athlete_13" ,"Athlete_16" ,"Athlete_12" ,"Athlete_04" ,"Athlete_10" ,"Athlete_08","Athlete_09" ,"Athlete_01" ,"Athlete_15"]
 
 folder_per_twist_nb = {"5": "Solutions_double_vrille_et_demi/"}  # {"3": "Solutions_vrille_et_demi/"}
 
