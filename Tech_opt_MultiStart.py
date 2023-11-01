@@ -771,7 +771,7 @@ def prepare_ocp(
                 u3 = data["tau"][3][:, :-1]
                 u4 = data["tau"][4][:, :-1]
 
-                t_init = [data["sol"].parameters["time"][i][0] for i in range(5)]
+                t_init = [float(data["sol"].parameters["time"][i][0]) for i in range(5)]
 
 
     x_init.add("q", initial_guess=x0[:nb_q, :], interpolation=interpolation, phase=0)
