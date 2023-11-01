@@ -958,7 +958,8 @@ def main():
         ]
 
     athlete_to_copy = {"AuJo": "ElMe",
-                       "MaCu": "Sarah"}
+                       # "MaCu": "Sarah",
+                       "MaCu": "WeEm"}
 
     all_paths = []
     for athlete in athletes :
