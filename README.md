@@ -10,7 +10,7 @@ If you use part of the code available here, please cite:
   year = {2023},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {[DOI: 10.5281/zenodo.10067374](https://zenodo.org/records/10067374)}
+  howpublished = {\url{https://zenodo.org/records/10067374}}
 }
 ```
 
