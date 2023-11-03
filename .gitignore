@@ -133,33 +133,21 @@ dmypy.json
 *.gv.pdf
 
 # Solutions except explicitely added ones
-Solutions/
-Videos/
-Images/
-
 .idea/
 
-*.pkl
-
-*.ogv
-
-
-*.pdf
-
-*.yml
-
-*.npy
-
-*.png
-
-*.txt
-
-Models_all_dofs/
-
-*.ods#
-
-*.zip
-
-.~lock.degrees_of_liberty.xlsx#
 
 *.svg
+
+compare_clusters.txt
+
+Passive_rotations/passive rotations results/Q_passive_rotations/
+
+Passive_rotations/passive rotations results/
+
+Models/text_files/
+
+markers_test.png
+
+videos_clusters/
+
+Passive_rotations/videos/
