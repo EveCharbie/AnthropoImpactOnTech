@@ -2,6 +2,7 @@
 import numpy as np
 import pickle
 import os
+import spm1d
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.patches import Rectangle
@@ -20,10 +21,10 @@ import bioptim
 # ---------------------------------------------------------------------------------
 
 
-model_path = "Models/JeCh_TechOpt83.bioMod"
-model_path_right_arm = "Models/JeCh_TechOpt83_right_arm.bioMod"
-model_path_left_arm = "Models/JeCh_TechOpt83_left_arm.bioMod"
-model_path_hips = "Models/JeCh_TechOpt83_hips.bioMod"
+model_path = "Models/Model_TechOpt83.bioMod"
+model_path_right_arm = "Models/Model_TechOpt83_right_arm.bioMod"
+model_path_left_arm = "Models/Model_TechOpt83_left_arm.bioMod"
+model_path_hips = "Models/Model_TechOpt83_hips.bioMod"
 model = biorbd.Model(model_path)
 nb_twists = 1
 chosen_clusters_dict = {}
@@ -37,7 +38,7 @@ cluster_right_arm = {
     "Athlete_03":     {"cluster_1": [1, 2, 5, 6, 7, 8],             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [0, 4, 9], "cluster_5": [],                          "others": []},
     "Athlete_05":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
     "Athlete_18":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 7],                   "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 4, 5, 6, 8, 9],          "others": []},
-    "Athlete_07": {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": [0, 1, 2, 3, 4, 5, 6, 7, 9, 8]},  # 8 different from the others
+    "Athlete_07":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": [0, 1, 2, 3, 4, 5, 6, 7, 9, 8]},  # 8 different from the others
     "Athlete_14":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
     "Athlete_17":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
     "Athlete_02":     {"cluster_1": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [],           "cluster_4": [5],       "cluster_5": [],                          "others": []},
@@ -48,7 +49,7 @@ cluster_right_arm = {
     "Athlete_12":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [1, 3],       "cluster_4": [],        "cluster_5": [2, 4, 5, 6, 7, 8, 9],       "others": []},
     "Athlete_04":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": [],           "cluster_4": [],        "cluster_5": [],                          "others": []},
     "Athlete_10":     {"cluster_1": [],                             "cluster_2": [0, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [1],          "cluster_4": [],        "cluster_5": [],                          "others": []},
-    "Athlete_08":    {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [3, 4, 8],    "cluster_4": [],        "cluster_5": [0, 1, 2, 5, 6, 7, 9],       "others": []},
+    "Athlete_08":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [3, 4, 8],    "cluster_4": [],        "cluster_5": [0, 1, 2, 5, 6, 7, 9],       "others": []},
     "Athlete_09":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [0, 1, 2, 8], "cluster_4": [],        "cluster_5": [3, 4, 5, 6, 7, 9],          "others": []},
     "Athlete_01":     {"cluster_1": [],                             "cluster_2": [2, 3],                         "cluster_3": [],           "cluster_4": [],        "cluster_5": [0, 1, 4, 5, 6, 7, 8, 9],    "others": []},
     "Athlete_15":     {"cluster_1": [],                             "cluster_2": [],                             "cluster_3": [3],          "cluster_4": [],        "cluster_5": [0, 1, 2, 4, 5, 6, 7, 8, 9], "others": []},
@@ -58,7 +59,7 @@ cluster_left_arm = {
     "Athlete_03":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": []},
     "Athlete_05":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
     "Athlete_18":     {"cluster_1": [4, 5, 6, 8, 9],                "cluster_2": [0, 2, 3, 7],                   "cluster_3": [1]},
-    "Athlete_07": {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
+    "Athlete_07":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
     "Athlete_14":     {"cluster_1": [5],                            "cluster_2": [0, 1, 2, 3, 4, 6, 7, 8, 9],    "cluster_3": []},
     "Athlete_17":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [],                             "cluster_3": [3]},
     "Athlete_02":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
@@ -69,7 +70,7 @@ cluster_left_arm = {
     "Athlete_12":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 6, 7, 8, 9],       "cluster_3": []},
     "Athlete_04":     {"cluster_1": [0, 2, 4, 5, 6, 9],             "cluster_2": [1, 3, 7, 8],                   "cluster_3": []},
     "Athlete_10":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": [],                             "cluster_3": []},
-    "Athlete_08":    {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 5, 6, 7, 8, 9],    "cluster_3": [4]},
+    "Athlete_08":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 5, 6, 7, 8, 9],    "cluster_3": [4]},
     "Athlete_09":     {"cluster_1": [],                             "cluster_2": [1, 2, 3, 4, 5, 6, 7, 8, 9],    "cluster_3": [0]},
     "Athlete_01":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
     "Athlete_15":     {"cluster_1": [],                             "cluster_2": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_3": []},
@@ -79,7 +80,7 @@ cluster_thighs = {
     "Athlete_03":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": []},
     "Athlete_05":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "Athlete_18":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "Athlete_07": {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
+    "Athlete_07":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "Athlete_14":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "Athlete_17":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "Athlete_02":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
@@ -90,7 +91,7 @@ cluster_thighs = {
     "Athlete_12":     {"cluster_1": [1, 2, 3, 4, 6, 7, 8, 9],       "cluster_2": []},
     "Athlete_04":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "Athlete_10":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
-    "Athlete_08":    {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [3]},
+    "Athlete_08":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [3]},
     "Athlete_09":     {"cluster_1": [0, 3, 4, 5, 6, 7, 9],          "cluster_2": [1, 2, 8]},
     "Athlete_01":     {"cluster_1": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], "cluster_2": []},
     "Athlete_15":     {"cluster_1": [0, 1, 2, 4, 5, 6, 7, 8, 9],    "cluster_2": [3]},
@@ -413,6 +414,110 @@ plt.suptitle(f"mean kinematics per cluster for {nb_twists}.5 twists")
 plt.savefig(f'cluster_graphs/mean_clusters_graph_for_all_athletes_{nb_twists}.png', dpi=300)
 # plt.show()
 
+def find_significant_timing_blocks(dof_1, dof_2, q, cluster_name1, cluster_name2):
+    significant_timings = []
+
+    # Rot 1
+    t = spm1d.stats.ttest2(q["q"][cluster_name1][dof_1, 1:-1, :].T,
+                           q["q"][cluster_name2][dof_1, 1:-1, :].T)
+    ti = t.inference(alpha=0.05, two_tailed=True)
+    if ti.h0reject == True:
+        if ti.clusters != []:
+            significant_timing_list = ti.clusters
+            for k in range(len(significant_timing_list)):
+                significant_timing_1_x, _ = significant_timing_list[k].get_patch_vertices()
+                significant_timings += list(range(int(significant_timing_1_x[1]+1), int(significant_timing_1_x[-2]+2)))
+    # Rot 2
+    t = spm1d.stats.ttest2(q["q"][cluster_name1][dof_2, 1:-1, :].T,
+                           q["q"][cluster_name2][dof_2, 1:-1, :].T)
+    ti = t.inference(alpha=0.05, two_tailed=True)
+    if ti.h0reject == True:
+        if ti.clusters != []:
+            significant_timing_list = ti.clusters
+            for k in range(len(significant_timing_list)):
+                significant_timing_2_x, _ = significant_timing_list[k].get_patch_vertices()
+                significant_timings += list(range(int(significant_timing_2_x[1]+1), int(significant_timing_2_x[-2]+2)))
+
+    # Remove duplicates from list and sort
+    significant_timings = list(set(significant_timings))
+    # Find blocks of consecutive indices
+    significant_timings_array = np.array(significant_timings)
+    significant_timings_diff = significant_timings_array[1:] - significant_timings_array[:-1]
+    significant_timings_index = np.hstack((-1, np.where(significant_timings_diff > 1)[0], len(significant_timings_array)-1))
+    ranges = []
+    for i in range(len(significant_timings_index)-1):
+        ranges += [range(significant_timings_array[significant_timings_index[i]+1], significant_timings_array[significant_timings_index[i+1]])]
+
+    return ranges, len(significant_timings)/381
+
+# SPM1D between clusters
+cluster_names_right_arm = list(cluster_right_arm['Athlete_05'].keys())[:-1]
+fig, axs = plt.subplots(1, 3, figsize=(18, 4))
+significant_timings = {"right_arm": {}, "left_arm": {}, "thighs": {}}
+num_combinaition = 0
+for i_cluster1, cluster_name1 in enumerate(cluster_names_right_arm):
+    for i_cluster2, cluster_name2 in enumerate(cluster_names_right_arm[i_cluster1+1:]):
+        timings, proportion = find_significant_timing_blocks(6, 7, q_right_arm, cluster_name1, cluster_name2)
+        significant_timings["right_arm"][f"{cluster_name1}_vs_{cluster_name2}"] = timings
+        rgba_1 = cmap_magma(1 - list(cluster_right_arm['Athlete_05'].keys()).index(cluster_name1) * 1 / 6 - 1 / 6)
+        rgba_2 = cmap_magma(1 - list(cluster_right_arm['Athlete_05'].keys()).index(cluster_name2) * 1 / 6 - 1 / 6)
+        for timing_this_time in timings:
+            axs[0].fill_between([timing_this_time[0]/381, timing_this_time[-1]/381], [-num_combinaition, -num_combinaition], [-num_combinaition+0.25, -num_combinaition+0.25], color=rgba_1, alpha=0.8)
+            axs[0].fill_between([timing_this_time[0]/381, timing_this_time[-1]/381], [-num_combinaition-0.25, -num_combinaition-0.25], [-num_combinaition, -num_combinaition], color=rgba_2, alpha=0.8)
+        print(f"Right arm : {cluster_name1} vs {cluster_name2} has {proportion * 100}% of the time with significant differences")
+        num_combinaition += 1
+
+num_combinaition = 0
+for i_cluster1, cluster_name1 in enumerate(cluster_left_arm['Athlete_05'].keys()):
+    for i_cluster2, cluster_name2 in enumerate(list(cluster_left_arm['Athlete_05'].keys())[i_cluster1+1:]):
+        timings, proportion = find_significant_timing_blocks(10, 11, q_left_arm, cluster_name1, cluster_name2)
+        significant_timings["left_arm"][f"{cluster_name1}_vs_{cluster_name2}"] = timings
+        rgba_1 = cmap_viridis(list(cluster_left_arm['Athlete_05'].keys()).index(cluster_name1) * 1/3)
+        rgba_2 = cmap_viridis(list(cluster_left_arm['Athlete_05'].keys()).index(cluster_name2) * 1/3)
+        for timing_this_time in timings:
+            axs[1].fill_between([timing_this_time[0]/381, timing_this_time[-1]/381], [-num_combinaition, -num_combinaition], [-num_combinaition+0.25, -num_combinaition+0.25], color=rgba_1, alpha=0.8)
+            axs[1].fill_between([timing_this_time[0]/381, timing_this_time[-1]/381], [-num_combinaition-0.25, -num_combinaition-0.25], [-num_combinaition, -num_combinaition], color=rgba_2, alpha=0.8)
+        print(f"Left arm: {cluster_name1} vs {cluster_name2} has {proportion * 100}% of the time with significant differences")
+        num_combinaition += 1
+
+num_combinaition = 0
+for i_cluster1, cluster_name1 in enumerate(cluster_thighs['Athlete_05'].keys()):
+    for i_cluster2, cluster_name2 in enumerate(list(cluster_thighs['Athlete_05'].keys())[i_cluster1+1:]):
+        timings, proportion = find_significant_timing_blocks(10, 11, q_left_arm, cluster_name1, cluster_name2)
+        significant_timings["thighs"][f"{cluster_name1}_vs_{cluster_name2}"] = timings
+        rgba_1 = cmap_viridis(1 - list(cluster_thighs['Athlete_05'].keys()).index(cluster_name1) * 1/6)
+        rgba_2 = cmap_viridis(1 - list(cluster_thighs['Athlete_05'].keys()).index(cluster_name2) * 1/6)
+        for timing_this_time in timings:
+            axs[2].fill_between([timing_this_time[0]/381, timing_this_time[-1]/381], [-num_combinaition, -num_combinaition], [-num_combinaition+0.25, -num_combinaition+0.25], color=rgba_1, alpha=0.5)
+            axs[2].fill_between([timing_this_time[0]/381, timing_this_time[-1]/381], [-num_combinaition-0.25, -num_combinaition-0.25], [-num_combinaition, -num_combinaition], color=rgba_2, alpha=0.5)
+        print(f"Thighs: {cluster_name1} vs {cluster_name2} has {proportion * 100}% of the time with significant differences")
+        num_combinaition += 1
+
+for i in range(3):
+    axs[i].spines['top'].set_visible(False)
+    axs[i].spines['right'].set_visible(False)
+    axs[i].spines['left'].set_visible(False)
+    axs[i].set_ylim(-10, 1)
+    axs[i].get_yaxis().set_ticks([])
+
+plt.savefig("cluster_graphs/significant_timing_blocks.png", dpi=300)
+plt.show()
+
+# Right arm : cluster_1 vs cluster_2 has 99.21259842519686% of the time with significant differences
+# Right arm : cluster_1 vs cluster_3 has 99.21259842519686% of the time with significant differences
+# Right arm : cluster_1 vs cluster_4 has 85.56430446194226% of the time with significant differences
+# Right arm : cluster_1 vs cluster_5 has 99.21259842519686% of the time with significant differences
+# Right arm : cluster_2 vs cluster_3 has 92.1259842519685% of the time with significant differences
+# Right arm : cluster_2 vs cluster_4 has 95.8005249343832% of the time with significant differences
+# Right arm : cluster_2 vs cluster_5 has 95.2755905511811% of the time with significant differences
+# Right arm : cluster_3 vs cluster_4 has 97.63779527559055% of the time with significant differences
+# Right arm : cluster_3 vs cluster_5 has 72.44094488188976% of the time with significant differences
+# Right arm : cluster_4 vs cluster_5 has 96.8503937007874% of the time with significant differences
+# Left arm: cluster_1 vs cluster_2 has 96.3254593175853% of the time with significant differences
+# Left arm: cluster_1 vs cluster_3 has 97.11286089238845% of the time with significant differences
+# Left arm: cluster_2 vs cluster_3 has 61.679790026246714% of the time with significant differences
+# Thighs: cluster_1 vs cluster_2 has 96.3254593175853% of the time with significant differences
+
 data_to_save = {"mean_q_per_cluster_right_arm": mean_q_per_cluster_right_arm,
                 "mean_q_per_cluster_left_arm": mean_q_per_cluster_left_arm,
                 "mean_q_per_cluster_thighs": mean_q_per_cluster_thighs,
@@ -425,7 +530,8 @@ data_to_save = {"mean_q_per_cluster_right_arm": mean_q_per_cluster_right_arm,
                 "cluster_right_arm" : cluster_right_arm,
                 "cluster_left_arm" : cluster_left_arm,
                 "cluster_thighs": cluster_thighs,
-                "best_solution_per_athlete": best_solution_per_athlete,}
+                "best_solution_per_athlete": best_solution_per_athlete,
+                "significant_timings": significant_timings,}
 
 
 with open(f'overview_graphs/clusters_sol.pkl', 'wb') as f:

@@ -19,6 +19,7 @@ In order to run the OCP and analysis of the results, you need to install the env
 ```bash
 conda env create -f environment.yml
 ```
+The bioptim version should be commit ID 6a919c0ef83b863ed262ac451cd1f71b7dc4ce40.
 
 # Contact
 If you would like to discuss research or have any question do not hesitate to communicate with me through email :)
