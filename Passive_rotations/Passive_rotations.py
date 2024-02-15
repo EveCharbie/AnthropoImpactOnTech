@@ -399,6 +399,34 @@ def plot_spline_limb_movements(time, X_simulated_arms, X_simulated_hips):
     fig.savefig(f'passive rotations results/Splines.png', dpi=300)
     fig.show()
 
+def rotate_to_principal_components(inertia_matrix):
+    """
+    Rotate a 3D inertia matrix to align it with its principal components.
+
+    Parameters:
+    inertia_matrix (np.ndarray): A 3x3 non-diagonal inertia matrix.
+
+    Returns:
+    np.ndarray: The rotated inertia matrix aligned with its principal components.
+    """
+    # Step 1: Calculate the eigenvalues and eigenvectors
+    eigenvalues, eigenvectors = np.linalg.eig(inertia_matrix)
+    normalized_eigenvectors = eigenvectors / np.linalg.norm(eigenvectors, axis=0)
+
+    # Step 2: Construct the rotation matrix from the eigenvectors
+    rotation_matrix = normalized_eigenvectors
+
+    # Step 3: Rotate the original inertia matrix
+    rotated_matrix = rotation_matrix.T @ inertia_matrix @ rotation_matrix
+
+    # Step 4: Sort the inertia components knowing that in straight position C < A < B
+    components = np.sort(np.array([rotated_matrix[0, 0], rotated_matrix[1, 1], rotated_matrix[2, 2]]))
+    rotated_inertia_components = np.zeros((3, ))
+    rotated_inertia_components[2] = components[0]
+    rotated_inertia_components[1] = components[2]
+    rotated_inertia_components[0] = components[1]
+    return rotated_inertia_components
+
 
 N = 100
 
@@ -421,7 +449,7 @@ Qf_HIPS = -2.7
 Q0_KNEE = 0
 Qf_KNEE = 2.7
 
-models_path = '../Models/Models_Lisa/'
+models_path = '../Models/Models_Lisa'
 row = 0
 for model_name in os.listdir(models_path):
     if not model_name.endswith('bioMod'):
@@ -432,6 +460,9 @@ for model_name in os.listdir(models_path):
     model_fixe = biorbd.Model(f"{models_path}/{model_name.removesuffix('.bioMod')}_rootYZfixed.bioMod")
     name = model_name.removesuffix('.bioMod')
 
+    inertia = model.bodyInertia(np.zeros((model.nbQ(), ))).to_array()
+    rotated_inertia_components = rotate_to_principal_components(inertia)
+    print(f"{name} & {round(rotated_inertia_components[0], 2)} & {round(rotated_inertia_components[1], 2)} & {round(rotated_inertia_components[2], 2)} \\\\")
     column = 0
 
     # debut bras en haut

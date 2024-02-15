@@ -15,7 +15,7 @@ segment Pelvis
 		0.0772467414021903 0.0 0.0
 		0.0 0.11464870520730258 0.0
 		0.0 0.0 0.0883256091561257
-	meshfile ../Model_mesh/pelvis.stl
+	meshfile Model_mesh/pelvis.stl
 	meshscale 0.9027777777777779 1.0253164556962024 1.5844155844155845
 	meshrt -0.175 0 0 xyz 0 0 0
 endsegment
@@ -29,7 +29,7 @@ segment Thorax
 		0.16167663284985345 0.0 0.0
 		0.0 0.22820939539579388 0.0
 		0.0 0.0 0.13516773461403545
-	meshfile ../Model_mesh/thorax.stl
+	meshfile Model_mesh/thorax.stl
 	meshscale 0.9525316455696203 1.0253164556962024 0.9180327868852458
 	meshrt -0.15 0 0 xyz 0 -0.025 0.05
 endsegment
@@ -43,7 +43,7 @@ segment Head
 		0.03790526629269092 0.0 0.0
 		0.0 0.03790526629269092 0.0
 		0.0 0.0 0.01721737660930297
-	meshfile ../Model_mesh/tete.stl
+	meshfile Model_mesh/tete.stl
 	meshscale 0.9841797562006934 0.9841797562006934 1.046931407942238
 	meshrt 0 0 pi xyz 0 0 0
 endsegment
@@ -61,7 +61,7 @@ segment RightUpperArm
 		0.012691236874168881 0.0 0.0
 		0.0 0.012691236874168881 0.0
 		0.0 0.0 0.002186704786304289
-	meshfile ../Model_mesh/bras.stl
+	meshfile Model_mesh/bras.stl
 	meshscale 0.9024249350571385 0.9024249350571385 1.0634615384615385
 endsegment
 
@@ -83,7 +83,7 @@ segment RightForearm
 		0.005944728660064743 0.0 0.0
 		0.0 0.00595915712620502 0.0
 		0.0 0.0 0.00075136892327097
-	meshfile ../Model_mesh/avantbras.stl
+	meshfile Model_mesh/avantbras.stl
 	meshscale 0.8824257400317309 0.8824257400317309 1.0383064516129032
 endsegment
 
@@ -96,7 +96,7 @@ segment RightHand
 		0.001045837188589735 0.0 0.0
 		0.0 0.0011973267748012148 0.0
 		0.0 0.0 0.0002709617347236722
-	meshfile ../Model_mesh/main.stl
+	meshfile Model_mesh/main.stl
 	meshscale 1.0408163265306123 1.0408163265306123 1.0141242937853108
 endsegment
 
@@ -118,7 +118,7 @@ segment LeftUpperArm
 		0.012691236874168881 0.0 0.0
 		0.0 0.012691236874168881 0.0
 		0.0 0.0 0.002186704786304289
-	meshfile ../Model_mesh/bras.stl
+	meshfile Model_mesh/bras.stl
 	meshscale 0.9024249350571385 0.9024249350571385 1.0634615384615385
 endsegment
 
@@ -140,7 +140,7 @@ segment LeftForearm
 		0.005944728660064743 0.0 0.0
 		0.0 0.00595915712620502 0.0
 		0.0 0.0 0.00075136892327097
-	meshfile ../Model_mesh/avantbras.stl
+	meshfile Model_mesh/avantbras.stl
 	meshscale 0.8824257400317309 0.8824257400317309 1.0383064516129032
 endsegment
 
@@ -153,7 +153,7 @@ segment LeftHand
 		0.001045837188589735 0.0 0.0
 		0.0 0.0011973267748012148 0.0
 		0.0 0.0 0.0002709617347236722
-	meshfile ../Model_mesh/main.stl
+	meshfile Model_mesh/main.stl
 	meshscale 1.0408163265306123 1.0408163265306123 1.0141242937853108
 endsegment
 
@@ -175,7 +175,7 @@ segment Thighs
 		0.183287255118407 0.0 0.0
 		0.0 0.26463128472318764 0.0
 		0.0 0.0 0.12284140246126189
-	meshfile ../Model_mesh/cuisse.stl
+	meshfile Model_mesh/cuisse.stl
 	meshscale 0.85980256612863 0.85980256612863 0.9020556227327691
 endsegment
 
@@ -193,7 +193,7 @@ segment Shanks
 		0.1144035079748728 0.0 0.0
 		0.0 0.15505394675775036 0.0
 		0.0 0.0 0.049357700853530986
-	meshfile ../Model_mesh/jambe.stl
+	meshfile Model_mesh/jambe.stl
 	meshscale 0.8773251821677206 0.8773251821677206 1.0956749672346004
 	meshrt pi 0 0 xyz 0 0 0
 endsegment
@@ -217,7 +217,7 @@ segment Feet
 		0.0046803679363999345 1.9470749596758314e-20 0.0
 		1.947074959675831e-20 0.014327113599676478 0.0
 		0.0 0.0 0.011169535208974953
-	meshfile ../Model_mesh/pied.stl
+	meshfile Model_mesh/pied.stl
 	meshscale 1.041027558214057 0.946518086980084 0.9341826923076924
 	meshrt 0 0 pi xyz 0 0 0
 endsegment
